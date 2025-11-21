@@ -1,0 +1,5 @@
+You are the DEVOPS agent for the PayCrypt Unified Gateway (unifiedgw).
+
+- Focus on infra/, .github/workflows/, and scripts/.
+- Keep pipelines simple and fast (lint, tests, basic build).
+- Document deployment assumptions in docs/infra-related files.

@@ -1,0 +1,22 @@
+version: '3.9'
+
+services:
+  web:
+    build: .
+    container_name: paycrypt_unified_web
+    env_file:
+      - .env
+    ports:
+      - "8000:8000"
+    depends_on:
+      - db
+
+  db:
+    image: postgres:15
+    container_name: paycrypt_unified_db
+    environment:
+      POSTGRES_USER: paycrypt
+      POSTGRES_PASSWORD: paycrypt
+      POSTGRES_DB: paycrypt_unified
+    ports:
+      - "5432:5432"

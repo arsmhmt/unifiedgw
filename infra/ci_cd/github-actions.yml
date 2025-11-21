@@ -1,0 +1,4 @@
+# Placeholder for CI/CD design notes (not the actual workflow file).
+
+- Describe how you want GitHub Actions / other CI to behave.
+- Link to .github/workflows/tests.yml for the actual pipeline.
