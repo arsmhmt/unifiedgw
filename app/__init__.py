@@ -246,8 +246,10 @@ def create_app():
     
     # Initialize middleware
     from app.middleware import init_branch_isolation, init_rate_limiting
+    from app.middleware.request_tracking import init_request_tracking
     init_branch_isolation(app)
     init_rate_limiting(app)
+    init_request_tracking(app)  # Day 1: Wire diagnostics
     
     # Context processor for admin notifications
     @app.context_processor

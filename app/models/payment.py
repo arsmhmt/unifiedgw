@@ -130,6 +130,48 @@ class Payment(BaseModel):
         if not self.rate_expiry:
             return 0
         return max(0, (self.rate_expiry - now_eest()).total_seconds())
+    
+    def confirm_payment(self, tx_hash=None, confirmations=1):
+        """
+        Confirm a crypto payment with double-confirmation protection.
+        Day 2: Flow hardening - prevents double crediting.
+        
+        Args:
+            tx_hash (str, optional): Transaction hash
+            confirmations (int): Number of confirmations
+            
+        Returns:
+            bool: True if confirmed, False if already confirmed (double confirmation rejected)
+        """
+        from app.utils.flow_logging import log_crypto_confirmation, log_double_confirmation_rejected
+        
+        # Check if already completed/approved to prevent double confirmation
+        if self.status in [PaymentStatus.COMPLETED, PaymentStatus.APPROVED]:
+            log_double_confirmation_rejected(
+                self.id,
+                f"Payment already in {self.status.value} status",
+                tx_hash=tx_hash,
+                current_status=self.status.value
+            )
+            return False
+        
+        # Log confirmation
+        log_crypto_confirmation(
+            self.id,
+            confirmations,
+            tx_hash=tx_hash,
+            amount=float(self.crypto_amount) if self.crypto_amount else None,
+            currency=self.crypto_currency
+        )
+        
+        # Update status
+        old_status = self.status
+        self.status = PaymentStatus.COMPLETED
+        
+        # Note: Balance updates should happen in the calling code, not here
+        # This follows the principle: "Do not change commission calculation logic, wallet balances"
+        
+        return True
 
     def __repr__(self):
         if self.fiat_amount and self.fiat_currency:
@@ -141,9 +183,11 @@ class Payment(BaseModel):
 def payment_status_changed(mapper, connection, target):
     """
     SQLAlchemy event listener to emit webhook events when payment status changes.
+    Day 2: Added status transition logging.
     """
     from sqlalchemy import inspect
     from app.payment.constants import WebhookEventType
+    from app.utils.flow_logging import log_status_transition
     
     # Check if status was changed
     state = inspect(target)
@@ -151,6 +195,23 @@ def payment_status_changed(mapper, connection, target):
     
     if not history.has_changes():
         return
+    
+    # Log status transition (Day 2)
+    old_status = history.deleted[0] if history.deleted else None
+    new_status = target._status
+    try:
+        log_status_transition(
+            'payment',
+            target.id,
+            old_status,
+            new_status,
+            payment_method=target.payment_method,
+            amount=float(target.fiat_amount) if target.fiat_amount else float(target.amount) if target.amount else None,
+            currency=target.fiat_currency or target.currency
+        )
+    except Exception as e:
+        import logging
+        logging.error(f"Failed to log status transition for payment {target.id}: {e}")
     
     # Map status to webhook event type
     status_to_event = {

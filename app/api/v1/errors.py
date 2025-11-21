@@ -1,7 +1,7 @@
 """
 Standardized error responses for API v1.
 """
-from flask import jsonify
+from flask import jsonify, g
 from app.payment.constants import APIErrorCode
 
 
@@ -24,6 +24,10 @@ def error_response(code, message, details=None, status_code=400):
             'message': message
         }
     }
+    
+    # Add request ID for diagnostics (Day 1)
+    if hasattr(g, 'request_id'):
+        response['error']['request_id'] = g.request_id
     
     if details:
         response['error']['details'] = details
