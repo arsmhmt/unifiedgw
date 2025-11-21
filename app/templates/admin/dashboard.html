@@ -15,12 +15,19 @@
     };
 </script>
 
+{% set stats = stats or {} %}
+{% set withdrawal_stats = withdrawal_stats or {} %}
+{% set total_fiat_volume = stats.get('total_fiat_volume', 0) %}
+{% set total_crypto_volume = stats.get('total_crypto_volume', 0) %}
+{% set total_volume_primary = total_fiat_volume if total_fiat_volume else total_crypto_volume %}
+{% set total_volume_currency = stats.get('fiat_currency', config.DEFAULT_CURRENCY) %}
+
 <div class="container-fluid">
     <!-- Page Heading -->
     <div class="d-flex flex-column flex-md-row align-items-center justify-content-between mb-4">
         <div class="mb-3 mb-md-0">
-            <h1 class="h3 mb-1 text-gray-800">Dashboard</h1>
-            <p class="text-muted mb-0">Welcome back, {{ current_user.username or 'Admin' }}! Here's what's happening.</p>
+            <h1 class="h3 mb-1 cyber-title">Dashboard</h1>
+            <p class="text-muted mb-0 cyber-subtitle">Welcome back, {{ current_user.username or 'Admin' }}! Here's what's happening.</p>
         </div>
         <div class="btn-toolbar">
             <div class="btn-group me-2">
@@ -78,20 +85,25 @@
 
     <!-- Row 1: Critical KPI Cards -->
     <div class="row g-4 mb-4">
-        <!-- Total Revenue Card -->
+        <!-- Total Volume Card -->
         <div class="col-12 col-sm-6 col-xl-3">
-            <div class="card stats-card border-left-primary h-100">
+            <div class="card stats-card primary h-100">
                 <div class="card-body">
                     <div class="d-flex align-items-center">
                         <div class="flex-grow-1">
-                            <h6 class="text-uppercase text-primary fw-bold mb-1">{{ _('Total Revenue') }} ({{
-                                config.DEFAULT_CURRENCY }})</h6>
-                            <h3 class="mb-0">{{ "{:,.2f}".format(0) }}</h3>
+                            <h6 class="text-uppercase fw-bold mb-1">{{ _('Total Volume') }} ({{ total_volume_currency }})</h6>
+                            <h3 class="mb-0">{{ "{:,.2f}".format(total_volume_primary or 0) }}</h3>
+                            {% if total_crypto_volume %}
+                            <p class="text-muted small mb-0 mt-1">
+                                ≈ {{ "{:,.6f}".format(total_crypto_volume) }} {{ stats.get('primary_crypto', 'BTC') }}
+                            </p>
+                            {% endif %}
                             <p class="text-success small mb-0 mt-2">
-                                <i class="bi bi-arrow-up me-1"></i> 0.0% <span class="text-muted">{{ _('from last month') }}</span>
+                                <i class="bi bi-arrow-up me-1"></i> {{ "{:+.1f}%".format(stats.get('revenue_growth', 0)) }}
+                                <span>{{ _('vs last month') }}</span>
                             </p>
                         </div>
-                        <div class="icon-bg text-primary">
+                        <div class="icon-bg">
                             <i class="bi bi-currency-bitcoin"></i>
                         </div>
                     </div>
@@ -101,17 +113,18 @@
 
         <!-- Total Transactions Card -->
         <div class="col-12 col-sm-6 col-xl-3">
-            <div class="card stats-card border-left-success h-100">
+            <div class="card stats-card success h-100">
                 <div class="card-body">
                     <div class="d-flex align-items-center">
                         <div class="flex-grow-1">
-                            <h6 class="text-uppercase text-success fw-bold mb-1">Total Transactions</h6>
-                            <h3 class="mb-0">{{ "{:,}".format(total_transactions|default(0)) }}</h3>
+                            <h6 class="text-uppercase fw-bold mb-1">Total Transactions</h6>
+                            <h3 class="mb-0">{{ "{:,}".format(stats.get('total_transactions', 0)) }}</h3>
                             <p class="text-success small mb-0 mt-2">
-                                <i class="bi bi-arrow-up me-1"></i> 0.0% <span class="text-muted">from last month</span>
+                                <i class="bi bi-arrow-up me-1"></i> {{ "{:+.1f}%".format(stats.get('transactions_growth', 0)) }}
+                                <span>{{ _('vs last month') }}</span>
                             </p>
                         </div>
-                        <div class="icon-bg text-success">
+                        <div class="icon-bg">
                             <i class="bi bi-arrow-repeat"></i>
                         </div>
                     </div>
@@ -121,19 +134,21 @@
 
         <!-- Active Clients Card -->
         <div class="col-12 col-sm-6 col-xl-3">
-            <div class="card stats-card border-left-info h-100">
+            <div class="card stats-card warning h-100">
                 <div class="card-body">
                     <div class="d-flex align-items-center">
                         <div class="flex-grow-1">
-                            <h6 class="text-uppercase text-info fw-bold mb-1">Active Clients</h6>
-                            <h3 class="mb-0">{{ stats['total_clients'] }}</h3>
+                            <h6 class="text-uppercase fw-bold mb-1">Active Clients</h6>
+                            <h3 class="mb-0">{{ stats.get('total_clients', 0) }}</h3>
                             <p class="text-success small mb-0 mt-2">
-                                <i class="bi bi-arrow-up me-1"></i> {{
-                                "{:.1f}%".format(stats.get('active_clients_change', 0)|default(0)) }} <span class="text-muted">from
-                                    last month</span>
+                                <i class="bi bi-arrow-up me-1"></i> {{ "{:+.1f}%".format(stats.get('active_clients_change', 0)) }}
+                                <span>{{ _('vs last month') }}</span>
+                            </p>
+                            <p class="text-muted small mb-0 mt-1">
+                                {{ _('Verified') }}: {{ stats.get('verified_clients', 0) }}
                             </p>
                         </div>
-                        <div class="icon-bg text-info">
+                        <div class="icon-bg">
                             <i class="bi bi-people"></i>
                         </div>
                     </div>
@@ -143,25 +158,80 @@
 
         <!-- Pending Withdrawals Card (CRITICAL) -->
         <div class="col-12 col-sm-6 col-xl-3">
-            <div class="card stats-card border-left-danger h-100">
+            <div class="card stats-card danger h-100">
                 <div class="card-body">
                     <div class="d-flex align-items-center">
                         <div class="flex-grow-1">
-                            <h6 class="text-uppercase text-danger fw-bold mb-1">Pending Withdrawals</h6>
-                            <h3 class="mb-0">{{ stats['pending_withdrawals'] }}</h3>
-                            {% if stats['pending_withdrawals'] > 0 %}
+                            <h6 class="text-uppercase fw-bold mb-1">Pending Withdrawals</h6>
+                            <h3 class="mb-0">{{ withdrawal_stats.get('pending', 0) }}</h3>
+                            {% if withdrawal_stats.get('pending', 0) > 0 %}
                             <p class="text-danger small mb-0 mt-2">
-                                <i class="bi bi-exclamation-triangle me-1"></i> <span class="text-muted">Requires
+                                <i class="bi bi-exclamation-triangle me-1"></i> <span>Requires
                                     attention</span>
                             </p>
                             {% else %}
                             <p class="text-success small mb-0 mt-2">
-                                <i class="bi bi-check-circle me-1"></i> <span class="text-muted">All processed</span>
+                                <i class="bi bi-check-circle me-1"></i> <span>All processed</span>
+                            </p>
+                            {% endif %}
+                            {% if withdrawal_stats.get('last_24h_volume') %}
+                            <p class="text-muted small mb-0 mt-1">
+                                {{ _('Last 24h') }}: {{ "{:,.2f}".format(withdrawal_stats.get('last_24h_volume', 0)) }}
+                                {{ config.DEFAULT_CURRENCY }}
                             </p>
                             {% endif %}
                         </div>
-                        <div class="icon-bg text-danger">
+                        <div class="icon-bg">
                             <i class="bi bi-wallet2"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Actions Row -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card shadow-sm">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold">
+                        <i class="bi bi-lightning-charge me-2"></i>Quick Actions
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="row g-3">
+                        <!-- Crypto Operations -->
+                        <div class="col-md-3 col-sm-6">
+                            <a href="{{ url_for('admin.wallet_providers') }}" class="btn btn-outline-primary w-100 h-100 d-flex flex-column align-items-center justify-content-center p-3 text-decoration-none">
+                                <i class="bi bi-wallet2 fs-2 mb-2"></i>
+                                <span class="fw-bold">Crypto Wallets</span>
+                                <small class="text-muted">Manage wallets & balances</small>
+                            </a>
+                        </div>
+                        <!-- Bank Operations -->
+                        <div class="col-md-3 col-sm-6">
+                            <a href="{{ url_for('withdrawal_admin.user_withdrawal_bulk') }}" class="btn btn-outline-success w-100 h-100 d-flex flex-column align-items-center justify-content-center p-3 text-decoration-none">
+                                <i class="bi bi-bank fs-2 mb-2"></i>
+                                <span class="fw-bold">Bank Operations</span>
+                                <small class="text-muted">Process withdrawals</small>
+                            </a>
+                        </div>
+                        <!-- Client Management -->
+                        <div class="col-md-3 col-sm-6">
+                            <a href="{{ url_for('admin.list_clients') }}" class="btn btn-outline-warning w-100 h-100 d-flex flex-column align-items-center justify-content-center p-3 text-decoration-none">
+                                <i class="bi bi-people fs-2 mb-2"></i>
+                                <span class="fw-bold">Client Management</span>
+                                <small class="text-muted">Manage merchants</small>
+                            </a>
+                        </div>
+                        <!-- Reports -->
+                        <div class="col-md-3 col-sm-6">
+                            <a href="{{ url_for('withdrawal_admin.withdrawal_reports') }}" class="btn btn-outline-info w-100 h-100 d-flex flex-column align-items-center justify-content-center p-3 text-decoration-none">
+                                <i class="bi bi-graph-up fs-2 mb-2"></i>
+                                <span class="fw-bold">Reports</span>
+                                <small class="text-muted">View analytics</small>
+                            </a>
                         </div>
                     </div>
                 </div>
@@ -175,14 +245,14 @@
         <div class="col-xl-8 col-lg-7">
             <div class="card shadow mb-4">
                 <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
-                    <h6 class="m-0 font-weight-bold text-primary">
+                    <h6 class="m-0 font-weight-bold">
                         <i class="bi bi-graph-up me-2"></i>{{ _('Transaction Volume Trends') }} ({{
                         config.DEFAULT_CURRENCY }})
                     </h6>
                     <div class="dropdown no-arrow">
                         <a class="dropdown-toggle" href="#" role="button" id="volumeDropdown" data-bs-toggle="dropdown"
                             aria-haspopup="true" aria-expanded="false">
-                            <i class="bi bi-three-dots-vertical text-gray-400"></i>
+                            <i class="bi bi-three-dots-vertical"></i>
                         </a>
                         <div class="dropdown-menu dropdown-menu-end shadow animated--fade-in"
                             aria-labelledby="volumeDropdown">
@@ -197,7 +267,7 @@
                 </div>
                 <div class="card-body">
                     <div class="chart-area">
-                        <div id="volumeTrendsChart" style="min-height: 350px; background: #f8fafc; position: relative;">
+                        <div id="volumeTrendsChart" style="min-height: 350px; position: relative;">
                         </div>
                         <div id="volumeTrendsChartFallback"
                             style="display:none; color: red; position: absolute; top: 10px; left: 10px;">{{ _('Chart
@@ -211,12 +281,12 @@
         <div class="col-xl-4 col-lg-5">
             <div class="card shadow mb-4 h-100">
                 <div class="card-header py-3">
-                    <h6 class="m-0 font-weight-bold text-primary">
+                    <h6 class="m-0 font-weight-bold">
                         <i class="bi bi-pie-chart me-2"></i>{{ _('Top Cryptocurrencies') }}
                     </h6>
                 </div>
                 <div class="card-body">
-                    <div id="topCryptosChart" style="min-height: 350px; background: #f8fafc; position: relative;"></div>
+                    <div id="topCryptosChart" style="min-height: 350px; position: relative;"></div>
                     <div id="topCryptosChartFallback"
                         style="display:none; color: red; position: absolute; top: 10px; left: 10px;">{{ _('Chart failed
                         to load.') }}</div>
@@ -234,11 +304,16 @@
                     <div class="d-flex align-items-center">
                         <div class="flex-grow-1">
                             <h6 class="text-uppercase text-success fw-bold mb-1">24h Volume</h6>
-                            <h3 class="mb-0>{{ " {:,.6f}".format(stats.get('volume_24h', 0)) }}</h3>
-                                <p class="text-info small mb-0 mt-2">
-                                    <i class="bi bi-clock me-1"></i> <span class="text-muted">{{ _('Last 24 hours')
-                                        }}</span>
-                                </p>
+                            <h3 class="mb-0">{{ "{:,.2f}".format(stats.get('volume_24h', 0)) }} {{ total_volume_currency }}</h3>
+                            <p class="text-info small mb-0 mt-2">
+                                <i class="bi bi-clock me-1"></i> <span class="text-muted">{{ _('Last 24 hours')
+                                    }}</span>
+                            </p>
+                            {% if stats.get('crypto_volume_24h') %}
+                            <p class="text-muted small mb-0 mt-1">
+                                ≈ {{ "{:,.6f}".format(stats.get('crypto_volume_24h', 0)) }} {{ stats.get('primary_crypto', 'BTC') }}
+                            </p>
+                            {% endif %}
                         </div>
                         <div class="icon-bg text-success">
                             <i class="bi bi-speedometer2"></i>
@@ -250,18 +325,18 @@
 
         <!-- Success Rate Card -->
         <div class="col-12 col-sm-6 col-xl-4">
-            <div class="card stats-card border-left-warning h-100">
+            <div class="card stats-card warning h-100">
                 <div class="card-body">
                     <div class="d-flex align-items-center">
                         <div class="flex-grow-1">
-                            <h6 class="text-uppercase text-warning fw-bold mb-1">Success Rate</h6>
-                            <h3 class="mb-0">{{ "{:.1f}%".format(stats.get('success_rate', 95.5)) }}</h3>
+                            <h6 class="text-uppercase fw-bold mb-1">Success Rate</h6>
+                            <h3 class="mb-0">{{ "{:.1f}%".format(stats.get('success_rate', 0)) }}</h3>
                             <p class="text-success small mb-0 mt-2">
-                                <i class="bi bi-arrow-up me-1"></i> {{ "{:.1f}%".format(stats.get('success_rate_change',
-                                0)) }} <span class="text-muted">from last month</span>
+                                <i class="bi bi-arrow-up me-1"></i> {{ "{:+.1f}%".format(stats.get('success_rate_change', 0)) }}
+                                <span>{{ _('vs last month') }}</span>
                             </p>
                         </div>
-                        <div class="icon-bg text-warning">
+                        <div class="icon-bg">
                             <i class="bi bi-check-circle"></i>
                         </div>
                     </div>
@@ -271,18 +346,18 @@
 
         <!-- Commission Earned Card -->
         <div class="col-12 col-sm-6 col-xl-4">
-            <div class="card stats-card border-left-primary h-100">
+            <div class="card stats-card primary h-100">
                 <div class="card-body">
                     <div class="d-flex align-items-center">
                         <div class="flex-grow-1">
-                            <h6 class="text-uppercase text-primary fw-bold mb-1">Commission Earned</h6>
+                            <h6 class="text-uppercase fw-bold mb-1">Commission Earned</h6>
                             <h3 class="mb-0">{{ "{:,.6f}".format(stats.get('total_commission', 0)) }}</h3>
                             <p class="text-success small mb-0 mt-2">
-                                <i class="bi bi-arrow-up me-1"></i> {{ "{:.1f}%".format(stats.get('commission_change',
-                                0)) }} <span class="text-muted">from last month</span>
+                                <i class="bi bi-arrow-up me-1"></i> {{ "{:+.1f}%".format(stats.get('commission_change', 0)) }}
+                                <span>{{ _('vs last month') }}</span>
                             </p>
                         </div>
-                        <div class="icon-bg text-primary">
+                        <div class="icon-bg">
                             <i class="bi bi-percent"></i>
                         </div>
                     </div>
@@ -298,12 +373,12 @@
             <div class="card shadow mb-4">
                 <!-- Card Header - Dropdown -->
                 <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
-                    <h6 class="m-0 font-weight-bold text-primary">{{ _('Transaction Volume Overview') }} ({{
+                    <h6 class="m-0 font-weight-bold">{{ _('Transaction Volume Overview') }} ({{
                         config.DEFAULT_CURRENCY }})</h6>
                     <div class="dropdown no-arrow">
                         <a class="dropdown-toggle" href="#" role="button" id="revenueDropdown" data-bs-toggle="dropdown"
                             aria-haspopup="true" aria-expanded="false">
-                            <i class="bi bi-three-dots-vertical text-gray-400"></i>
+                            <i class="bi bi-three-dots-vertical"></i>
                         </a>
                         <div class="dropdown-menu dropdown-menu-end shadow animated--fade-in"
                             aria-labelledby="revenueDropdown">
@@ -319,7 +394,7 @@
                 <!-- Card Body -->
                 <div class="card-body">
                     <div class="chart-area">
-                        <div id="revenueChart" style="min-height: 300px; background: #f8fafc; position: relative;">
+                        <div id="revenueChart" style="min-height: 300px; position: relative;">
                         </div>
                         <div id="revenueChartFallback"
                             style="display:none; color: red; position: absolute; top: 10px; left: 10px;">{{ _('Chart
@@ -334,7 +409,7 @@
                     <h6 class="mb-0">{{ _('Payment Methods') }}</h6>
                 </div>
                 <div class="card-body">
-                    <div id="paymentMethodsChart" style="min-height: 300px; background: #f8fafc; position: relative;">
+                    <div id="paymentMethodsChart" style="min-height: 300px; position: relative;">
                     </div>
                     <div id="paymentMethodsChartFallback"
                         style="display:none; color: red; position: absolute; top: 10px; left: 10px;">{{ _('Chart failed
@@ -398,28 +473,26 @@
                                         </div>
                                     </td>
                                     <td class="text-nowrap">
-                                        <div>{{ transaction.created_at.strftime('%b %d, %Y') if transaction.created_at
+                                        <div>{{ transaction.created_at|datetime_eest('%b %d, %Y') if transaction.created_at
                                             else 'N/A' }}</div>
-                                        <small class="text-muted">{{ transaction.created_at.strftime('%H:%M') if
+                                        <small class="text-muted">{{ transaction.created_at|datetime_eest('%H:%M') if
                                             transaction.created_at else '' }}</small>
                                     </td>
                                     <td class="text-end fw-bold">
-                                        <div>{{ "{:.6f}".format(transaction.btc_value or 0) }} {{ transaction.currency
-                                            or 'BTC' }}</div>
-                                        {% if transaction.amount and transaction.currency != 'BTC' %}
-                                        <small class="text-muted">≈ {{ "{:.2f}".format(transaction.amount) }} {{
-                                            transaction.currency }}</small>
+                                        {% if transaction.fiat_display_amount %}
+                                        <div>{{ "{:,.2f}".format(transaction.fiat_display_amount) }} {{ transaction.fiat_currency or total_volume_currency }}</div>
                                         {% endif %}
+                                        <small class="text-muted">
+                                            {{ "{:,.6f}".format(transaction.btc_value or 0) }}
+                                            {{ transaction.crypto_currency or transaction.currency or 'BTC' }}
+                                        </small>
                                     </td>
                                     <td>
-                                        {% set status_class = 'success' if transaction.status.value == 'completed' else
-                                        'warning' if transaction.status.value == 'pending' else 'danger' %}
-                                        {% set status_icon = 'check-circle-fill' if transaction.status.value ==
-                                        'completed' else 'hourglass-split' if transaction.status.value == 'pending' else
-                                        'x-circle-fill' %}
+                                        {% set status_val = transaction.status.value if transaction.status else transaction.status %}
+                                        {% set status_class = 'success' if status_val == 'completed' else 'warning' if status_val == 'pending' else 'danger' %}
+                                        {% set status_icon = 'check-circle-fill' if status_val == 'completed' else 'hourglass-split' if status_val == 'pending' else 'x-circle-fill' %}
                                         <span class="badge bg-{{ status_class }} bg-opacity-10 text-{{ status_class }}">
-                                            <i class="bi bi-{{ status_icon }} me-1"></i> {{
-                                            transaction.status.value.title() }}
+                                            <i class="bi bi-{{ status_icon }} me-1"></i> {{ status_val.title() if status_val else _('Unknown') }}
                                         </span>
                                     </td>
                                     <td class="text-center">
@@ -477,16 +550,21 @@
                                     </div>
                                 </td>
                                 <td class="text-end">
-                                    <div class="fw-bold text-success">{{ "{:.4f}".format(client.total_volume or 0) }}
-                                        BTC</div>
-                                    <small class="text-muted">{{ client.transaction_count or 0 }} transactions</small>
+                                    {% if client.total_fiat_volume %}
+                                    <div class="fw-bold text-success">{{ "{:,.2f}".format(client.total_fiat_volume) }} {{ total_volume_currency }}</div>
+                                    {% endif %}
+                                    {% if client.total_crypto_volume %}
+                                    <small class="text-muted d-block">{{ "{:,.6f}".format(client.total_crypto_volume) }} {{ client.crypto_currency or 'BTC' }}</small>
+                                    {% endif %}
+                                    <small class="text-muted">{{ client.transaction_count or 0 }} {{ _('transactions') }}</small>
                                 </td>
                             </tr>
                             {% endfor %}
                             {% else %}
                             <tr>
                                 <td colspan="2" class="text-center text-muted py-4">
-                                    <i class="bi bi-people me-2"></i{{ _('No client data available') }} </td>
+                                    <i class="bi bi-people me-2"></i>{{ _('No client data available') }}
+                                </td>
                             </tr>
                             {% endif %}
                         </table>
@@ -495,6 +573,134 @@
             </div>
         </div>
     </div>
+
+    <!-- Bank Gateway Management Section -->
+    {% if bank_stats %}
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card shadow-sm">
+                <div class="card-header bg-white d-flex align-items-center justify-content-between py-3">
+                    <h6 class="card-title mb-0">
+                        <i class="bi bi-bank me-2 text-success"></i>{{ _('Bank Gateway Overview') }}
+                    </h6>
+                    <a href="{{ url_for('admin.bank_gateway_dashboard') }}" class="btn btn-sm btn-outline-success">
+                        <i class="bi bi-arrow-right-circle me-1"></i> {{ _('Manage Bank Gateway') }}
+                    </a>
+                </div>
+                <div class="card-body">
+                    <div class="row g-3">
+                        <!-- Bank Gateway Stats -->
+                        <div class="col-12 col-sm-6 col-lg-3">
+                            <div class="d-flex align-items-center p-3 bg-success bg-opacity-10 rounded">
+                                <div class="icon-bg text-success me-3">
+                                    <i class="bi bi-building"></i>
+                                </div>
+                                <div>
+                                    <h6 class="text-success mb-0">Bank Providers</h6>
+                                    <h4 class="mb-0">{{ bank_stats.total_providers }}</h4>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="col-12 col-sm-6 col-lg-3">
+                            <div class="d-flex align-items-center p-3 bg-info bg-opacity-10 rounded">
+                                <div class="icon-bg text-info me-3">
+                                    <i class="bi bi-credit-card"></i>
+                                </div>
+                                <div>
+                                    <h6 class="text-info mb-0">Bank Accounts</h6>
+                                    <h4 class="mb-0">{{ bank_stats.total_accounts }}</h4>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="col-12 col-sm-6 col-lg-3">
+                            <div class="d-flex align-items-center p-3 bg-warning bg-opacity-10 rounded">
+                                <div class="icon-bg text-warning me-3">
+                                    <i class="bi bi-clock"></i>
+                                </div>
+                                <div>
+                                    <h6 class="text-warning mb-0">Pending Transactions</h6>
+                                    <h4 class="mb-0">{{ bank_stats.pending_transactions }}</h4>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="col-12 col-sm-6 col-lg-3">
+                            <div class="d-flex align-items-center p-3 bg-primary bg-opacity-10 rounded">
+                                <div class="icon-bg text-primary me-3">
+                                    <i class="bi bi-graph-up"></i>
+                                </div>
+                                <div>
+                                    <h6 class="text-primary mb-0">24h Transactions</h6>
+                                    <h4 class="mb-0">{{ bank_stats.total_transactions_24h }}</h4>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    {% if bank_revenue %}
+                    <div class="row mt-3">
+                        <div class="col-12">
+                            <div class="text-center p-3 bg-light rounded">
+                                <h6 class="text-muted mb-1">Monthly Bank Revenue</h6>
+                                <h3 class="text-success mb-0">${{ "%.2f"|format(bank_revenue) }}</h3>
+                                <small class="text-muted">Last 30 days</small>
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+                    
+                    {% if recent_bank_transactions %}
+                    <div class="row mt-3">
+                        <div class="col-12">
+                            <h6 class="text-muted mb-3">Recent Bank Transactions</h6>
+                            <div class="table-responsive">
+                                <table class="table table-sm table-hover">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th>ID</th>
+                                            <th>Amount</th>
+                                            <th>Status</th>
+                                            <th>Provider</th>
+                                            <th>Date</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for transaction in recent_bank_transactions %}
+                                        <tr>
+                                            <td>
+                                                <a href="{{ url_for('admin.bank_transaction_detail', transaction_id=transaction.id) }}" class="text-decoration-none">
+                                                    #{{ transaction.id }}
+                                                </a>
+                                            </td>
+                                            <td>${{ "%.2f"|format(transaction.amount) }}</td>
+                                            <td>
+                                                {% if transaction.status == 'confirmed' %}
+                                                    <span class="badge bg-success">{{ transaction.status.title() }}</span>
+                                                {% elif transaction.status == 'pending' %}
+                                                    <span class="badge bg-warning">{{ transaction.status.title() }}</span>
+                                                {% elif transaction.status == 'failed' %}
+                                                    <span class="badge bg-danger">{{ transaction.status.title() }}</span>
+                                                {% else %}
+                                                    <span class="badge bg-secondary">{{ transaction.status.title() }}</span>
+                                                {% endif %}
+                                            </td>
+                                            <td>{{ transaction.bank_account.provider.bank_name if transaction.bank_account and transaction.bank_account.provider else 'N/A' }}</td>
+                                            <td>{{ transaction.created_at|datetime_eest('%m-%d %H:%M') }}</td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
 
     <!-- Row 5: System Health & Real-time Data -->
     <div class="row mb-4">
@@ -876,7 +1082,7 @@
                     <h6 class="card-title mb-0">
                         <i class="bi bi-graph-up me-2 text-primary"></i>Live Currency Rates
                     </h6>
-                    <small class="text-muted">Updated: {{ current_time.strftime('%H:%M') }}</small>
+                    <small class="text-muted">Updated: {{ current_time|datetime_eest('%H:%M') }}</small>
                 </div>
                 <div class="card-body">
                     <div class="row g-3">

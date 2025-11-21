@@ -1,4 +1,5 @@
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
+from ..utils.timezone import now_eest, utc_to_eest
 from app.extensions import db
 from .base import BaseModel
 
@@ -25,12 +26,19 @@ class PaymentSession(BaseModel):
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
     client = db.relationship('Client', backref=db.backref('payment_sessions', lazy=True))
+    events = db.relationship(
+        'PaymentSessionEvent',
+        backref='session',
+        lazy=True,
+        cascade='all, delete-orphan',
+        order_by='PaymentSessionEvent.created_at.desc()'
+    )
 
     @classmethod
     def create_from_request(cls, data: dict, client_id: int):
         import uuid
         ps_id = 'ps_' + uuid.uuid4().hex[:12]
-        expires = datetime.utcnow() + timedelta(minutes=30)
+        expires = now_eest() + timedelta(minutes=30)
         obj = cls(
             public_id=ps_id,
             client_id=client_id,
@@ -50,4 +58,39 @@ class PaymentSession(BaseModel):
         return obj
 
     def is_expired(self) -> bool:
-        return datetime.utcnow() > (self.expires_at or datetime.utcnow())
+        """Check if payment session has expired, handling both naive and aware datetimes"""
+        now = now_eest()
+        expires = self.expires_at
+        
+        # If expires_at is timezone-naive, assume it's UTC and convert to EEST
+        if expires and expires.tzinfo is None:
+            expires = expires.replace(tzinfo=timezone.utc).astimezone(now.tzinfo)
+        
+        # If expires_at is None, consider it expired
+        if expires is None:
+            return True
+            
+        return now > expires
+
+
+class PaymentSessionEvent(BaseModel):
+    __tablename__ = 'payment_session_events'
+
+    payment_session_id = db.Column(db.Integer, db.ForeignKey('payment_sessions.id'), nullable=False, index=True)
+    event_type = db.Column(db.String(40), nullable=False)
+    payload = db.Column(db.JSON, default=dict)
+    response_status = db.Column(db.Integer, nullable=True)
+    response_body = db.Column(db.Text, nullable=True)
+    error = db.Column(db.Text, nullable=True)
+
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+    def mark_delivered(self, status_code: int, body: str | None = None):
+        self.response_status = status_code
+        self.response_body = body
+        self.error = None
+
+    def mark_failed(self, status_code: int | None, error_message: str):
+        self.response_status = status_code
+        self.error = error_message

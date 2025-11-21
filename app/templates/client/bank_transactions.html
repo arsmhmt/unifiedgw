@@ -1,0 +1,356 @@
+{% extends 'client/base.html' %}
+{% block title %}{{ _('Bank Transactions') }} - PayCrypt{% endblock %}
+{% block content %}
+<div class="container-fluid" style="margin-top: 1.5rem;">
+    <!-- Page Header -->
+    <div class="d-flex flex-column flex-md-row align-items-center justify-content-between mb-4">
+        <div>
+            <h1 class="h3 mb-0 text-gray-800">
+                <i class="bi bi-bank me-2"></i>{{ _('Bank Transactions') }}
+            </h1>
+            <p class="text-muted mb-0">{{ _('Monitor all bank gateway transactions and processing activity') }}</p>
+        </div>
+        <div class="btn-toolbar">
+            <div class="btn-group me-2">
+                <button type="button" class="btn btn-outline-primary dropdown-toggle" data-bs-toggle="dropdown">
+                    <i class="bi bi-funnel me-1"></i>{{ _('Status') }}
+                </button>
+                <ul class="dropdown-menu">
+                    <li><a class="dropdown-item" href="{{ url_for('client.bank_transactions') }}">{{ _('All Statuses') }}</a></li>
+                    <li><a class="dropdown-item" href="{{ url_for('client.bank_transactions') }}?status=pending">{{ _('Pending') }}</a></li>
+                    <li><a class="dropdown-item" href="{{ url_for('client.bank_transactions') }}?status=completed">{{ _('Completed') }}</a></li>
+                    <li><a class="dropdown-item" href="{{ url_for('client.bank_transactions') }}?status=failed">{{ _('Failed') }}</a></li>
+                </ul>
+            </div>
+            <div class="btn-group me-2">
+                <button type="button" class="btn btn-outline-secondary dropdown-toggle" data-bs-toggle="dropdown">
+                    <i class="bi bi-calendar me-1"></i>{{ _('Period') }}
+                </button>
+                <ul class="dropdown-menu">
+                    <li><a class="dropdown-item" href="{{ url_for('client.bank_transactions') }}">{{ _('All Time') }}</a></li>
+                    <li><a class="dropdown-item" href="{{ url_for('client.bank_transactions') }}?period=today">{{ _('Today') }}</a></li>
+                    <li><a class="dropdown-item" href="{{ url_for('client.bank_transactions') }}?period=week">{{ _('This Week') }}</a></li>
+                    <li><a class="dropdown-item" href="{{ url_for('client.bank_transactions') }}?period=month">{{ _('This Month') }}</a></li>
+                </ul>
+            </div>
+            <a href="{{ url_for('client.bank_gateway') }}" class="btn btn-outline-info">
+                <i class="bi bi-gear me-1"></i>{{ _('Manage Sites') }}
+            </a>
+        </div>
+    </div>
+
+    <!-- Quick Stats -->
+    <div class="row g-4 mb-4">
+        <div class="col-md-3">
+            <div class="card border-warning">
+                <div class="card-body text-center">
+                    <i class="bi bi-clock-history text-warning mb-2" style="font-size: 2rem;"></i>
+                    <h4 class="card-title">{{ pending_count|default(0) }}</h4>
+                    <p class="card-text text-muted">{{ _('Pending') }}</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card border-success">
+                <div class="card-body text-center">
+                    <i class="bi bi-check-circle text-success mb-2" style="font-size: 2rem;"></i>
+                    <h4 class="card-title">{{ completed_count|default(0) }}</h4>
+                    <p class="card-text text-muted">{{ _('Completed') }}</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card border-danger">
+                <div class="card-body text-center">
+                    <i class="bi bi-x-circle text-danger mb-2" style="font-size: 2rem;"></i>
+                    <h4 class="card-title">{{ failed_count|default(0) }}</h4>
+                    <p class="card-text text-muted">{{ _('Failed') }}</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card border-primary">
+                <div class="card-body text-center">
+                    <i class="bi bi-cash-stack text-primary mb-2" style="font-size: 2rem;"></i>
+                    <h4 class="card-title">${{ "%.2f"|format(total_volume|default(0)) }}</h4>
+                    <p class="card-text text-muted">{{ _('Total Volume') }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Transactions Table -->
+    <div class="card shadow">
+        <div class="card-header py-3 d-flex justify-content-between align-items-center">
+            <h6 class="m-0 font-weight-bold text-primary">
+                <i class="bi bi-list-task me-2"></i>{{ _('Bank Transaction History') }}
+            </h6>
+            <div class="d-flex align-items-center">
+                <small class="text-muted me-3">{{ _('Auto-refresh in') }} <span id="refreshTimer">30</span>s</small>
+                <button class="btn btn-sm btn-outline-primary" onclick="refreshTransactions()">
+                    <i class="bi bi-arrow-clockwise"></i>
+                </button>
+            </div>
+        </div>
+        <div class="card-body">
+            {% if transactions.items|length == 0 %}
+            <div class="text-center py-5">
+                <i class="bi bi-receipt text-muted mb-3" style="font-size: 4rem;"></i>
+                <h5 class="text-muted">{{ _('No bank transactions found') }}</h5>
+                <p class="text-muted">{{ _('Bank gateway transactions will appear here once processing begins.') }}</p>
+                <a href="{{ url_for('client.bank_gateway') }}" class="btn btn-primary">
+                    <i class="bi bi-plus-circle me-1"></i>{{ _('Setup Bank Gateway') }}
+                </a>
+            </div>
+            {% else %}
+            <div class="table-responsive">
+                <table class="table table-hover align-middle">
+                    <thead class="table-light">
+                        <tr>
+                            <th>{{ _('Transaction ID') }}</th>
+                            <th>{{ _('Gateway Site') }}</th>
+                            <th>{{ _('Date/Time') }}</th>
+                            <th>{{ _('Amount') }}</th>
+                            <th>{{ _('Status') }}</th>
+                            <th>{{ _('Customer') }}</th>
+                            <th>{{ _('Actions') }}</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for transaction in transactions.items %}
+                        <tr>
+                            <td>
+                                <code class="text-primary">#{{ transaction.id }}</code>
+                                {% if transaction.external_reference %}
+                                <br><small class="text-muted">{{ transaction.external_reference|truncate(20) }}</small>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if transaction.site %}
+                                <div>
+                                    <strong>{{ transaction.site.site_name }}</strong>
+                                    <br><small class="text-muted">{{ transaction.site.site_url|truncate(30) }}</small>
+                                </div>
+                                {% else %}
+                                <span class="text-muted">{{ _('Unknown Site') }}</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <div>{{ transaction.created_at.strftime('%b %d, %Y') }}</div>
+                                <small class="text-muted">{{ transaction.created_at.strftime('%H:%M:%S') }}</small>
+                            </td>
+                            <td>
+                                <span class="fw-bold text-success">${{ "%.2f"|format(transaction.amount) }}</span>
+                                {% if transaction.currency %}
+                                <br><small class="text-muted">{{ transaction.currency }}</small>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% set status_value = transaction.status|string|lower if transaction.status else 'unknown' %}
+                                {% set status_class = {
+                                    'completed': 'success',
+                                    'confirmed': 'success',
+                                    'pending': 'warning',
+                                    'processing': 'info',
+                                    'failed': 'danger',
+                                    'rejected': 'danger',
+                                    'cancelled': 'secondary',
+                                    'expired': 'secondary'
+                                } %}
+                                <span class="badge bg-{{ status_class.get(status_value, 'secondary') }}">
+                                    {% if status_value == 'pending' %}
+                                    <i class="bi bi-clock me-1"></i>
+                                    {% elif status_value == 'completed' %}
+                                    <i class="bi bi-check-circle me-1"></i>
+                                    {% elif status_value == 'failed' %}
+                                    <i class="bi bi-x-circle me-1"></i>
+                                    {% elif status_value == 'processing' %}
+                                    <i class="bi bi-arrow-repeat me-1"></i>
+                                    {% endif %}
+                                    {{ status_value|title }}
+                                </span>
+                            </td>
+                            <td>
+                                {% if transaction.customer_email %}
+                                <div>{{ transaction.customer_email|truncate(25) }}</div>
+                                {% endif %}
+                                {% if transaction.customer_name %}
+                                <small class="text-muted">{{ transaction.customer_name|truncate(20) }}</small>
+                                {% endif %}
+                                {% if not transaction.customer_email and not transaction.customer_name %}
+                                <span class="text-muted">{{ _('Anonymous') }}</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <div class="btn-group btn-group-sm">
+                                    <button class="btn btn-outline-primary" onclick="showTransactionDetails({{ transaction.id }})">
+                                        <i class="bi bi-eye"></i>
+                                    </button>
+                                    {% if transaction.status == 'pending' %}
+                                    <button class="btn btn-outline-warning" data-bs-toggle="tooltip" title="{{ _('Transaction pending - check gateway') }}">
+                                        <i class="bi bi-exclamation-triangle"></i>
+                                    </button>
+                                    {% endif %}
+                                    <button class="btn btn-outline-secondary dropdown-toggle" data-bs-toggle="dropdown">
+                                        <i class="bi bi-three-dots"></i>
+                                    </button>
+                                    <ul class="dropdown-menu">
+                                        <li><a class="dropdown-item" href="#" onclick="copyTransactionId({{ transaction.id }})">
+                                            <i class="bi bi-clipboard me-2"></i>{{ _('Copy ID') }}
+                                        </a></li>
+                                        {% if transaction.external_reference %}
+                                        <li><a class="dropdown-item" href="#" onclick="copyExternalRef('{{ transaction.external_reference }}')">
+                                            <i class="bi bi-link me-2"></i>{{ _('Copy Reference') }}
+                                        </a></li>
+                                        {% endif %}
+                                        <li><hr class="dropdown-divider"></li>
+                                        <li><a class="dropdown-item text-primary" href="{{ url_for('client.bank_gateway_site_detail', site_id=transaction.site.id) if transaction.site else '#' }}">
+                                            <i class="bi bi-arrow-right me-2"></i>{{ _('View Site') }}
+                                        </a></li>
+                                    </ul>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            
+            <!-- Pagination -->
+            {% if transactions.pages > 1 %}
+            <nav aria-label="Transaction pagination" class="mt-4">
+                <ul class="pagination justify-content-center">
+                    {% for page_num in transactions.iter_pages() %}
+                    {% if page_num %}
+                    <li class="page-item {% if page_num == transactions.page %}active{% endif %}">
+                        <a class="page-link" href="{{ url_for('client.bank_transactions', page=page_num) }}">{{ page_num }}</a>
+                    </li>
+                    {% else %}
+                    <li class="page-item disabled"><span class="page-link">…</span></li>
+                    {% endif %}
+                    {% endfor %}
+                </ul>
+            </nav>
+            {% endif %}
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- Transaction Details Modal -->
+<div class="modal fade" id="transactionModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">{{ _('Bank Transaction Details') }}</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div id="transactionDetails">
+                    <!-- Transaction details will be loaded here -->
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{{ _('Close') }}</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Auto-refresh timer
+let refreshCounter = 30;
+const refreshInterval = setInterval(() => {
+    refreshCounter--;
+    document.getElementById('refreshTimer').textContent = refreshCounter;
+    if (refreshCounter <= 0) {
+        refreshTransactions();
+        refreshCounter = 30;
+    }
+}, 1000);
+
+function refreshTransactions() {
+    location.reload();
+}
+
+function showTransactionDetails(transactionId) {
+    document.getElementById('transactionDetails').innerHTML = `
+        <div class="text-center">
+            <div class="spinner-border" role="status">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+        </div>
+    `;
+    
+    new bootstrap.Modal(document.getElementById('transactionModal')).show();
+    
+    // In a real application, this would be an AJAX call to fetch transaction details
+    setTimeout(() => {
+        document.getElementById('transactionDetails').innerHTML = `
+            <div class="alert alert-info">
+                <i class="bi bi-info-circle me-2"></i>
+                <strong>Transaction #${transactionId}</strong>
+            </div>
+            <div class="row">
+                <div class="col-md-6">
+                    <strong>{{ _('Transaction ID') }}:</strong> #${transactionId}<br>
+                    <strong>{{ _('Status') }}:</strong> <span class="badge bg-warning">{{ _('Pending') }}</span><br>
+                    <strong>{{ _('Amount') }}:</strong> $0.00<br>
+                    <strong>{{ _('Currency') }}:</strong> USD
+                </div>
+                <div class="col-md-6">
+                    <strong>{{ _('Gateway Site') }}:</strong> Example Site<br>
+                    <strong>{{ _('Created') }}:</strong> ${new Date().toLocaleString()}<br>
+                    <strong>{{ _('Customer') }}:</strong> customer@example.com<br>
+                    <strong>{{ _('External Ref') }}:</strong> EXT-${transactionId}
+                </div>
+            </div>
+            <hr>
+            <p class="text-muted">{{ _('Detailed transaction information would be loaded here in a real implementation.') }}</p>
+        `;
+    }, 1000);
+}
+
+function copyTransactionId(transactionId) {
+    navigator.clipboard.writeText(`#${transactionId}`).then(() => {
+        // Show temporary success feedback
+        const toast = document.createElement('div');
+        toast.className = 'toast align-items-center text-white bg-success border-0 position-fixed top-0 end-0 m-3';
+        toast.style.zIndex = '1060';
+        toast.innerHTML = `
+            <div class="d-flex">
+                <div class="toast-body">{{ _('Transaction ID copied!') }}</div>
+                <button type="button" class="btn-close btn-close-white me-2 m-auto" onclick="this.parentElement.parentElement.remove()"></button>
+            </div>
+        `;
+        document.body.appendChild(toast);
+        setTimeout(() => toast.remove(), 3000);
+    });
+}
+
+function copyExternalRef(reference) {
+    navigator.clipboard.writeText(reference).then(() => {
+        // Show temporary success feedback
+        const toast = document.createElement('div');
+        toast.className = 'toast align-items-center text-white bg-success border-0 position-fixed top-0 end-0 m-3';
+        toast.style.zIndex = '1060';
+        toast.innerHTML = `
+            <div class="d-flex">
+                <div class="toast-body">{{ _('Reference copied!') }}</div>
+                <button type="button" class="btn-close btn-close-white me-2 m-auto" onclick="this.parentElement.parentElement.remove()"></button>
+            </div>
+        `;
+        document.body.appendChild(toast);
+        setTimeout(() => toast.remove(), 3000);
+    });
+}
+
+// Initialize tooltips
+document.addEventListener('DOMContentLoaded', function() {
+    var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+    var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+        return new bootstrap.Tooltip(tooltipTriggerEl);
+    });
+});
+</script>
+{% endblock %}

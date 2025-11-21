@@ -46,7 +46,7 @@
                     <li class="list-group-item">
                         <div class="d-flex justify-content-between align-items-center">
                             <span>{{ activity.type }}</span>
-                            <span class="text-muted">{{ activity.timestamp.strftime('%H:%M') }}</span>
+                            <span class="text-muted">{{ activity.timestamp|datetime_eest('%H:%M') }}</span>
                         </div>
                         <small class="text-muted">{{ _(activity.description) }}</small>
                     </li>
@@ -127,7 +127,7 @@
                                         {{ payment.status }}
                                     </span>
                                 </td>
-                                <td>{{ payment.created_at.strftime('%Y-%m-%d %H:%M') }}</td>
+                                <td>{{ payment.created_at|datetime_eest('%Y-%m-%d %H:%M') }}</td>
                             </tr>
                             {% endfor %}
                         </tbody>

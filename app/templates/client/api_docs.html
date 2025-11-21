@@ -1,0 +1,850 @@
+{% extends 'client/base.html' %}
+{% block title %}API Documentation{% endblock %}
+
+{% block styles %}
+{{ super() }}
+<style>
+.doc-section {
+    border-left: 4px solid #007bff;
+    padding-left: 20px;
+    margin-bottom: 30px;
+}
+.endpoint-card {
+    border: 1px solid #dee2e6;
+    border-radius: 8px;
+    margin-bottom: 20px;
+}
+.endpoint-header {
+    background-color: #f8f9fa;
+    padding: 15px;
+    border-bottom: 1px solid #dee2e6;
+    border-radius: 8px 8px 0 0;
+}
+.method-badge {
+    font-weight: bold;
+    font-size: 0.8em;
+    padding: 4px 8px;
+    border-radius: 4px;
+}
+.method-get { background-color: #28a745; color: white; }
+.method-post { background-color: #007bff; color: white; }
+.method-put { background-color: #ffc107; color: black; }
+.method-delete { background-color: #dc3545; color: white; }
+.code-block {
+    background-color: #f8f9fa;
+    border: 1px solid #e9ecef;
+    border-radius: 4px;
+    padding: 15px;
+    font-family: 'Courier New', monospace;
+    font-size: 0.9em;
+    white-space: pre-wrap;
+    overflow-x: auto;
+}
+.toc {
+    background-color: #f8f9fa;
+    border: 1px solid #dee2e6;
+    border-radius: 8px;
+    padding: 20px;
+    margin-bottom: 30px;
+}
+.toc ul {
+    list-style: none;
+    padding-left: 0;
+}
+.toc li {
+    margin-bottom: 5px;
+}
+.toc a {
+    text-decoration: none;
+    color: #007bff;
+}
+.toc a:hover {
+    text-decoration: underline;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <!-- Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex align-items-center justify-content-between">
+                <div>
+                    <h1 class="h3 mb-1">PayCrypt API Documentation</h1>
+                    <p class="text-muted mb-0">Complete integration guide for crypto payments and bank gateway</p>
+                </div>
+                <div>
+                    <a href="{{ url_for('client.api_management') }}" class="btn btn-primary">
+                        <i class="fas fa-key me-2"></i>Manage API Keys
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Table of Contents -->
+    <div class="row">
+        <div class="col-lg-3">
+            <div class="toc position-sticky" style="top: 20px;">
+                <h6 class="mb-3">Table of Contents</h6>
+                <ul>
+                    <li><a href="#getting-started">Getting Started</a></li>
+                    <li><a href="#crypto-api">Crypto Payment API</a>
+                        <ul class="ms-3">
+                            <li><a href="#crypto-auth">Authentication</a></li>
+                            <li><a href="#crypto-endpoints">Endpoints</a></li>
+                            <li><a href="#crypto-webhooks">Webhooks</a></li>
+                        </ul>
+                    </li>
+                    <li><a href="#bank-api">Bank Gateway API</a>
+                        <ul class="ms-3">
+                            <li><a href="#bank-auth">Authentication</a></li>
+                            <li><a href="#bank-endpoints">Endpoints</a></li>
+                            <li><a href="#bank-callbacks">Callbacks</a></li>
+                        </ul>
+                    </li>
+                    <li><a href="#code-examples">Code Examples</a></li>
+                    <li><a href="#testing">Testing</a></li>
+                    <li><a href="#support">Support</a></li>
+                </ul>
+            </div>
+        </div>
+        
+        <div class="col-lg-9">
+            <!-- Getting Started -->
+            <section id="getting-started" class="doc-section">
+                <h2>Getting Started</h2>
+                <p>PayCrypt provides two main API systems for accepting payments:</p>
+                <div class="row mb-4">
+                    <div class="col-md-6">
+                        <div class="card h-100">
+                            <div class="card-body">
+                                <h5><i class="fas fa-bitcoin text-warning me-2"></i>Crypto Payment API</h5>
+                                <p class="text-muted">Accept cryptocurrency payments with hosted checkout pages and real-time notifications.</p>
+                                <ul class="small">
+                                    <li>HMAC-signed requests for security</li>
+                                    <li>Hosted checkout pages</li>
+                                    <li>Real-time webhooks</li>
+                                    <li>Multiple cryptocurrencies</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="card h-100">
+                            <div class="card-body">
+                                <h5><i class="fas fa-university text-success me-2"></i>Bank Gateway API</h5>
+                                <p class="text-muted">Process traditional bank payments and transfers with multiple banking partners.</p>
+                                <ul class="small">
+                                    <li>Simple API key authentication</li>
+                                    <li>Deposit and withdrawal requests</li>
+                                    <li>Real-time status updates</li>
+                                    <li>Multiple bank accounts</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="alert alert-info">
+                    <h6><i class="fas fa-info-circle me-2"></i>Base URLs</h6>
+                    <ul class="mb-0">
+                        <li><strong>Crypto API:</strong> <code>{{ request.host_url }}api/v1/</code></li>
+                        <li><strong>Bank API:</strong> <code>{{ request.host_url }}bank-api/</code></li>
+                    </ul>
+                </div>
+            </section>
+
+            <!-- Crypto Payment API -->
+            <section id="crypto-api" class="doc-section">
+                <h2><i class="fas fa-bitcoin text-warning me-2"></i>Crypto Payment API</h2>
+                
+                <div id="crypto-auth" class="mb-4">
+                    <h4>Authentication</h4>
+                    <p>All crypto API requests must include HMAC authentication headers:</p>
+                    
+                    <div class="endpoint-card">
+                        <div class="endpoint-header">
+                            <h6>Required Headers</h6>
+                        </div>
+                        <div class="p-3">
+                            <table class="table table-sm">
+                                <tr>
+                                    <td><code>X-Paycrypt-Key</code></td>
+                                    <td>Your API key from the dashboard</td>
+                                </tr>
+                                <tr>
+                                    <td><code>X-Paycrypt-Timestamp</code></td>
+                                    <td>Unix timestamp in seconds (UTC)</td>
+                                </tr>
+                                <tr>
+                                    <td><code>X-Paycrypt-Signature</code></td>
+                                    <td>HMAC-SHA256 signature of "<timestamp>.<request_body>"</td>
+                                </tr>
+                                <tr>
+                                    <td><code>Content-Type</code></td>
+                                    <td>application/json</td>
+                                </tr>
+                            </table>
+                            
+                            <h6 class="mt-3">Signature Generation</h6>
+                            <div class="code-block">// JavaScript
+const timestamp = Math.floor(Date.now() / 1000).toString();
+const message = `${timestamp}.${JSON.stringify(requestBody)}`;
+const signature = crypto.createHmac('sha256', secretKey)
+    .update(message)
+    .digest('hex');
+
+# Python
+import hmac
+import hashlib
+import time
+import json
+
+timestamp = str(int(time.time()))
+message = f"{timestamp}.{json.dumps(request_body)}"
+signature = hmac.new(
+    secret_key.encode(),
+    message.encode(),
+    hashlib.sha256
+).hexdigest()</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="crypto-endpoints" class="mb-4">
+                    <h4>Endpoints</h4>
+                    
+                    <!-- Create Payment Session -->
+                    <div class="endpoint-card">
+                        <div class="endpoint-header">
+                            <span class="method-badge method-post">POST</span>
+                            <code class="ms-2">/api/v1/payment_sessions</code>
+                            <span class="float-end text-muted">Create Payment Session</span>
+                        </div>
+                        <div class="p-3">
+                            <p>Create a new payment session for cryptocurrency payments.</p>
+                            
+                            <h6>Request Body:</h6>
+                            <div class="code-block">{
+  "order_id": "ORD-12345",
+  "amount": "99.99",
+  "currency": "USD",
+  "customer": {
+    "email": "customer@example.com"
+  },
+  "metadata": {
+    "source": "your_app",
+    "user_id": "12345"
+  },
+  "success_url": "https://yoursite.com/payment/success?order=ORD-12345",
+  "cancel_url": "https://yoursite.com/payment/cancel?order=ORD-12345",
+  "webhook_url": "https://yoursite.com/api/paycrypt/webhook"
+}</div>
+
+                            <h6>Response (201 Created):</h6>
+                            <div class="code-block">{
+  "id": "ps_abcd1234ef56",
+  "status": "created",
+  "checkout_url": "https://checkout.paycrypt.online/ps_abcd1234ef56",
+  "expires_at": 1694692800,
+  "order_id": "ORD-12345",
+  "amount": "99.99",
+  "currency": "USD"
+}</div>
+                        </div>
+                    </div>
+
+                    <!-- Get Payment Session -->
+                    <div class="endpoint-card">
+                        <div class="endpoint-header">
+                            <span class="method-badge method-get">GET</span>
+                            <code class="ms-2">/api/v1/payment_sessions/{id}</code>
+                            <span class="float-end text-muted">Get Payment Session</span>
+                        </div>
+                        <div class="p-3">
+                            <p>Retrieve the current status of a payment session.</p>
+                            
+                            <h6>Response (200 OK):</h6>
+                            <div class="code-block">{
+  "id": "ps_abcd1234ef56",
+  "status": "completed",
+  "order_id": "ORD-12345",
+  "amount": "99.99",
+  "currency": "USD",
+  "paid_at": 1694692900,
+  "transaction_hash": "0x1234567890abcdef..."
+}</div>
+                        </div>
+                    </div>
+
+                    <!-- Generate Betslip -->
+                    <div class="endpoint-card">
+                        <div class="endpoint-header">
+                            <span class="method-badge method-post">POST</span>
+                            <code class="ms-2">/api/v1/betslip/generate</code>
+                            <span class="float-end text-muted">Generate Betslip (Gaming)</span>
+                        </div>
+                        <div class="p-3">
+                            <p>Generate a betslip for gaming and sports betting platforms.</p>
+                            
+                            <h6>Request Body:</h6>
+                            <div class="code-block">{
+  "betslip_id": "BS-12345",
+  "user_id": "user123",
+  "bets": [
+    {
+      "event_id": "match_001",
+      "bet_type": "winner",
+      "odds": 2.5,
+      "stake": "50.00"
+    }
+  ],
+  "total_stake": "50.00",
+  "potential_payout": "125.00",
+  "webhook_url": "https://yoursite.com/api/betslip/webhook"
+}</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="crypto-webhooks" class="mb-4">
+                    <h4>Webhooks</h4>
+                    <p>PayCrypt sends webhook notifications to your specified URL when payment events occur.</p>
+                    
+                    <div class="endpoint-card">
+                        <div class="endpoint-header">
+                            <h6>Webhook Events</h6>
+                        </div>
+                        <div class="p-3">
+                            <table class="table table-sm">
+                                <tr>
+                                    <td><code>payment.created</code></td>
+                                    <td>Payment session was created</td>
+                                </tr>
+                                <tr>
+                                    <td><code>payment.completed</code></td>
+                                    <td>Payment was successfully completed</td>
+                                </tr>
+                                <tr>
+                                    <td><code>payment.failed</code></td>
+                                    <td>Payment failed or was rejected</td>
+                                </tr>
+                                <tr>
+                                    <td><code>payment.expired</code></td>
+                                    <td>Payment session expired</td>
+                                </tr>
+                            </table>
+                            
+                            <h6 class="mt-3">Webhook Verification</h6>
+                            <div class="code-block"># Python webhook verification
+import hmac
+import hashlib
+
+def verify_webhook(request):
+    signature = request.headers.get('X-Paycrypt-Signature')
+    timestamp = request.headers.get('X-Paycrypt-Timestamp')
+    body = request.body.decode('utf-8')
+    
+    expected_signature = hmac.new(
+        webhook_secret.encode(),
+        f"{timestamp}.{body}".encode(),
+        hashlib.sha256
+    ).hexdigest()
+    
+    return hmac.compare_digest(signature, expected_signature)</div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Bank Gateway API -->
+            <section id="bank-api" class="doc-section">
+                <h2><i class="fas fa-university text-success me-2"></i>Bank Gateway API</h2>
+                
+                <div id="bank-auth" class="mb-4">
+                    <h4>Authentication</h4>
+                    <p>Bank gateway API uses simple API key authentication:</p>
+                    
+                    <div class="endpoint-card">
+                        <div class="endpoint-header">
+                            <h6>Required Headers</h6>
+                        </div>
+                        <div class="p-3">
+                            <table class="table table-sm">
+                                <tr>
+                                    <td><code>X-API-Key</code></td>
+                                    <td>Your bank gateway API key</td>
+                                </tr>
+                                <tr>
+                                    <td><code>Content-Type</code></td>
+                                    <td>application/json</td>
+                                </tr>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="bank-endpoints" class="mb-4">
+                    <h4>Endpoints</h4>
+                    
+                    <!-- Create Deposit -->
+                    <div class="endpoint-card">
+                        <div class="endpoint-header">
+                            <span class="method-badge method-post">POST</span>
+                            <code class="ms-2">/bank-api/deposit/request</code>
+                            <span class="float-end text-muted">Create Deposit Request</span>
+                        </div>
+                        <div class="p-3">
+                            <p>Create a new deposit request for bank transfer.</p>
+                            
+                            <h6>Request Body:</h6>
+                            <div class="code-block">{
+  "amount": "500.00",
+  "currency": "TRY",
+  "user_name": "John Doe",
+  "user_email": "john@example.com",
+  "user_phone": "+90555123456",
+  "callback_url": "https://yoursite.com/api/bank/callback",
+  "external_transaction_id": "TXN-67890"
+}</div>
+
+                            <h6>Response (200 OK):</h6>
+                            <div class="code-block">{
+  "success": true,
+  "transaction_id": "TXN-67890",
+  "reference_code": "REF-ABC123",
+  "bank_details": {
+    "bank_name": "Example Bank",
+    "account_holder": "PayCrypt Gateway",
+    "iban": "TR1234567890123456789012345",
+    "amount": "500.00",
+    "currency": "TRY"
+  },
+  "instructions": "Please transfer exactly 500.00 TRY to the provided account.",
+  "expires_at": "2025-09-15T10:00:00Z"
+}</div>
+                        </div>
+                    </div>
+
+                    <!-- Create Withdrawal -->
+                    <div class="endpoint-card">
+                        <div class="endpoint-header">
+                            <span class="method-badge method-post">POST</span>
+                            <code class="ms-2">/bank-api/withdraw/request</code>
+                            <span class="float-end text-muted">Create Withdrawal Request</span>
+                        </div>
+                        <div class="p-3">
+                            <p>Create a new withdrawal request to user's bank account.</p>
+                            
+                            <h6>Request Body:</h6>
+                            <div class="code-block">{
+  "amount": "200.00",
+  "currency": "TRY",
+  "user_name": "John Doe",
+  "user_email": "john@example.com",
+  "user_iban": "TR9876543210987654321098765",
+  "callback_url": "https://yoursite.com/api/bank/callback",
+  "external_transaction_id": "WTH-12345"
+}</div>
+                        </div>
+                    </div>
+
+                    <!-- Get Transaction Status -->
+                    <div class="endpoint-card">
+                        <div class="endpoint-header">
+                            <span class="method-badge method-get">GET</span>
+                            <code class="ms-2">/bank-api/transaction/{reference}</code>
+                            <span class="float-end text-muted">Get Transaction Status</span>
+                        </div>
+                        <div class="p-3">
+                            <p>Check the status of a bank transaction.</p>
+                            
+                            <h6>Response (200 OK):</h6>
+                            <div class="code-block">{
+  "success": true,
+  "reference_code": "REF-ABC123",
+  "status": "confirmed",
+  "amount": "500.00",
+  "currency": "TRY",
+  "created_at": "2025-09-14T09:00:00Z",
+  "confirmed_at": "2025-09-14T09:30:00Z",
+  "transaction_type": "deposit"
+}</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="bank-callbacks" class="mb-4">
+                    <h4>Callbacks</h4>
+                    <p>Bank gateway sends HTTP POST callbacks to your specified callback URL when transaction status changes.</p>
+                    
+                    <div class="endpoint-card">
+                        <div class="endpoint-header">
+                            <h6>Callback Payload</h6>
+                        </div>
+                        <div class="p-3">
+                            <div class="code-block">{
+  "reference_code": "REF-ABC123",
+  "external_transaction_id": "TXN-67890",
+  "status": "confirmed",
+  "amount": "500.00",
+  "currency": "TRY",
+  "transaction_type": "deposit",
+  "timestamp": "2025-09-14T09:30:00Z"
+}</div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Code Examples -->
+            <section id="code-examples" class="doc-section">
+                <h2><i class="fas fa-code text-info me-2"></i>Code Examples & SDKs</h2>
+                
+                <!-- SDK Downloads -->
+                <div class="row mb-4">
+                    <div class="col-12">
+                        <div class="alert alert-primary">
+                            <h6><i class="fas fa-download me-2"></i>Official SDKs</h6>
+                            <p class="mb-3">Download our official SDKs to get started quickly:</p>
+                            <div class="btn-group" role="group">
+                                <a href="{{ url_for('client.download_sdk', filename='paycrypt_sdk.py') }}" class="btn btn-outline-primary">
+                                    <i class="fab fa-python me-2"></i>Python SDK
+                                </a>
+                                <a href="#" class="btn btn-outline-primary disabled">
+                                    <i class="fab fa-js me-2"></i>JavaScript SDK
+                                    <small>(Coming Soon)</small>
+                                </a>
+                                <a href="#" class="btn btn-outline-primary disabled">
+                                    <i class="fab fa-php me-2"></i>PHP SDK
+                                    <small>(Coming Soon)</small>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="mb-4">
+                    <h4>Complete Integration Examples</h4>
+                    
+                    <ul class="nav nav-tabs" id="exampleTabs" role="tablist">
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link active" id="js-tab" data-bs-toggle="tab" data-bs-target="#js-example">JavaScript/Node.js</button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="python-tab" data-bs-toggle="tab" data-bs-target="#python-example">Python</button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="php-tab" data-bs-toggle="tab" data-bs-target="#php-example">PHP</button>
+                        </li>
+                    </ul>
+                    
+                    <div class="tab-content border border-top-0 p-3">
+                        <div class="tab-pane fade show active" id="js-example">
+                            <div class="code-block">// PayCrypt JavaScript SDK Example
+const PayCrypt = require('./paycrypt-sdk');
+
+const client = new PayCrypt({
+  apiKey: 'your_crypto_api_key',
+  secretKey: 'your_crypto_secret',
+  bankApiKey: 'your_bank_api_key',
+  baseUrl: '{{ request.host_url }}'
+});
+
+// Create crypto payment
+async function createCryptoPayment() {
+  try {
+    const payment = await client.crypto.createPaymentSession({
+      order_id: 'ORD-123',
+      amount: '99.99',
+      currency: 'USD',
+      customer: { email: 'customer@example.com' },
+      success_url: 'https://yoursite.com/success',
+      cancel_url: 'https://yoursite.com/cancel',
+      webhook_url: 'https://yoursite.com/webhook'
+    });
+    
+    console.log('Payment created:', payment.id);
+    console.log('Checkout URL:', payment.checkout_url);
+    return payment;
+  } catch (error) {
+    console.error('Payment creation failed:', error);
+  }
+}
+
+// Create bank deposit
+async function createBankDeposit() {
+  try {
+    const deposit = await client.bank.createDeposit({
+      amount: '500.00',
+      currency: 'TRY',
+      user_name: 'John Doe',
+      user_email: 'john@example.com',
+      callback_url: 'https://yoursite.com/callback'
+    });
+    
+    console.log('Deposit created:', deposit.reference_code);
+    return deposit;
+  } catch (error) {
+    console.error('Deposit creation failed:', error);
+  }
+}</div>
+                        </div>
+                        
+                        <div class="tab-pane fade" id="python-example">
+                            <div class="code-block"># PayCrypt Python SDK Example
+import paycrypt
+
+client = paycrypt.Client(
+    api_key='your_crypto_api_key',
+    secret_key='your_crypto_secret',
+    bank_api_key='your_bank_api_key',
+    base_url='{{ request.host_url }}'
+)
+
+# Create crypto payment
+def create_crypto_payment():
+    try:
+        payment = client.crypto.create_payment_session(
+            order_id='ORD-123',
+            amount='99.99',
+            currency='USD',
+            customer={'email': 'customer@example.com'},
+            success_url='https://yoursite.com/success',
+            cancel_url='https://yoursite.com/cancel',
+            webhook_url='https://yoursite.com/webhook'
+        )
+        
+        print(f"Payment created: {payment.id}")
+        print(f"Checkout URL: {payment.checkout_url}")
+        return payment
+    except Exception as error:
+        print(f"Payment creation failed: {error}")
+
+# Create bank deposit
+def create_bank_deposit():
+    try:
+        deposit = client.bank.create_deposit(
+            amount='500.00',
+            currency='TRY',
+            user_name='John Doe',
+            user_email='john@example.com',
+            callback_url='https://yoursite.com/callback'
+        )
+        
+        print(f"Deposit created: {deposit.reference_code}")
+        return deposit
+    except Exception as error:
+        print(f"Deposit creation failed: {error}")
+
+# Webhook verification
+def verify_webhook(request):
+    return client.crypto.verify_webhook(
+        signature=request.headers.get('X-Paycrypt-Signature'),
+        timestamp=request.headers.get('X-Paycrypt-Timestamp'),
+        body=request.body
+    )</div>
+                        </div>
+                        
+                        <div class="tab-pane fade" id="php-example">
+                            <div class="code-block"><?php
+// PayCrypt PHP SDK Example
+require_once 'vendor/autoload.php';
+
+use PayCrypt\Client;
+
+$client = new Client([
+    'api_key' => 'your_crypto_api_key',
+    'secret_key' => 'your_crypto_secret',
+    'bank_api_key' => 'your_bank_api_key',
+    'base_url' => '{{ request.host_url }}'
+]);
+
+// Create crypto payment
+function createCryptoPayment($client) {
+    try {
+        $payment = $client->crypto->createPaymentSession([
+            'order_id' => 'ORD-123',
+            'amount' => '99.99',
+            'currency' => 'USD',
+            'customer' => ['email' => 'customer@example.com'],
+            'success_url' => 'https://yoursite.com/success',
+            'cancel_url' => 'https://yoursite.com/cancel',
+            'webhook_url' => 'https://yoursite.com/webhook'
+        ]);
+        
+        echo "Payment created: " . $payment->id . "\n";
+        echo "Checkout URL: " . $payment->checkout_url . "\n";
+        return $payment;
+    } catch (Exception $e) {
+        echo "Payment creation failed: " . $e->getMessage() . "\n";
+    }
+}
+
+// Create bank deposit
+function createBankDeposit($client) {
+    try {
+        $deposit = $client->bank->createDeposit([
+            'amount' => '500.00',
+            'currency' => 'TRY',
+            'user_name' => 'John Doe',
+            'user_email' => 'john@example.com',
+            'callback_url' => 'https://yoursite.com/callback'
+        ]);
+        
+        echo "Deposit created: " . $deposit->reference_code . "\n";
+        return $deposit;
+    } catch (Exception $e) {
+        echo "Deposit creation failed: " . $e->getMessage() . "\n";
+    }
+}
+
+// Webhook verification
+function verifyWebhook($client) {
+    $signature = $_SERVER['HTTP_X_PAYCRYPT_SIGNATURE'];
+    $timestamp = $_SERVER['HTTP_X_PAYCRYPT_TIMESTAMP'];
+    $body = file_get_contents('php://input');
+    
+    return $client->crypto->verifyWebhook($signature, $timestamp, $body);
+}
+?></div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Testing -->
+            <section id="testing" class="doc-section">
+                <h2><i class="fas fa-flask text-warning me-2"></i>Testing</h2>
+                
+                <div class="alert alert-info">
+                    <h6><i class="fas fa-info-circle me-2"></i>Test Environment</h6>
+                    <p class="mb-2">You can test the API integration directly from your dashboard:</p>
+                    <a href="{{ url_for('client.api_management') }}" class="btn btn-sm btn-primary">
+                        <i class="fas fa-play me-2"></i>Go to API Testing Interface
+                    </a>
+                </div>
+
+                <div class="mb-4">
+                    <h4>Test Data</h4>
+                    <p>Use these test values for development:</p>
+                    
+                    <table class="table table-bordered">
+                        <thead>
+                            <tr>
+                                <th>Field</th>
+                                <th>Test Value</th>
+                                <th>Expected Result</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Amount</td>
+                                <td>1.00</td>
+                                <td>Instant success</td>
+                            </tr>
+                            <tr>
+                                <td>Amount</td>
+                                <td>2.00</td>
+                                <td>Pending (manual approval)</td>
+                            </tr>
+                            <tr>
+                                <td>Amount</td>
+                                <td>3.00</td>
+                                <td>Failure</td>
+                            </tr>
+                            <tr>
+                                <td>Email</td>
+                                <td>test@example.com</td>
+                                <td>Valid test customer</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- Support -->
+            <section id="support" class="doc-section">
+                <h2><i class="fas fa-life-ring text-primary me-2"></i>Support</h2>
+                
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="card h-100">
+                            <div class="card-body">
+                                <h5><i class="fas fa-envelope me-2"></i>Email Support</h5>
+                                <p class="text-muted">Get help with integration questions</p>
+                                <a href="mailto:support@paycrypt.online" class="btn btn-outline-primary">
+                                    support@paycrypt.online
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="card h-100">
+                            <div class="card-body">
+                                <h5><i class="fas fa-book me-2"></i>Documentation</h5>
+                                <p class="text-muted">Additional resources and guides</p>
+                                <a href="#" class="btn btn-outline-primary">
+                                    Developer Portal
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mt-4">
+                    <h4>Response Codes</h4>
+                    <table class="table table-bordered">
+                        <thead>
+                            <tr>
+                                <th>Code</th>
+                                <th>Meaning</th>
+                                <th>Description</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr class="table-success">
+                                <td>200</td>
+                                <td>OK</td>
+                                <td>Request was successful</td>
+                            </tr>
+                            <tr class="table-success">
+                                <td>201</td>
+                                <td>Created</td>
+                                <td>Resource was created successfully</td>
+                            </tr>
+                            <tr class="table-warning">
+                                <td>400</td>
+                                <td>Bad Request</td>
+                                <td>Invalid request data</td>
+                            </tr>
+                            <tr class="table-warning">
+                                <td>401</td>
+                                <td>Unauthorized</td>
+                                <td>Invalid API key or signature</td>
+                            </tr>
+                            <tr class="table-warning">
+                                <td>404</td>
+                                <td>Not Found</td>
+                                <td>Resource not found</td>
+                            </tr>
+                            <tr class="table-warning">
+                                <td>429</td>
+                                <td>Rate Limited</td>
+                                <td>Too many requests</td>
+                            </tr>
+                            <tr class="table-danger">
+                                <td>500</td>
+                                <td>Server Error</td>
+                                <td>Internal server error</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+        </div>
+    </div>
+</div>
+{% endblock %}

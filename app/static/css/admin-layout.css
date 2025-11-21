@@ -4,10 +4,8 @@
     --sidebar-width: 240px;
     --sidebar-collapsed-width: 60px;
     --topbar-height: 60px;
-    --sidebar-bg: linear-gradient(145deg, #2c3e50, #34495e);
-    --sidebar-color: #ecf0f1;
-    --sidebar-hover: rgba(255, 255, 255, 0.1);
-    --sidebar-active: rgba(52, 152, 219, 0.2);
+    --sidebar-hover: rgba(255, 107, 53, 0.1);
+    --sidebar-active: rgba(255, 107, 53, 0.2);
     --content-bg: #f8f9fc;
     --border-color: #e3e6f0;
     --shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15);
@@ -26,25 +24,6 @@ body {
     display: flex;
     min-height: 100vh;
     width: 100%;
-}
-
-/* Sidebar Layout */
-.sidebar {
-    min-height: 100vh;
-    width: var(--sidebar-width);
-    background: var(--sidebar-bg);
-    color: var(--sidebar-color);
-    position: fixed;
-    left: 0;
-    top: 0;
-    z-index: 999;
-    transition: all 0.3s ease-in-out;
-    overflow-y: auto;
-    overflow-x: hidden;
-}
-
-.sidebar.collapsed {
-    width: var(--sidebar-collapsed-width);
 }
 
 /* Content Area Layout */
@@ -104,18 +83,6 @@ body {
 }
 
 /* Card Layout Enhancements */
-.card {
-    border: none;
-    border-radius: 0.5rem;
-    box-shadow: var(--shadow);
-    margin-bottom: 1.5rem;
-    transition: all 0.3s ease;
-}
-
-.card:hover {
-    box-shadow: 0 0.25rem 2rem 0 rgba(58, 59, 69, 0.2);
-    transform: translateY(-2px);
-}
 
 .card-header {
     background: #fff;
@@ -126,20 +93,6 @@ body {
 
 .card-body {
     padding: 1.5rem;
-}
-
-/* Button Layout Improvements */
-.btn {
-    border-radius: 0.375rem;
-    font-weight: 500;
-    text-transform: none;
-    letter-spacing: 0.025em;
-    transition: all 0.15s ease-in-out;
-}
-
-.btn:hover {
-    transform: translateY(-1px);
-    box-shadow: 0 0.125rem 0.5rem rgba(0, 0, 0, 0.15);
 }
 
 /* Table Layout */

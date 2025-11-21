@@ -1,0 +1,190 @@
+{% extends 'owner/base.html' %}
+
+{% block title %}Neural API - CyberFinance{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Page Heading -->
+    <div class="d-flex flex-column flex-md-row align-items-center justify-content-between mb-4">
+        <div class="mb-3 mb-md-0 page-header">
+            <h1 class="h3 mb-1">Neural Network API</h1>
+            <p class="text-muted mb-0">Quantum access credentials for {{ branch.name }} SuperAdmin Node</p>
+        </div>
+        <a href="{{ url_for('owner.list_branches') }}" class="btn btn-cyber-outline">
+            <i class="fas fa-arrow-left me-2"></i>Back to Network
+        </a>
+    </div>
+
+    <!-- Quantum Credentials -->
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="card">
+                <div class="card-header">
+                    <h6 class="m-0 font-weight-bold text-cyber-primary">
+                        <i class="fas fa-key me-2"></i>Quantum Access Credentials
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle me-2"></i>
+                        <strong>Neural Security:</strong> These credentials grant superadmin access to the quantum financial network. Keep them secure and rotate regularly.
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label class="text-cyber-primary font-weight-bold">
+                                    <i class="fas fa-fingerprint me-2"></i>API Key (Public)
+                                </label>
+                                <div class="input-group">
+                                    <input type="text" class="form-control bg-dark text-cyber-text border-cyber-primary"
+                                           value="{{ branch.api_key }}" readonly>
+                                    <button class="btn btn-cyber-outline" onclick="copyToClipboard('{{ branch.api_key }}')">
+                                        <i class="fas fa-copy me-1"></i>Copy
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label class="text-cyber-primary font-weight-bold">
+                                    <i class="fas fa-lock me-2"></i>API Secret (Private)
+                                </label>
+                                <div class="input-group">
+                                    <input type="password" class="form-control bg-dark text-cyber-text border-cyber-primary"
+                                           value="{{ branch.api_secret }}" readonly id="apiSecret">
+                                    <button class="btn btn-cyber-outline me-1" onclick="toggleSecret()">
+                                        <i class="fas fa-eye me-1"></i>Show
+                                    </button>
+                                    <button class="btn btn-cyber-outline" onclick="copyToClipboard('{{ branch.api_secret }}')">
+                                        <i class="fas fa-copy me-1"></i>Copy
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="text-cyber-primary font-weight-bold">
+                            <i class="fas fa-webhook me-2"></i>Neural Webhook URL
+                        </label>
+                        <input type="text" class="form-control bg-dark text-cyber-text border-cyber-primary"
+                               value="{{ branch.webhook_url or 'Not configured' }}" readonly>
+                    </div>
+
+                    <div class="mt-4">
+                        <h6 class="text-cyber-primary font-weight-bold mb-3">
+                            <i class="fas fa-shield-alt me-2"></i>Security Actions
+                        </h6>
+                        <form method="post" action="{{ url_for('owner.regenerate_api_key', branch_id=branch.id) }}"
+                              onsubmit="return confirm('This will generate new API credentials. The old ones will stop working immediately. Continue?')">
+                            <button type="submit" class="btn btn-cyber">
+                                <i class="fas fa-sync-alt me-2"></i>Regenerate Quantum Credentials
+                            </button>
+                            <small class="text-cyber-text-muted d-block mt-2">
+                                <i class="fas fa-exclamation-triangle me-1"></i>
+                                Warning: This will invalidate all existing API connections for this node.
+                            </small>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Usage Stats -->
+    <div class="row mt-4">
+        <div class="col-lg-12">
+            <div class="card">
+                <div class="card-header">
+                    <h6 class="m-0 font-weight-bold text-cyber-primary">
+                        <i class="fas fa-chart-bar me-2"></i>Neural Activity Metrics
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="row text-center">
+                        <div class="col-md-3">
+                            <div class="p-3">
+                                <i class="fas fa-server fa-2x text-cyber-primary mb-2"></i>
+                                <h4 class="text-cyber-text">{{ branch.total_transactions or 0 }}</h4>
+                                <small class="text-cyber-text-muted">Total Transactions</small>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="p-3">
+                                <i class="fas fa-coins fa-2x text-cyber-success mb-2"></i>
+                                <h4 class="text-cyber-text">${{ "%.2f"|format(branch.total_volume or 0) }}</h4>
+                                <small class="text-cyber-text-muted">Volume Processed</small>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="p-3">
+                                <i class="fas fa-bolt fa-2x text-cyber-warning mb-2"></i>
+                                <h4 class="text-cyber-text">{{ "Online" if branch.is_active else "Offline" }}</h4>
+                                <small class="text-cyber-text-muted">Node Status</small>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="p-3">
+                                <i class="fas fa-clock fa-2x text-cyber-info mb-2"></i>
+                                <h4 class="text-cyber-text">{{ branch.created_at|datetime_eest('%Y-%m-%d') if branch.created_at else 'N/A' }}</h4>
+                                <small class="text-cyber-text-muted">Activation Date</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+                        <form method="post" action="{{ url_for('owner.regenerate_api_key', branch_id=branch.id) }}" style="display: inline;">
+                            <button type="submit" class="btn btn-warning" onclick="return confirm('This will invalidate the current API key. Continue?')">Regenerate API Key</button>
+                        </form>
+                        <a href="{{ url_for('owner.list_branches') }}" class="btn btn-secondary">Back to Branches</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Usage Stats -->
+    <div class="row">
+        <div class="col-lg-6">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Usage Statistics</h6>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-sm-6">
+                            <div class="text-center">
+                                <h4 class="text-primary">{{ branch.total_transactions }}</h4>
+                                <small class="text-muted">Total Transactions</small>
+                            </div>
+                        </div>
+                        <div class="col-sm-6">
+                            <div class="text-center">
+                                <h4 class="text-success">${{ "%.2f"|format(branch.total_volume) }}</h4>
+                                <small class="text-muted">Total Volume</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function copyToClipboard(text) {
+    navigator.clipboard.writeText(text).then(function() {
+        alert('Copied to clipboard!');
+    });
+}
+
+function toggleSecret() {
+    const input = document.getElementById('apiSecret');
+    input.type = input.type === 'password' ? 'text' : 'password';
+}
+</script>
+{% endblock %}

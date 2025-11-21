@@ -1,0 +1,553 @@
+{% extends "base.html" %}
+
+{% block title %}Crypto Payment Gateway for Betting Platforms | PayCrypt{% endblock %}
+
+{% block meta_tags %}
+<meta name="description" content="Accept USDT, BTC, ETH deposits on your betting platform in under 8 minutes. Automated confirmations, TRC20 support, full audit logs. Trusted by casino operators worldwide.">
+<meta name="keywords" content="crypto payment gateway betting, casino crypto deposits, usdt betting platform, trc20 casino payment, crypto gambling gateway">
+<link rel="canonical" href="{{ request.url }}">
+
+<!-- Open Graph -->
+<meta property="og:title" content="Crypto Payment Gateway for Betting Platforms | PayCrypt">
+<meta property="og:description" content="Accept USDT, BTC, ETH deposits on your betting platform in under 8 minutes. Automated confirmations, TRC20 support, full audit logs.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="{{ request.url }}">
+
+<!-- JSON-LD Schema -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "PayCrypt Betting Gateway",
+  "applicationCategory": "FinancialApplication",
+  "offers": {
+    "@type": "Offer",
+    "price": "299",
+    "priceCurrency": "USD",
+    "priceSpecification": {
+      "@type": "UnitPriceSpecification",
+      "price": "299",
+      "priceCurrency": "USD"
+    }
+  },
+  "description": "Crypto payment gateway for betting platforms with automated deposit confirmations",
+  "operatingSystem": "Web",
+  "provider": {
+    "@type": "Organization",
+    "name": "PayCrypt",
+    "url": "{{ request.url_root }}"
+  }
+}
+</script>
+{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="hero-section bg-dark text-white py-5">
+    <div class="container py-md-5">
+        <div class="row align-items-center g-4">
+            <div class="col-lg-7">
+                <div class="badge bg-warning text-dark mb-3 px-3 py-2">
+                    <i class="fas fa-bolt me-1"></i> Built for Betting Platforms & Casinos
+                </div>
+                <h1 class="display-4 fw-bold mb-3">
+                    Accept Crypto Deposits in <span class="text-warning">8 Minutes</span>
+                </h1>
+                <p class="lead mb-4">
+                    USDT, BTC, ETH on TRC20 / ERC20 — automated confirmations, webhooks, and audit logs built for betting platforms and casinos.
+                </p>
+                <ul class="list-unstyled mb-4">
+                    <li class="d-flex align-items-start mb-2">
+                        <i class="fas fa-check-circle text-success me-2 mt-1"></i>
+                        <span>Auto-detect and confirm deposits under 8 minutes</span>
+                    </li>
+                    <li class="d-flex align-items-start mb-2">
+                        <i class="fas fa-check-circle text-success me-2 mt-1"></i>
+                        <span>TRC20 USDT with $1-2 fees (perfect for high volume)</span>
+                    </li>
+                    <li class="d-flex align-items-start mb-2">
+                        <i class="fas fa-check-circle text-success me-2 mt-1"></i>
+                        <span>Full admin panel + API webhooks + audit logs</span>
+                    </li>
+                    <li class="d-flex align-items-start mb-2">
+                        <i class="fas fa-check-circle text-success me-2 mt-1"></i>
+                        <span>Curacao license compatible • Turkish & Ukrainian markets</span>
+                    </li>
+                </ul>
+                <div class="d-flex flex-wrap gap-3">
+                    <a href="https://t.me/paycryptonline" class="btn btn-warning btn-lg fw-semibold px-4" target="_blank" rel="noopener">
+                        <i class="fab fa-telegram me-2"></i> Get Demo on Telegram (5 min)
+                    </a>
+                </div>
+            </div>
+            <div class="col-lg-5">
+                <div class="card bg-gradient border-0 shadow-lg">
+                    <div class="card-body p-4">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <span class="badge bg-success">Live Transaction</span>
+                            <span class="text-muted small">2 minutes ago</span>
+                        </div>
+                        <div class="mb-3">
+                            <div class="d-flex justify-content-between mb-2">
+                                <span class="text-muted">Amount</span>
+                                <span class="fw-bold">500 USDT</span>
+                            </div>
+                            <div class="d-flex justify-content-between mb-2">
+                                <span class="text-muted">Network</span>
+                                <span class="fw-bold">TRC20</span>
+                            </div>
+                            <div class="d-flex justify-content-between mb-2">
+                                <span class="text-muted">Fee</span>
+                                <span class="fw-bold text-success">$1.20</span>
+                            </div>
+                            <div class="d-flex justify-content-between">
+                                <span class="text-muted">Confirmation</span>
+                                <span class="fw-bold text-success">6 minutes</span>
+                            </div>
+                        </div>
+                        <div class="progress" style="height: 4px;">
+                            <div class="progress-bar bg-success" role="progressbar" style="width: 100%"></div>
+                        </div>
+                        <p class="text-success small mb-0 mt-2">
+                            <i class="fas fa-check-circle me-1"></i> Deposit confirmed & credited automatically
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Problems Section -->
+<section class="py-5 bg-light">
+    <div class="container">
+        <div class="text-center mb-5">
+            <h2 class="h1 fw-bold mb-3">Stop Losing Money on Manual Deposits</h2>
+            <p class="lead text-muted">These problems cost betting platforms thousands daily</p>
+        </div>
+        <div class="row g-4">
+            <div class="col-md-4">
+                <div class="card border-danger h-100">
+                    <div class="card-body">
+                        <div class="text-danger mb-3">
+                            <i class="fas fa-exclamation-triangle fa-3x"></i>
+                        </div>
+                        <h5 class="fw-bold">Fake Deposits</h5>
+                        <p class="text-muted mb-0">Users screenshot pending transactions and claim they paid</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card border-warning h-100">
+                    <div class="card-body">
+                        <div class="text-warning mb-3">
+                            <i class="fas fa-clock fa-3x"></i>
+                        </div>
+                        <h5 class="fw-bold">Slow Confirmations</h5>
+                        <p class="text-muted mb-0">Manual checking takes 30-60 minutes, users get frustrated</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card border-info h-100">
+                    <div class="card-body">
+                        <div class="text-info mb-3">
+                            <i class="fas fa-money-bill-wave fa-3x"></i>
+                        </div>
+                        <h5 class="fw-bold">High Gas Fees</h5>
+                        <p class="text-muted mb-0">ERC20 fees eat 20-50% of small deposits</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card border-secondary h-100">
+                    <div class="card-body">
+                        <div class="text-secondary mb-3">
+                            <i class="fas fa-user-clock fa-3x"></i>
+                        </div>
+                        <h5 class="fw-bold">Manual Checking</h5>
+                        <p class="text-muted mb-0">Staff wastes hours verifying blockchain transactions</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card border-dark h-100">
+                    <div class="card-body">
+                        <div class="text-dark mb-3">
+                            <i class="fas fa-chart-line fa-3x"></i>
+                        </div>
+                        <h5 class="fw-bold">No Deposit Tracking</h5>
+                        <p class="text-muted mb-0">Can't see which deposits are pending or completed</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card border-primary h-100">
+                    <div class="card-body">
+                        <div class="text-primary mb-3">
+                            <i class="fas fa-file-alt fa-3x"></i>
+                        </div>
+                        <h5 class="fw-bold">No Audit Logs</h5>
+                        <p class="text-muted mb-0">Impossible to prove deposits for license compliance</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Solution Section -->
+<section class="py-5">
+    <div class="container">
+        <div class="text-center mb-5">
+            <h2 class="h1 fw-bold mb-3">PayCrypt Solves Everything</h2>
+            <p class="lead text-muted">Fully automated crypto payment infrastructure for betting platforms</p>
+        </div>
+        <div class="row g-4">
+            <div class="col-lg-4">
+                <div class="card h-100 border-0 shadow-sm">
+                    <div class="card-body p-4">
+                        <div class="bg-success bg-opacity-10 rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 60px; height: 60px;">
+                            <i class="fas fa-robot fa-2x text-success"></i>
+                        </div>
+                        <h4 class="fw-bold mb-3">Auto-Detect Deposits</h4>
+                        <p class="text-muted">PayCrypt monitors blockchain 24/7 and detects your deposits instantly. No manual checking needed.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-4">
+                <div class="card h-100 border-0 shadow-sm">
+                    <div class="card-body p-4">
+                        <div class="bg-warning bg-opacity-10 rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 60px; height: 60px;">
+                            <i class="fas fa-bolt fa-2x text-warning"></i>
+                        </div>
+                        <h4 class="fw-bold mb-3">Confirm in 8 Minutes</h4>
+                        <p class="text-muted">TRC20 USDT confirms in 3-8 minutes. Your users get credited automatically via webhook.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-4">
+                <div class="card h-100 border-0 shadow-sm">
+                    <div class="card-body p-4">
+                        <div class="bg-primary bg-opacity-10 rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 60px; height: 60px;">
+                            <i class="fas fa-dollar-sign fa-2x text-primary"></i>
+                        </div>
+                        <h4 class="fw-bold mb-3">$1-2 TRC20 Fees</h4>
+                        <p class="text-muted">TRC20 network has the lowest fees. Perfect for high-volume betting platforms.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-4">
+                <div class="card h-100 border-0 shadow-sm">
+                    <div class="card-body p-4">
+                        <div class="bg-info bg-opacity-10 rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 60px; height: 60px;">
+                            <i class="fas fa-tachometer-alt fa-2x text-info"></i>
+                        </div>
+                        <h4 class="fw-bold mb-3">Full Admin Panel</h4>
+                        <p class="text-muted">See all deposits, withdrawals, users, and transactions in real-time dashboard.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-4">
+                <div class="card h-100 border-0 shadow-sm">
+                    <div class="card-body p-4">
+                        <div class="bg-danger bg-opacity-10 rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 60px; height: 60px;">
+                            <i class="fas fa-code fa-2x text-danger"></i>
+                        </div>
+                        <h4 class="fw-bold mb-3">API Webhooks</h4>
+                        <p class="text-muted">Get instant notifications when deposits confirm. Integrate with any platform in minutes.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-4">
+                <div class="card h-100 border-0 shadow-sm">
+                    <div class="card-body p-4">
+                        <div class="bg-secondary bg-opacity-10 rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 60px; height: 60px;">
+                            <i class="fas fa-coins fa-2x text-secondary"></i>
+                        </div>
+                        <h4 class="fw-bold mb-3">Multiple Coins</h4>
+                        <p class="text-muted">Accept USDT, BTC, ETH, BNB, and 30+ cryptocurrencies. All networks supported.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- How It Works -->
+<section class="py-5 bg-dark text-white">
+    <div class="container">
+        <div class="text-center mb-5">
+            <h2 class="h1 fw-bold mb-3">How PayCrypt Works</h2>
+            <p class="lead">4 simple steps to automated crypto deposits</p>
+        </div>
+        <div class="row g-4">
+            <div class="col-md-6 col-lg-3">
+                <div class="text-center">
+                    <div class="bg-warning text-dark rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 80px; height: 80px;">
+                        <span class="h2 fw-bold mb-0">1</span>
+                    </div>
+                    <h5 class="fw-bold mb-2">User Sends Crypto</h5>
+                    <p class="text-muted">Your user sends USDT/BTC to the deposit address you provide</p>
+                </div>
+            </div>
+            <div class="col-md-6 col-lg-3">
+                <div class="text-center">
+                    <div class="bg-warning text-dark rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 80px; height: 80px;">
+                        <span class="h2 fw-bold mb-0">2</span>
+                    </div>
+                    <h5 class="fw-bold mb-2">PayCrypt Detects</h5>
+                    <p class="text-muted">Our system detects the transaction on blockchain within seconds</p>
+                </div>
+            </div>
+            <div class="col-md-6 col-lg-3">
+                <div class="text-center">
+                    <div class="bg-warning text-dark rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 80px; height: 80px;">
+                        <span class="h2 fw-bold mb-0">3</span>
+                    </div>
+                    <h5 class="fw-bold mb-2">Webhook Fires</h5>
+                    <p class="text-muted">PayCrypt calls your webhook with confirmed deposit details</p>
+                </div>
+            </div>
+            <div class="col-md-6 col-lg-3">
+                <div class="text-center">
+                    <div class="bg-warning text-dark rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 80px; height: 80px;">
+                        <span class="h2 fw-bold mb-0">4</span>
+                    </div>
+                    <h5 class="fw-bold mb-2">Balance Updates</h5>
+                    <p class="text-muted">Your platform credits user balance automatically. Done!</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Pricing Section -->
+<section class="py-5">
+    <div class="container">
+        <div class="text-center mb-5">
+            <h2 class="h1 fw-bold mb-3">Simple, Transparent Pricing</h2>
+            <p class="lead text-muted">One-time setup fees. No monthly subscription.</p>
+        </div>
+        <div class="row g-4 justify-content-center">
+            <div class="col-lg-4">
+                <div class="card h-100 border-0 shadow">
+                    <div class="card-body p-4">
+                        <h4 class="fw-bold mb-3">Starter</h4>
+                        <div class="mb-4">
+                            <span class="h2 fw-bold">$299</span>
+                            <span class="text-muted">one-time setup</span>
+                        </div>
+                        <ul class="list-unstyled mb-4">
+                            <li class="mb-2"><i class="fas fa-check text-success me-2"></i> Up to 1,000 deposits/month</li>
+                            <li class="mb-2"><i class="fas fa-check text-success me-2"></i> USDT, BTC, ETH support</li>
+                            <li class="mb-2"><i class="fas fa-check text-success me-2"></i> Admin panel access</li>
+                            <li class="mb-2"><i class="fas fa-check text-success me-2"></i> API webhooks</li>
+                            <li class="mb-2"><i class="fas fa-check text-success me-2"></i> Telegram support</li>
+                        </ul>
+                        <a href="https://t.me/paycryptonline" class="btn btn-outline-primary w-100" target="_blank">Get Started</a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-4">
+                <div class="card h-100 border-warning shadow-lg">
+                    <div class="card-header bg-warning text-dark text-center py-3">
+                        <span class="fw-bold">MOST POPULAR</span>
+                    </div>
+                    <div class="card-body p-4">
+                        <h4 class="fw-bold mb-3">Business</h4>
+                        <div class="mb-4">
+                            <span class="h2 fw-bold">$699</span>
+                            <span class="text-muted">one-time setup</span>
+                        </div>
+                        <ul class="list-unstyled mb-4">
+                            <li class="mb-2"><i class="fas fa-check text-success me-2"></i> Up to 5,000 deposits/month</li>
+                            <li class="mb-2"><i class="fas fa-check text-success me-2"></i> All cryptocurrencies</li>
+                            <li class="mb-2"><i class="fas fa-check text-success me-2"></i> Priority support</li>
+                            <li class="mb-2"><i class="fas fa-check text-success me-2"></i> Custom branding</li>
+                            <li class="mb-2"><i class="fas fa-check text-success me-2"></i> Dedicated account manager</li>
+                        </ul>
+                        <a href="https://t.me/paycryptonline" class="btn btn-warning w-100" target="_blank">Get Started</a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-4">
+                <div class="card h-100 border-0 shadow">
+                    <div class="card-body p-4">
+                        <h4 class="fw-bold mb-3">Enterprise</h4>
+                        <div class="mb-4">
+                            <span class="h2 fw-bold">from $999</span>
+                            <span class="text-muted">custom setup</span>
+                        </div>
+                        <ul class="list-unstyled mb-4">
+                            <li class="mb-2"><i class="fas fa-check text-success me-2"></i> Unlimited deposits</li>
+                            <li class="mb-2"><i class="fas fa-check text-success me-2"></i> White-label solution</li>
+                            <li class="mb-2"><i class="fas fa-check text-success me-2"></i> Custom integrations</li>
+                            <li class="mb-2"><i class="fas fa-check text-success me-2"></i> 24/7 support</li>
+                            <li class="mb-2"><i class="fas fa-check text-success me-2"></i> SLA guarantee</li>
+                        </ul>
+                        <a href="https://t.me/paycryptonline" class="btn btn-outline-primary w-100" target="_blank">Contact Sales</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- CTA Section -->
+<section class="py-5 bg-warning">
+    <div class="container">
+        <div class="row align-items-center g-4">
+            <div class="col-lg-8">
+                <h2 class="h1 fw-bold mb-3">Ready to Automate Your Crypto Deposits?</h2>
+                <p class="lead mb-0">Get a live demo in 5 minutes. See PayCrypt in action on Telegram.</p>
+            </div>
+            <div class="col-lg-4 text-lg-end">
+                <a href="https://t.me/paycryptonline" class="btn btn-dark btn-lg fw-semibold px-4 w-100 w-lg-auto" target="_blank" rel="noopener">
+                    <i class="fab fa-telegram me-2"></i> Get Demo on Telegram
+                </a>
+            </div>
+        </div>
+
+        <div class="row g-3 mt-3">
+            <div class="col-md-4">
+                <a href="{{ url_for('main.pricing') }}" class="card border-0 shadow-sm text-decoration-none h-100">
+                    <div class="card-body">
+                        <h5 class="fw-bold text-dark">Pricing</h5>
+                        <p class="text-muted small mb-0">View one-time setup tiers and typical ranges for betting operators.</p>
+                    </div>
+                </a>
+            </div>
+        </div>
+
+        <div class="row g-3 mt-3">
+            <div class="col-md-6">
+                <a href="{{ url_for('main.paycrypt_vs_coinspaid') }}" class="card border-0 shadow-sm text-decoration-none h-100">
+                    <div class="card-body">
+                        <h5 class="fw-bold text-dark">PayCrypt vs CoinsPaid</h5>
+                        <p class="text-muted small mb-0">See when a specialised betting gateway is useful alongside a larger processor.</p>
+                    </div>
+                </a>
+            </div>
+            <div class="col-md-6">
+                <a href="{{ url_for('main.paycrypt_vs_danapay') }}" class="card border-0 shadow-sm text-decoration-none h-100">
+                    <div class="card-body">
+                        <h5 class="fw-bold text-dark">PayCrypt vs Danapay</h5>
+                        <p class="text-muted small mb-0">Understand trade-offs between a betting-focused gateway and a regional provider.</p>
+                    </div>
+                </a>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- FAQ Section -->
+<section class="py-5">
+    <div class="container">
+        <div class="text-center mb-5">
+            <h2 class="h1 fw-bold mb-3">Frequently Asked Questions</h2>
+        </div>
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                <div class="accordion" id="faqAccordion">
+                    <div class="accordion-item">
+                        <h3 class="accordion-header">
+                            <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#faq1">
+                                How fast are deposit confirmations?
+                            </button>
+                        </h3>
+                        <div id="faq1" class="accordion-collapse collapse show" data-bs-parent="#faqAccordion">
+                            <div class="accordion-body">
+                                TRC20 USDT deposits confirm in 3-8 minutes. Bitcoin takes 10-30 minutes depending on network congestion. Ethereum takes 2-5 minutes.
+                            </div>
+                        </div>
+                    </div>
+                    <div class="accordion-item">
+                        <h3 class="accordion-header">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq2">
+                                Do you support TRC20 USDT?
+                            </button>
+                        </h3>
+                        <div id="faq2" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                            <div class="accordion-body">
+                                Yes! TRC20 is our most popular network because of low fees ($1-2) and fast confirmations. Perfect for betting platforms with high volume.
+                            </div>
+                        </div>
+                    </div>
+                    <div class="accordion-item">
+                        <h3 class="accordion-header">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq3">
+                                Is PayCrypt compatible with Curacao licenses?
+                            </button>
+                        </h3>
+                        <div id="faq3" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                            <div class="accordion-body">
+                                Yes. PayCrypt provides full audit logs and transaction records required for Curacao gaming license compliance.
+                            </div>
+                        </div>
+                    </div>
+                    <div class="accordion-item">
+                        <h3 class="accordion-header">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq4">
+                                How do I integrate PayCrypt with my platform?
+                            </button>
+                        </h3>
+                        <div id="faq4" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                            <div class="accordion-body">
+                                We provide REST API and webhooks. Integration takes 1-2 hours for most platforms. We have guides for PHP, Python, Node.js, and more.
+                            </div>
+                        </div>
+                    </div>
+                    <div class="accordion-item">
+                        <h3 class="accordion-header">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq5">
+                                What happens if a deposit fails?
+                            </button>
+                        </h3>
+                        <div id="faq5" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                            <div class="accordion-body">
+                                PayCrypt monitors all transactions. If a deposit fails or gets stuck, you'll see it in the admin panel and can manually resolve it.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Internal Links Section -->
+<section class="py-5 bg-light">
+    <div class="container">
+        <div class="text-center mb-4">
+            <h3 class="fw-bold">Explore More</h3>
+        </div>
+        <div class="row g-3">
+            <div class="col-md-4">
+                <a href="{{ url_for('main.home') }}" class="card border-0 shadow-sm text-decoration-none h-100">
+                    <div class="card-body">
+                        <h5 class="fw-bold text-dark">PayCrypt Platform</h5>
+                        <p class="text-muted small mb-0">Learn about our full crypto payment infrastructure</p>
+                    </div>
+                </a>
+            </div>
+            <div class="col-md-4">
+                <a href="{{ url_for('tools.index') }}" class="card border-0 shadow-sm text-decoration-none h-100">
+                    <div class="card-body">
+                        <h5 class="fw-bold text-dark">Free Crypto Tools</h5>
+                        <p class="text-muted small mb-0">RugCheck AI, Gas Tracker, Wallet Profiler & more</p>
+                    </div>
+                </a>
+            </div>
+            <div class="col-md-4">
+                <a href="{{ url_for('main.usdt_deposit_api') }}" class="card border-0 shadow-sm text-decoration-none h-100">
+                    <div class="card-body">
+                        <h5 class="fw-bold text-dark">USDT Deposit API</h5>
+                        <p class="text-muted small mb-0">Technical documentation for developers</p>
+                    </div>
+                </a>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

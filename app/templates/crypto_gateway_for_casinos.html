@@ -1,0 +1,206 @@
+{% extends "base.html" %}
+
+{% block title %}Crypto Gateway for Online Casinos | PayCrypt{% endblock %}
+
+{% block meta_tags %}
+<meta name="description" content="Crypto payment gateway for online casinos in Curacao, UAE, India, LATAM. Accept USDT, BTC, ETH with automated confirmations and audit logs.">
+<link rel="canonical" href="{{ request.url }}">
+
+<!-- Open Graph -->
+<meta property="og:title" content="Crypto Gateway for Online Casinos | PayCrypt">
+<meta property="og:description" content="Accept USDT, BTC, ETH in your online casino with fast confirmations and full logs.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="{{ request.url }}">
+
+<!-- JSON-LD Schema -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "PayCrypt Casino Gateway",
+  "applicationCategory": "FinancialApplication",
+  "description": "Crypto gateway for online casinos with automated deposits and withdrawals.",
+  "operatingSystem": "Web",
+  "provider": {
+    "@type": "Organization",
+    "name": "PayCrypt",
+    "url": "{{ request.url_root }}"
+  }
+}
+</script>
+{% endblock %}
+
+{% block content %}
+<section class="py-5 bg-dark text-white">
+  <div class="container py-md-5">
+    <div class="row align-items-center g-4">
+      <div class="col-lg-7">
+        <div class="badge bg-warning text-dark mb-3 px-3 py-2">
+          <i class="fas fa-dice me-1"></i> Built for Online Casinos &amp; Gaming Operators
+        </div>
+        <h1 class="display-5 fw-bold mb-3">Crypto Gateway for Online Casinos</h1>
+        <p class="lead mb-4">Accept USDT, BTC, ETH and 30+ coins with automated confirmations, audit logs, and Curacao-friendly reporting.</p>
+        <ul class="list-unstyled mb-4">
+          <li class="d-flex gap-2 mb-2"><i class="fas fa-check-circle text-success mt-1"></i><span>Curacao, MGA, and offshore-friendly reporting</span></li>
+          <li class="d-flex gap-2 mb-2"><i class="fas fa-check-circle text-success mt-1"></i><span>TRC20 for low-fee, high-volume deposits</span></li>
+          <li class="d-flex gap-2 mb-2"><i class="fas fa-check-circle text-success mt-1"></i><span>Separate cashier dashboards per brand / skin</span></li>
+          <li class="d-flex gap-2 mb-2"><i class="fas fa-check-circle text-success mt-1"></i><span>Webhook-based integration with any casino platform</span></li>
+        </ul>
+        <a href="https://t.me/paycryptonline" class="btn btn-warning btn-lg fw-semibold px-4" target="_blank" rel="noopener">
+          <i class="fab fa-telegram me-2"></i> Request Casino Gateway Demo
+        </a>
+      </div>
+      <div class="col-lg-5">
+        <div class="card bg-gradient border-0 shadow-lg">
+          <div class="card-body p-4">
+            <h5 class="fw-bold mb-3">Example Casino Flow</h5>
+            <ol class="ps-3 small mb-0">
+              <li class="mb-2">Player opens cashier and selects "Crypto"</li>
+              <li class="mb-2">Your platform calls PayCrypt to create deposit</li>
+              <li class="mb-2">Player sends USDT/BTC to generated address</li>
+              <li class="mb-2">PayCrypt confirms on-chain &amp; calls your webhook</li>
+              <li class="mb-0">Casino credits player balance automatically</li>
+            </ol>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="py-5 bg-light">
+  <div class="container">
+    <div class="text-center mb-5">
+      <h2 class="h2 fw-bold mb-3">Designed for Real Casino Operations</h2>
+      <p class="lead text-muted mb-0">From small Curacao brands to high-volume multi-brand operators.</p>
+    </div>
+    <div class="row g-4">
+      <div class="col-md-4">
+        <div class="card h-100 border-0 shadow-sm">
+          <div class="card-body p-4">
+            <h5 class="fw-bold mb-2">Curacao &amp; Offshore Friendly</h5>
+            <p class="text-muted small mb-0">Exportable reports, transaction logs, and audit trails to satisfy license requirements.</p>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="card h-100 border-0 shadow-sm">
+          <div class="card-body p-4">
+            <h5 class="fw-bold mb-2">Multi-Brand Support</h5>
+            <p class="text-muted small mb-0">Run multiple brands, white-labels, or skins from a single PayCrypt backend.</p>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="card h-100 border-0 shadow-sm">
+          <div class="card-body p-4">
+            <h5 class="fw-bold mb-2">High-Risk Friendly</h5>
+            <p class="text-muted small mb-0">Built specifically for gaming, betting, and high-risk fintech environments.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="py-5">
+  <div class="container">
+    <div class="row g-4">
+      <div class="col-lg-6">
+        <h3 class="h4 fw-bold mb-3">Deposit Flows</h3>
+        <p class="text-muted">Use our USDT Deposit API to build flows where players see a unique deposit address per session.</p>
+        <ul class="list-unstyled mb-3 small">
+          <li class="mb-2"><i class="fas fa-chevron-right text-secondary me-2"></i> TRC20 deposits confirm in 3-8 minutes</li>
+          <li class="mb-2"><i class="fas fa-chevron-right text-secondary me-2"></i> Webhooks for automatic balance updates</li>
+          <li class="mb-2"><i class="fas fa-chevron-right text-secondary me-2"></i> Detailed logs for disputes and chargebacks</li>
+        </ul>
+        <a href="{{ url_for('main.usdt_deposit_api') }}" class="btn btn-outline-primary btn-sm fw-semibold">View USDT Deposit API Docs</a>
+      </div>
+      <div class="col-lg-6">
+        <h3 class="h4 fw-bold mb-3">Withdrawal Flows</h3>
+        <p class="text-muted">Use PayCrypt to manage outbound payouts while keeping your own KYC logic.</p>
+        <ul class="list-unstyled mb-3 small">
+          <li class="mb-2"><i class="fas fa-chevron-right text-secondary me-2"></i> Queue and approve withdrawals via admin</li>
+          <li class="mb-2"><i class="fas fa-chevron-right text-secondary me-2"></i> Optional provider API execution for auto-payouts</li>
+          <li class="mb-2"><i class="fas fa-chevron-right text-secondary me-2"></i> Per-brand limits and monitoring</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="py-5 bg-warning">
+  <div class="container">
+    <div class="row align-items-center g-4">
+      <div class="col-lg-8">
+        <h2 class="h2 fw-bold mb-2">Need a Casino-Ready Crypto Gateway?</h2>
+        <p class="mb-0">Get a live walkthrough of PayCrypt tailored to your jurisdiction and traffic profile.</p>
+      </div>
+      <div class="col-lg-4 text-lg-end">
+        <a href="https://t.me/paycryptonline" class="btn btn-dark btn-lg fw-semibold px-4 w-100 w-lg-auto" target="_blank" rel="noopener">
+          <i class="fab fa-telegram me-2"></i> Request Casino Demo
+        </a>
+      </div>
+    </div>
+    <div class="row g-3 mt-3">
+      <div class="col-md-6">
+        <a href="{{ url_for('main.paycrypt_vs_coinspaid') }}" class="card border-0 shadow-sm text-decoration-none h-100">
+          <div class="card-body">
+            <h5 class="fw-bold text-dark">PayCrypt vs CoinsPaid</h5>
+            <p class="text-muted small mb-0">Compare a betting-focused gateway with a multi-vertical crypto processor.</p>
+          </div>
+        </a>
+      </div>
+      <div class="col-md-6">
+        <a href="{{ url_for('main.paycrypt_vs_danapay') }}" class="card border-0 shadow-sm text-decoration-none h-100">
+          <div class="card-body">
+            <h5 class="fw-bold text-dark">PayCrypt vs Danapay</h5>
+            <p class="text-muted small mb-0">See how PayCrypt fits alongside regional payment providers.</p>
+          </div>
+        </a>
+      </div>
+    </div>
+    <div class="row g-3 mt-3">
+      <div class="col-md-4">
+        <a href="{{ url_for('main.pricing') }}" class="card border-0 shadow-sm text-decoration-none h-100">
+          <div class="card-body">
+            <h5 class="fw-bold text-dark">Pricing</h5>
+            <p class="text-muted small mb-0">See setup fee tiers for single-brand and multi-brand casino gateways.</p>
+          </div>
+        </a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="py-5 bg-light">
+  <div class="container">
+    <div class="row g-3">
+      <div class="col-md-4">
+        <a href="{{ url_for('main.betting_crypto_gateway') }}" class="card border-0 shadow-sm text-decoration-none h-100">
+          <div class="card-body">
+            <h5 class="fw-bold text-dark">Betting Crypto Gateway</h5>
+            <p class="text-muted small mb-0">Focused landing page for betting platforms</p>
+          </div>
+        </a>
+      </div>
+      <div class="col-md-4">
+        <a href="{{ url_for('main.usdt_deposit_api') }}" class="card border-0 shadow-sm text-decoration-none h-100">
+          <div class="card-body">
+            <h5 class="fw-bold text-dark">USDT Deposit API</h5>
+            <p class="text-muted small mb-0">Developer docs for TRC20 / ERC20 deposits</p>
+          </div>
+        </a>
+      </div>
+      <div class="col-md-4">
+        <a href="{{ url_for('tools.index') }}" class="card border-0 shadow-sm text-decoration-none h-100">
+          <div class="card-body">
+            <h5 class="fw-bold text-dark">Free Crypto Tools</h5>
+            <p class="text-muted small mb-0">On-chain risk tools that power PayCrypt intelligence</p>
+          </div>
+        </a>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}

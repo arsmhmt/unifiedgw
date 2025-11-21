@@ -1,5 +1,6 @@
 from ..extensions import db
 from datetime import datetime
+from ..utils.timezone import now_eest
 from enum import Enum
 
 class AuditActionType(Enum):
@@ -28,7 +29,7 @@ class AuditTrail(db.Model):
     new_value = db.Column(db.JSON)
     ip_address = db.Column(db.String(45))
     user_agent = db.Column(db.String(255))
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    created_at = db.Column(db.DateTime, default=now_eest)
     
     # Relationships
     user = db.relationship('User', back_populates='audit_trail')
@@ -121,3 +122,73 @@ class AuditTrail(db.Model):
                         'new': self.new_value.get(key)
                     })
         return changes
+
+
+class AuditLog(db.Model):
+    """Branch-level audit log for tracking admin actions, client activity, and API calls"""
+    __tablename__ = 'audit_logs'
+
+    id = db.Column(db.Integer, primary_key=True)
+    branch_id = db.Column(db.Integer, db.ForeignKey('branches.id'), nullable=False)
+    admin_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=True)  # Admin who performed action
+    client_id = db.Column(db.Integer, db.ForeignKey('clients.id'), nullable=True)  # Client affected (if applicable)
+    action = db.Column(db.String(255), nullable=False)  # e.g., 'approve_deposit', 'create_client', 'api_call'
+    details = db.Column(db.Text)  # JSON string with action details
+    ip_address = db.Column(db.String(45))
+    user_agent = db.Column(db.String(255))
+    timestamp = db.Column(db.DateTime, default=now_eest, index=True)
+
+    # Relationships
+    branch = db.relationship('Branch', backref='audit_logs', lazy=True)
+    admin = db.relationship('User', foreign_keys=[admin_id], backref='admin_audit_logs', lazy=True)
+    client = db.relationship('Client', backref='audit_logs', lazy=True)
+
+    def __init__(self, branch_id, action, details=None, admin_id=None, client_id=None,
+                 ip_address=None, user_agent=None):
+        self.branch_id = branch_id
+        self.admin_id = admin_id
+        self.client_id = client_id
+        self.action = action
+        self.details = details
+        self.ip_address = ip_address
+        self.user_agent = user_agent
+
+    @classmethod
+    def log_action(cls, branch_id, action, details=None, admin_id=None, client_id=None,
+                  request=None):
+        """Log a branch-level audit action"""
+        ip_address = None
+        user_agent = None
+
+        if request:
+            ip_address = request.remote_addr
+            user_agent = request.headers.get('User-Agent')
+
+        audit_log = cls(
+            branch_id=branch_id,
+            action=action,
+            details=details,
+            admin_id=admin_id,
+            client_id=client_id,
+            ip_address=ip_address,
+            user_agent=user_agent
+        )
+
+        db.session.add(audit_log)
+        db.session.commit()
+
+        return audit_log
+
+    def to_dict(self):
+        """Convert audit log to dictionary"""
+        return {
+            'id': self.id,
+            'branch_id': self.branch_id,
+            'admin_id': self.admin_id,
+            'client_id': self.client_id,
+            'action': self.action,
+            'details': self.details,
+            'ip_address': self.ip_address,
+            'user_agent': self.user_agent,
+            'timestamp': self.timestamp.isoformat() if self.timestamp else None
+        }

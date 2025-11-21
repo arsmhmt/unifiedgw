@@ -1,4 +1,5 @@
 from datetime import datetime, timedelta
+from ..utils.timezone import now_eest
 from apscheduler.schedulers.background import BackgroundScheduler
 
 from app.models import CommissionSnapshot
@@ -26,7 +27,7 @@ def create_monthly_commission_snapshots():
                 deposit_commission, withdrawal_commission, total_commission = FinanceCalculator().calculate_commission(client.id)
                 
                 # Create snapshot for this client
-                now = datetime.utcnow()
+                now = now_eest()
                 first_day = now.replace(day=1)
                 last_month = first_day - timedelta(days=1)
                 start_of_month = last_month.replace(day=1)
@@ -77,7 +78,7 @@ def create_initial_snapshots():
                 deposit_commission, withdrawal_commission, total_commission = FinanceCalculator().calculate_commission(client.id)
                 
                 # Create snapshot for this client
-                now = datetime.utcnow()
+                now = now_eest()
                 first_day = now.replace(day=1)
                 last_month = first_day - timedelta(days=1)
                 start_of_month = last_month.replace(day=1)

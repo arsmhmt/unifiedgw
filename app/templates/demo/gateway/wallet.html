@@ -1,0 +1,250 @@
+{% extends 'demo/base.html' %}
+
+{% block title %}{{ _('Demo Gateway Wallet') }}{% endblock %}
+
+{% block styles %}
+    {{ super() }}
+    <style>
+        .wallet-demo-layout {
+            display: grid;
+            grid-template-columns: 320px 1fr;
+            gap: 2rem;
+        }
+        @media (max-width: 992px) {
+            .wallet-demo-layout {
+                grid-template-columns: 1fr;
+            }
+        }
+        .wallet-login-card {
+            position: sticky;
+            top: 1.5rem;
+        }
+        .json-response {
+            font-family: var(--bs-font-monospace);
+            font-size: 0.85rem;
+            background: rgba(15, 23, 42, 0.65);
+            color: #f3f4f6;
+            border-radius: 0.75rem;
+            padding: 1rem;
+            overflow-x: auto;
+            min-height: 220px;
+            max-height: 380px;
+        }
+        .api-sample pre {
+            background: var(--steel-black);
+            color: #e5e7eb;
+            border-radius: 0.75rem;
+            padding: 1rem;
+            overflow-x: auto;
+        }
+    </style>
+{% endblock %}
+
+{% block demo_content %}
+<div class="container">
+    <div class="d-flex align-items-center justify-content-between mb-4">
+        <div>
+            <div class="demo-badge mb-2">
+                <i class="bi bi-wallet2"></i>
+                {{ _('Player Wallet Walkthrough') }}
+            </div>
+            <h2 class="fw-semibold text-white">{{ _('Demo Gateway Wallet Console') }}</h2>
+            <p class="text-white-50 mb-0">{{ _('Simulate a player logging in, topping up their balance, and requesting withdrawals while we capture real API calls.') }}</p>
+        </div>
+        <a class="btn btn-outline-light" href="{{ url_for('demo_gateway.landing') }}">
+            <i class="bi bi-arrow-left me-2"></i>{{ _('Back to Overview') }}
+        </a>
+    </div>
+
+    <div class="wallet-demo-layout">
+        <aside>
+            <div class="demo-card p-4 wallet-login-card">
+                <h5 class="fw-semibold text-white">{{ _('Demo Login') }}</h5>
+                <p class="text-muted">{{ _('Use the prefilled sandbox credentials to activate the wallet demo UI.') }}</p>
+                <form id="demoLoginForm">
+                    <div class="mb-3">
+                        <label class="form-label text-muted">{{ _('Username') }}</label>
+                        <input type="text" class="form-control" id="demoUsername" value="demo_user" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label text-muted">{{ _('Password') }}</label>
+                        <input type="password" class="form-control" id="demoPassword" value="demo1234" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary w-100">{{ _('Login to Demo Wallet') }}</button>
+                </form>
+                <div class="alert alert-success mt-3 d-none" id="demoLoginSuccess">
+                    <i class="bi bi-check-circle me-2"></i>{{ _('Demo session active. Explore the wallet below!') }}
+                </div>
+            </div>
+        </aside>
+
+        <section>
+            <div class="demo-card p-4 mb-4">
+                <div class="row g-3 align-items-center">
+                    <div class="col-md-4">
+                        <p class="text-muted mb-1">{{ _('Available Balance') }}</p>
+                        <h2 class="fw-semibold text-white" id="availableBalance">₺0.00</h2>
+                        <small class="text-muted">{{ _('Updated after each simulated transaction') }}</small>
+                    </div>
+                    <div class="col-md-4 border-start border-end border-secondary py-2">
+                        <p class="text-muted mb-1">{{ _('Demo API Key') }}</p>
+                        <code class="text-white" id="demoApiKey">demo_live_pk_xxxx</code>
+                        <button class="btn btn-sm btn-outline-light ms-2" id="copyDemoKey">{{ _('Copy') }}</button>
+                    </div>
+                    <div class="col-md-4">
+                        <p class="text-muted mb-1">{{ _('API Endpoint') }}</p>
+                        <code class="text-white" id="demoApiUrl">{{ request.url_root.rstrip('/') }}/api/v1</code>
+                        <small class="d-block text-muted">{{ _('Requests are sent from your browser; inspect the Network tab for details.') }}</small>
+                    </div>
+                </div>
+            </div>
+
+            <div class="demo-card p-4 mb-4">
+                <ul class="nav nav-tabs" id="walletTabs" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link active" id="overview-tab" data-bs-toggle="tab" data-bs-target="#overview" type="button" role="tab">{{ _('Overview') }}</button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="deposit-tab" data-bs-toggle="tab" data-bs-target="#deposit" type="button" role="tab">{{ _('Deposit') }}</button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="withdraw-tab" data-bs-toggle="tab" data-bs-target="#withdraw" type="button" role="tab">{{ _('Withdraw') }}</button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="api-tab" data-bs-toggle="tab" data-bs-target="#api" type="button" role="tab">{{ _('API Samples') }}</button>
+                    </li>
+                </ul>
+                <div class="tab-content pt-4" id="walletTabContent">
+                    <div class="tab-pane fade show active" id="overview" role="tabpanel">
+                        <h5 class="text-white">{{ _('Recent Activity (Demo Data)') }}</h5>
+                        <div id="demoTransactions" class="text-muted">
+                            <p class="mb-0">{{ _('No transactions yet. Run a deposit or withdrawal to populate history.') }}</p>
+                        </div>
+                    </div>
+                    <div class="tab-pane fade" id="deposit" role="tabpanel">
+                        <form id="depositForm" class="row g-3">
+                            <div class="col-md-4">
+                                <label class="form-label text-muted">{{ _('Fiat Amount') }}</label>
+                                <div class="input-group">
+                                    <span class="input-group-text">{{ _('TRY') }}</span>
+                                    <input type="number" class="form-control" id="depositFiatAmount" value="1000" min="50" max="100000" step="10" required>
+                                </div>
+                                <div class="form-text text-muted">{{ _('Player enters amount in TL/USD') }}</div>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label text-muted">{{ _('Fiat Currency') }}</label>
+                                <select class="form-select" id="depositFiatCurrency">
+                                    <option value="TRY">TRY</option>
+                                    <option value="USD">USD</option>
+                                </select>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label text-muted">{{ _('Receive Coin') }}</label>
+                                <select class="form-select" id="depositCryptoCurrency">
+                                    <option value="USDT">USDT</option>
+                                    <option value="BTC">BTC</option>
+                                    <option value="ETH">ETH</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label text-muted">{{ _('Network') }}</label>
+                                <select class="form-select" id="depositNetwork">
+                                    <option value="TRC20">TRC20</option>
+                                    <option value="ERC20">ERC20</option>
+                                    <option value="BEP20">BEP20</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label text-muted">{{ _('Conversion Preview') }}</label>
+                                <div class="border rounded p-3 bg-dark text-white" id="conversionPreview">
+                                    <div class="small text-muted">{{ _('Enter amount to see conversion summary') }}</div>
+                                </div>
+                            </div>
+                            <div class="col-12">
+                                <button type="submit" class="btn btn-success">
+                                    <i class="bi bi-arrow-down-circle me-2"></i>{{ _('Generate Deposit Details') }}
+                                </button>
+                            </div>
+                        </form>
+                        <div class="mt-4 d-none" id="depositDetails">
+                            <div class="border rounded p-4 bg-dark text-white">
+                                <div class="d-flex justify-content-between flex-wrap gap-3">
+                                    <div>
+                                        <p class="text-muted mb-1">{{ _('Send Exactly') }}</p>
+                                        <h4 class="mb-0" id="depositCryptoAmount">0.00000000</h4>
+                                        <small class="text-muted" id="depositRate"></small>
+                                    </div>
+                                    <div>
+                                        <p class="text-muted mb-1">{{ _('Deposit Address') }}</p>
+                                        <code class="d-block" id="depositAddress"></code>
+                                        <button class="btn btn-sm btn-outline-light mt-2" id="copyDepositAddress">{{ _('Copy Address') }}</button>
+                                    </div>
+                                    <div>
+                                        <p class="text-muted mb-1">{{ _('QR Code') }}</p>
+                                        <div id="depositQr" class="bg-body p-2 rounded"></div>
+                                    </div>
+                                </div>
+                                <div class="alert alert-warning mt-3">
+                                    <i class="bi bi-info-circle me-2"></i>{{ _('Admin approval required. Track status in “Recent Activity”.') }}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="tab-pane fade" id="withdraw" role="tabpanel">
+                        <form id="withdrawForm" class="row g-3">
+                            <div class="col-md-4">
+                                <label class="form-label text-muted">{{ _('Amount (USDT)') }}</label>
+                                <input type="number" class="form-control" id="withdrawAmount" value="50" min="10" max="5000" required>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label text-muted">{{ _('Network') }}</label>
+                                <select class="form-select" id="withdrawNetwork">
+                                    <option value="TRC20">TRC20</option>
+                                    <option value="ERC20">ERC20</option>
+                                </select>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label text-muted">{{ _('Wallet Address') }}</label>
+                                <input type="text" class="form-control" id="withdrawWallet" value="TByDemoWalletAddress123" required>
+                            </div>
+                            <div class="col-12">
+                                <button type="submit" class="btn btn-warning text-dark">
+                                    <i class="bi bi-arrow-up-circle me-2"></i>{{ _('Submit Withdrawal Request') }}
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                    <div class="tab-pane fade" id="api" role="tabpanel">
+                        <div class="row g-4">
+                            <div class="col-md-6 api-sample">
+                                <h6 class="text-muted">{{ _('cURL Example - Deposit') }}</h6>
+                                <pre><code id="curlDeposit"></code></pre>
+                            </div>
+                            <div class="col-md-6 api-sample">
+                                <h6 class="text-muted">{{ _('Fetch Example - Withdrawal') }}</h6>
+                                <pre><code id="fetchWithdrawal"></code></pre>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="demo-card p-4">
+                <div class="d-flex align-items-center justify-content-between mb-3">
+                    <h5 class="text-white mb-0">{{ _('API Response Console') }}</h5>
+                    <button class="btn btn-sm btn-outline-light" id="clearConsole">{{ _('Clear') }}</button>
+                </div>
+                <div class="json-response" id="apiConsole">{}</div>
+            </div>
+        </section>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+    {{ super() }}
+    <script>
+        window.demoGatewayConfig = {{ demo_config|tojson }};
+    </script>
+    <script src="{{ url_for('static', filename='js/demo-gateway-wallet.js') }}"></script>
+{% endblock %}

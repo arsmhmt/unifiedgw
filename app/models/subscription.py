@@ -1,4 +1,5 @@
 from datetime import datetime, timedelta
+from ..utils.timezone import now_eest
 from enum import Enum
 from app.extensions.extensions import db
 
@@ -49,7 +50,7 @@ class Subscription(db.Model):
     
     def is_active(self):
         """Check if the subscription is currently active."""
-        now = datetime.utcnow()
+        now = now_eest()
         return (
             self.status == SubscriptionStatus.ACTIVE and 
             (self.end_date is None or self.end_date > now)
@@ -57,7 +58,7 @@ class Subscription(db.Model):
     
     def renew(self, period_days=30):
         """Renew the subscription for the given period."""
-        now = datetime.utcnow()
+        now = now_eest()
         if self.end_date and self.end_date > now:
             self.end_date += timedelta(days=period_days)
         else:

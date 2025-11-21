@@ -1,0 +1,195 @@
+{% extends 'admin/base.html' %}
+
+{% block title %}Payment Session {{ session.public_id }} - Admin{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <div>
+            <h1 class="h3 mb-0 text-gray-800">Payment Session</h1>
+            <p class="text-muted mb-0">{{ session.public_id }} · Created {{ session.created_at.strftime('%Y-%m-%d %H:%M:%S') if session.created_at else 'n/a' }}</p>
+        </div>
+        <a href="{{ url_for('admin.payment_sessions_list') }}" class="btn btn-sm btn-secondary">
+            <i class="bi bi-arrow-left"></i> Back to sessions
+        </a>
+    </div>
+
+    <div class="row g-4">
+        <div class="col-xl-8">
+            <div class="card shadow-sm">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">Session Details</h5>
+                    <span class="badge bg-{{ status_badges.get(session.status, 'secondary') }} text-uppercase">{{ session.status }}</span>
+                </div>
+                <div class="card-body">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <small class="text-muted d-block">Order ID</small>
+                            <strong>{{ session.order_id }}</strong>
+                        </div>
+                        <div class="col-md-6">
+                            <small class="text-muted d-block">Public Session ID</small>
+                            <code>{{ session.public_id }}</code>
+                        </div>
+                        <div class="col-md-4">
+                            <small class="text-muted d-block">Amount</small>
+                            <strong>{{ session.amount }} {{ session.currency }}</strong>
+                        </div>
+                        <div class="col-md-4">
+                            <small class="text-muted d-block">Expires</small>
+                            {{ session.expires_at.strftime('%Y-%m-%d %H:%M:%S') if session.expires_at else '—' }}
+                        </div>
+                        <div class="col-md-4">
+                            <small class="text-muted d-block">Webhook</small>
+                            {% if session.webhook_url %}
+                                <span class="badge bg-success">Configured</span>
+                            {% else %}
+                                <span class="badge bg-secondary">None</span>
+                            {% endif %}
+                        </div>
+                        <div class="col-md-6">
+                            <small class="text-muted d-block">Success URL</small>
+                            <a href="{{ session.success_url }}" target="_blank" rel="noopener">{{ session.success_url }}</a>
+                        </div>
+                        <div class="col-md-6">
+                            <small class="text-muted d-block">Cancel URL</small>
+                            <a href="{{ session.cancel_url }}" target="_blank" rel="noopener">{{ session.cancel_url }}</a>
+                        </div>
+                        <div class="col-12">
+                            <small class="text-muted d-block">Metadata</small>
+                            {% if session.meta %}
+                                <pre class="bg-light p-3 rounded border">{{ session.meta | tojson(indent=2) }}</pre>
+                            {% else %}
+                                <span class="text-muted">No metadata provided</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card shadow-sm mt-4">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">Webhook Events</h5>
+                    <small class="text-muted">Latest first</small>
+                </div>
+                <div class="card-body">
+                    {% if session.events %}
+                        <div class="timeline">
+                            {% for event in session.events %}
+                            <div class="timeline-item pb-4">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <h6 class="mb-1">{{ event.event_type }}</h6>
+                                    <small class="text-muted">{{ event.created_at.strftime('%Y-%m-%d %H:%M:%S') if event.created_at else '' }}</small>
+                                </div>
+                                <div class="mb-2">
+                                    <small class="text-muted">Response</small>
+                                    {% if event.response_status %}
+                                        <span class="badge bg-{{ 'success' if 200 <= event.response_status < 300 else 'warning' }}">
+                                            {{ event.response_status }}
+                                        </span>
+                                    {% else %}
+                                        <span class="badge bg-secondary">n/a</span>
+                                    {% endif %}
+                                </div>
+                                <details class="mb-2">
+                                    <summary class="text-primary">Payload</summary>
+                                    <pre class="bg-light p-3 rounded border mt-2">{{ event.payload | tojson(indent=2) }}</pre>
+                                </details>
+                                {% if event.response_body %}
+                                <details class="mb-2">
+                                    <summary class="text-primary">Response body</summary>
+                                    <pre class="bg-light p-3 rounded border mt-2">{{ event.response_body }}</pre>
+                                </details>
+                                {% endif %}
+                                {% if event.error %}
+                                <div class="alert alert-warning d-flex align-items-center" role="alert">
+                                    <i class="bi bi-exclamation-triangle me-2"></i>
+                                    <span>{{ event.error }}</span>
+                                </div>
+                                {% endif %}
+                            </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <p class="text-muted mb-0">No webhook activity recorded for this session.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-4">
+            <div class="card shadow-sm mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0">Client</h5>
+                </div>
+                <div class="card-body">
+                    {% if session.client %}
+                        <div class="mb-2 fw-semibold">{{ session.client.company_name or session.client.name or ('Client #' ~ session.client.id) }}</div>
+                        <div class="text-muted small">{{ session.client.email }}</div>
+                        <div class="text-muted small">Client ID: {{ session.client.id }}</div>
+                        <a href="{{ url_for('admin.view_client', client_id=session.client.id) }}" class="btn btn-outline-primary btn-sm mt-3">View client profile</a>
+                    {% else %}
+                        <p class="text-muted mb-0">Client record unavailable.</p>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="card shadow-sm mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0">Payment</h5>
+                </div>
+                <div class="card-body">
+                    {% if payment %}
+                        <div class="d-flex justify-content-between mb-2">
+                            <span class="text-muted">Status</span>
+                            <span class="badge bg-{{ 'success' if payment.status.value == 'completed' else 'warning' if payment.status.value == 'pending' else 'danger' }} text-uppercase">{{ payment.status.value }}</span>
+                        </div>
+                        <div class="mb-2">
+                            <small class="text-muted d-block">Fiat amount</small>
+                            <strong>{{ payment.fiat_amount }} {{ payment.fiat_currency }}</strong>
+                        </div>
+                        <div class="mb-2">
+                            <small class="text-muted d-block">Crypto amount</small>
+                            {% if payment.crypto_amount %}
+                                <strong>{{ payment.crypto_amount }} {{ payment.crypto_currency }}</strong>
+                            {% else %}
+                                <span class="text-muted">Pending conversion</span>
+                            {% endif %}
+                        </div>
+                        <div class="mb-2">
+                            <small class="text-muted d-block">Payment method</small>
+                            {{ payment.payment_method or '—' }}
+                        </div>
+                        <a href="{{ url_for('admin.view_payment', payment_id=payment.id) }}" class="btn btn-outline-primary btn-sm">View payment record</a>
+                    {% else %}
+                        <p class="text-muted mb-0">No payment record has been created for this session yet.</p>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="card shadow-sm">
+                <div class="card-header">
+                    <h5 class="mb-0">Recent Sessions for Client</h5>
+                </div>
+                <div class="card-body">
+                    {% if recent_sessions %}
+                        <ul class="list-unstyled mb-0">
+                            {% for recent in recent_sessions %}
+                            <li class="mb-3">
+                                <div class="d-flex justify-content-between">
+                                    <a href="{{ url_for('admin.view_payment_session', session_id=recent.id) }}" class="fw-semibold">{{ recent.order_id }}</a>
+                                    <span class="badge bg-{{ status_badges.get(recent.status, 'secondary') }} text-uppercase">{{ recent.status }}</span>
+                                </div>
+                                <small class="text-muted">{{ recent.created_at.strftime('%Y-%m-%d %H:%M') if recent.created_at else '' }}</small>
+                            </li>
+                            {% endfor %}
+                        </ul>
+                    {% else %}
+                        <p class="text-muted mb-0">No other sessions for this client.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

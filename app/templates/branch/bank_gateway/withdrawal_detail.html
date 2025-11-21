@@ -1,0 +1,296 @@
+{% extends "branch/base.html" %}
+
+{% block title %}Withdrawal #{{ withdrawal.reference_code }} - {{ branch.name }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <!-- Page Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="mb-1">
+                <i class="bi bi-arrow-up-circle me-2"></i>Withdrawal Request Details
+            </h2>
+            <p class="text-muted mb-0">Reference: <code>{{ withdrawal.reference_code }}</code> (Read Only)</p>
+        </div>
+        <a href="{{ url_for('branch.bank_gateway_withdrawals') }}" class="btn btn-outline-secondary">
+            <i class="bi bi-arrow-left me-2"></i>Back to List
+        </a>
+    </div>
+
+    <div class="row">
+        <!-- Main Details -->
+        <div class="col-lg-8">
+            <!-- Request Information -->
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-header bg-white border-bottom">
+                    <h5 class="mb-0">
+                        <i class="bi bi-info-circle me-2"></i>Request Information
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row mb-3">
+                        <div class="col-6">
+                            <label class="text-muted small mb-1">Status</label>
+                            <div>
+                                {% if withdrawal.status == 'pending' %}
+                                <span class="badge bg-warning text-dark fs-6">Pending Review</span>
+                                {% elif withdrawal.status == 'approved' %}
+                                <span class="badge bg-success fs-6">Approved</span>
+                                {% elif withdrawal.status == 'rejected' %}
+                                <span class="badge bg-danger fs-6">Rejected</span>
+                                {% elif withdrawal.status == 'completed' %}
+                                <span class="badge bg-dark fs-6">Completed</span>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <label class="text-muted small mb-1">Created At</label>
+                            <div><strong>{{ withdrawal.created_at.strftime('%Y-%m-%d %H:%M:%S') }}</strong></div>
+                        </div>
+                    </div>
+
+                    <hr>
+
+                    <div class="row mb-3">
+                        <div class="col-6">
+                            <label class="text-muted small mb-1">User Name</label>
+                            <div><strong>{{ withdrawal.user_name }} {{ withdrawal.user_surname or '' }}</strong></div>
+                        </div>
+                        <div class="col-6">
+                            <label class="text-muted small mb-1">Client Site</label>
+                            <div>
+                                {% if withdrawal.client_site %}
+                                <i class="bi bi-globe2 me-1"></i>{{ withdrawal.client_site.site_url }}
+                                <br><small class="text-muted">{{ withdrawal.client_site.client.company_name }}</small>
+                                {% else %}
+                                <span class="text-muted">Not specified</span>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-12">
+                            <label class="text-muted small mb-1">Bank Details</label>
+                            <div class="card bg-light border-0">
+                                <div class="card-body">
+                                    <div class="row">
+                                        <div class="col-6">
+                                            <small class="text-muted">Bank Name:</small><br>
+                                            <strong>{{ withdrawal.bank_name }}</strong>
+                                        </div>
+                                        <div class="col-6">
+                                            <small class="text-muted">Branch Code:</small><br>
+                                            <strong>{{ withdrawal.bank_branch or 'N/A' }}</strong>
+                                        </div>
+                                    </div>
+                                    <div class="mt-2">
+                                        <small class="text-muted">IBAN:</small><br>
+                                        <code class="fs-6">{{ withdrawal.iban }}</code>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <hr>
+
+                    <div class="row">
+                        <div class="col-4">
+                            <label class="text-muted small mb-1">Withdrawal Amount</label>
+                            <div><h4 class="text-primary mb-0">{{ "%.2f"|format(withdrawal.amount) }} {{ withdrawal.currency }}</h4></div>
+                        </div>
+                        <div class="col-4">
+                            <label class="text-muted small mb-1">Provider Commission</label>
+                            <div><h5 class="text-warning mb-0">-{{ "%.2f"|format(withdrawal.provider_commission) }} {{ withdrawal.currency }}</h5></div>
+                        </div>
+                        <div class="col-4">
+                            <label class="text-muted small mb-1">Net Amount</label>
+                            <div><h4 class="text-success mb-0">{{ "%.2f"|format(withdrawal.net_amount()) }} {{ withdrawal.currency }}</h4></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Processing Information -->
+            {% if withdrawal.status != 'pending' %}
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-header bg-white border-bottom">
+                    <h5 class="mb-0">
+                        <i class="bi bi-gear me-2"></i>Processing Information
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row mb-3">
+                        <div class="col-6">
+                            <label class="text-muted small mb-1">Processed At</label>
+                            <div><strong>{{ withdrawal.processed_at.strftime('%Y-%m-%d %H:%M:%S') if withdrawal.processed_at else 'N/A' }}</strong></div>
+                        </div>
+                        <div class="col-6">
+                            <label class="text-muted small mb-1">Processed By</label>
+                            <div>
+                                {% if withdrawal.processed_by_user %}
+                                <strong>{{ withdrawal.processed_by_user.username }}</strong>
+                                {% else %}
+                                <span class="text-muted">System</span>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+
+                    {% if withdrawal.provider %}
+                    <div class="mb-3">
+                        <label class="text-muted small mb-1">Assigned Provider</label>
+                        <div>
+                            <span class="badge bg-info fs-6">{{ withdrawal.provider.display_name }}</span>
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    {% if withdrawal.processing_notes %}
+                    <div class="mb-3">
+                        <label class="text-muted small mb-1">Processing Notes</label>
+                        <div class="alert alert-info mb-0">{{ withdrawal.processing_notes }}</div>
+                    </div>
+                    {% endif %}
+
+                    {% if withdrawal.status == 'rejected' and withdrawal.rejection_reason %}
+                    <div>
+                        <label class="text-muted small mb-1">Rejection Reason</label>
+                        <div class="alert alert-danger mb-0">
+                            <i class="bi bi-exclamation-triangle me-2"></i>{{ withdrawal.rejection_reason }}
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Sidebar -->
+        <div class="col-lg-4">
+            <!-- Info Alert -->
+            <div class="alert alert-info">
+                <i class="bi bi-info-circle me-2"></i>
+                <strong>Read-Only Access</strong><br>
+                <small>Branch administrators can view withdrawal requests but cannot approve or reject them. Contact system administrators for processing.</small>
+            </div>
+
+            <!-- Metadata -->
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-header bg-white border-bottom">
+                    <h6 class="mb-0">
+                        <i class="bi bi-tag me-2"></i>Metadata
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <table class="table table-sm table-borderless mb-0">
+                        <tr>
+                            <td class="text-muted small">ID:</td>
+                            <td><strong>{{ withdrawal.id }}</strong></td>
+                        </tr>
+                        <tr>
+                            <td class="text-muted small">Reference:</td>
+                            <td><code>{{ withdrawal.reference_code }}</code></td>
+                        </tr>
+                        <tr>
+                            <td class="text-muted small">Currency:</td>
+                            <td><strong>{{ withdrawal.currency }}</strong></td>
+                        </tr>
+                        <tr>
+                            <td class="text-muted small">Commission %:</td>
+                            <td><strong>{{ "%.2f"|format(withdrawal.commission_percentage) }}%</strong></td>
+                        </tr>
+                        {% if withdrawal.updated_at %}
+                        <tr>
+                            <td class="text-muted small">Last Updated:</td>
+                            <td>{{ withdrawal.updated_at.strftime('%Y-%m-%d %H:%M') }}</td>
+                        </tr>
+                        {% endif %}
+                    </table>
+                </div>
+            </div>
+
+            <!-- Timeline -->
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white border-bottom">
+                    <h6 class="mb-0">
+                        <i class="bi bi-clock-history me-2"></i>Timeline
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="timeline">
+                        <div class="timeline-item">
+                            <div class="timeline-marker bg-primary"></div>
+                            <div class="timeline-content">
+                                <small class="text-muted">{{ withdrawal.created_at.strftime('%Y-%m-%d %H:%M') }}</small>
+                                <p class="mb-0"><strong>Request Created</strong></p>
+                                <small>User submitted withdrawal request</small>
+                            </div>
+                        </div>
+                        
+                        {% if withdrawal.status != 'pending' %}
+                        <div class="timeline-item">
+                            <div class="timeline-marker {% if withdrawal.status in ['approved', 'completed'] %}bg-success{% else %}bg-danger{% endif %}"></div>
+                            <div class="timeline-content">
+                                <small class="text-muted">{{ withdrawal.processed_at.strftime('%Y-%m-%d %H:%M') if withdrawal.processed_at else 'N/A' }}</small>
+                                <p class="mb-0">
+                                    <strong>{% if withdrawal.status == 'rejected' %}Rejected{% else %}Approved{% endif %}</strong>
+                                </p>
+                                <small>
+                                    {% if withdrawal.processed_by_user %}By {{ withdrawal.processed_by_user.username }}{% else %}By System{% endif %}
+                                </small>
+                            </div>
+                        </div>
+                        {% endif %}
+                        
+                        {% if withdrawal.status == 'completed' %}
+                        <div class="timeline-item">
+                            <div class="timeline-marker bg-dark"></div>
+                            <div class="timeline-content">
+                                <small class="text-muted">{{ withdrawal.updated_at.strftime('%Y-%m-%d %H:%M') if withdrawal.updated_at else 'N/A' }}</small>
+                                <p class="mb-0"><strong>Completed</strong></p>
+                                <small>Payment processed successfully</small>
+                            </div>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+/* Timeline styles */
+.timeline {
+    position: relative;
+    padding-left: 30px;
+}
+.timeline::before {
+    content: '';
+    position: absolute;
+    left: 8px;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background: #dee2e6;
+}
+.timeline-item {
+    position: relative;
+    margin-bottom: 20px;
+}
+.timeline-marker {
+    position: absolute;
+    left: -26px;
+    top: 0;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    border: 3px solid #fff;
+}
+.timeline-content {
+    padding-left: 10px;
+}
+</style>
+{% endblock %}

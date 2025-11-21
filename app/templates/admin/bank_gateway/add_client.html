@@ -1,0 +1,247 @@
+{% extends "admin/base.html" %}
+
+{% block title %}Add Client Site - Admin Panel{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Page Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h1 class="h3 mb-0">Add Client Site</h1>
+                    <p class="text-muted">Register a new client site in the bank gateway system</p>
+                </div>
+                <a href="{{ url_for('admin.bank_clients') }}" class="btn btn-outline-secondary">
+                    <i class="bi bi-arrow-left me-2"></i>Back to Client Sites
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Client Site Form -->
+    <div class="row">
+        <div class="col-lg-8">
+            <div class="card shadow">
+                <div class="card-header bg-gradient-primary text-white">
+                    <h5 class="mb-0"><i class="bi bi-building me-2"></i>Site Information</h5>
+                </div>
+                <div class="card-body">
+                    <form method="POST" action="{{ url_for('admin.add_bank_client') }}">
+                        <!-- Client Selection -->
+                        <div class="mb-3">
+                            <label for="client_id" class="form-label">
+                                Client <span class="text-danger">*</span>
+                            </label>
+                            <select class="form-select" id="client_id" name="client_id" required>
+                                <option value="">-- Select Client --</option>
+                                {% for client in clients %}
+                                <option value="{{ client.id }}">{{ client.name }} - {{ client.email }}</option>
+                                {% endfor %}
+                            </select>
+                            <div class="form-text">Select the client who owns this site</div>
+                        </div>
+
+                        <!-- Site Name -->
+                        <div class="mb-3">
+                            <label for="site_name" class="form-label">
+                                Site Name <span class="text-danger">*</span>
+                            </label>
+                            <input type="text" class="form-control" id="site_name" name="site_name" 
+                                   placeholder="e.g., MyBettingSite.com" required>
+                            <div class="form-text">Enter the name of the site</div>
+                        </div>
+
+                        <!-- Site URL -->
+                        <div class="mb-3">
+                            <label for="site_url" class="form-label">
+                                Site URL <span class="text-danger">*</span>
+                            </label>
+                            <input type="url" class="form-control" id="site_url" name="site_url" 
+                                   placeholder="https://example.com" required>
+                            <div class="form-text">Full URL of the site (including https://)</div>
+                        </div>
+
+                        <!-- Description -->
+                        <div class="mb-3">
+                            <label for="description" class="form-label">Description</label>
+                            <textarea class="form-control" id="description" name="description" rows="3" 
+                                      placeholder="Brief description of the site..."></textarea>
+                            <div class="form-text">Optional description or notes about this site</div>
+                        </div>
+
+                        <!-- API Configuration Section -->
+                        <div class="card border-info mb-3">
+                            <div class="card-header bg-info bg-opacity-10">
+                                <h6 class="mb-0"><i class="bi bi-key me-2"></i>API Configuration</h6>
+                            </div>
+                            <div class="card-body">
+                                <div class="mb-3">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="generate_api_key" 
+                                               name="generate_api_key" value="1" checked>
+                                        <label class="form-check-label" for="generate_api_key">
+                                            <strong>Automatically generate API key</strong>
+                                        </label>
+                                    </div>
+                                    <div class="form-text">API key is required for the site to communicate with the gateway</div>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label for="callback_url" class="form-label">Callback URL</label>
+                                    <input type="url" class="form-control" id="callback_url" name="callback_url" 
+                                           placeholder="https://example.com/api/payment-callback">
+                                    <div class="form-text">URL to receive payment status notifications</div>
+                                </div>
+
+                                <div class="mb-0">
+                                    <label for="webhook_url" class="form-label">Webhook URL</label>
+                                    <input type="url" class="form-control" id="webhook_url" name="webhook_url" 
+                                           placeholder="https://example.com/api/webhook">
+                                    <div class="form-text">URL to receive real-time event notifications</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Transaction Limits Section -->
+                        <div class="card border-warning mb-3">
+                            <div class="card-header bg-warning bg-opacity-10">
+                                <h6 class="mb-0"><i class="bi bi-shield-check me-2"></i>Transaction Limits</h6>
+                            </div>
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label for="min_deposit" class="form-label">Minimum Deposit</label>
+                                        <div class="input-group">
+                                            <span class="input-group-text">₺</span>
+                                            <input type="number" class="form-control" id="min_deposit" 
+                                                   name="min_deposit" step="0.01" min="0" value="10.00">
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label for="max_deposit" class="form-label">Maximum Deposit</label>
+                                        <div class="input-group">
+                                            <span class="input-group-text">₺</span>
+                                            <input type="number" class="form-control" id="max_deposit" 
+                                                   name="max_deposit" step="0.01" min="0" value="50000.00">
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6 mb-0">
+                                        <label for="min_withdrawal" class="form-label">Minimum Withdrawal</label>
+                                        <div class="input-group">
+                                            <span class="input-group-text">₺</span>
+                                            <input type="number" class="form-control" id="min_withdrawal" 
+                                                   name="min_withdrawal" step="0.01" min="0" value="20.00">
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6 mb-0">
+                                        <label for="max_withdrawal" class="form-label">Maximum Withdrawal</label>
+                                        <div class="input-group">
+                                            <span class="input-group-text">₺</span>
+                                            <input type="number" class="form-control" id="max_withdrawal" 
+                                                   name="max_withdrawal" step="0.01" min="0" value="100000.00">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Commission Settings -->
+                        <div class="card border-success mb-3">
+                            <div class="card-header bg-success bg-opacity-10">
+                                <h6 class="mb-0"><i class="bi bi-percent me-2"></i>Commission Settings</h6>
+                            </div>
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-md-6 mb-0">
+                                        <label for="withdrawal_commission_rate" class="form-label">
+                                            Withdrawal Commission (%)
+                                        </label>
+                                        <input type="number" class="form-control" id="withdrawal_commission_rate" 
+                                               name="withdrawal_commission_rate" step="0.01" min="0" max="100" 
+                                               value="2.50">
+                                        <div class="form-text">Commission rate for withdrawal transactions</div>
+                                    </div>
+                                    <div class="col-md-6 mb-0">
+                                        <label for="deposit_commission_rate" class="form-label">
+                                            Deposit Commission (%)
+                                        </label>
+                                        <input type="number" class="form-control" id="deposit_commission_rate" 
+                                               name="deposit_commission_rate" step="0.01" min="0" max="100" 
+                                               value="0.00">
+                                        <div class="form-text">Commission rate for deposit transactions</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Status -->
+                        <div class="mb-3">
+                            <label class="form-label">Initial Status</label>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="is_active" 
+                                       name="is_active" value="1" checked>
+                                <label class="form-check-label" for="is_active">
+                                    <strong>Activate site immediately</strong>
+                                </label>
+                            </div>
+                            <div class="form-text">Active sites can process transactions. Inactive sites cannot.</div>
+                        </div>
+
+                        <!-- Submit Buttons -->
+                        <div class="d-flex justify-content-between pt-3 border-top">
+                            <a href="{{ url_for('admin.bank_clients') }}" class="btn btn-outline-secondary">
+                                <i class="bi bi-x-circle me-2"></i>Cancel
+                            </a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="bi bi-check-circle me-2"></i>Create Client Site
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Help Card -->
+        <div class="col-lg-4">
+            <div class="card shadow border-info mb-3">
+                <div class="card-header bg-info bg-opacity-10">
+                    <h5 class="mb-0"><i class="bi bi-info-circle me-2"></i>Setup Guide</h5>
+                </div>
+                <div class="card-body">
+                    <h6>What is a Client Site?</h6>
+                    <p class="small">A client site is a registered website/application that uses the bank gateway system to process payments.</p>
+                    
+                    <h6 class="mt-3">API Key</h6>
+                    <ul class="small">
+                        <li>Unique identifier for API authentication</li>
+                        <li>Generated automatically when site is created</li>
+                        <li>Can be regenerated if compromised</li>
+                        <li>Must be kept secure and never shared publicly</li>
+                    </ul>
+
+                    <h6 class="mt-3">Callback & Webhook URLs</h6>
+                    <ul class="small">
+                        <li><strong>Callback URL:</strong> Receives payment status updates</li>
+                        <li><strong>Webhook URL:</strong> Receives real-time event notifications</li>
+                        <li>Both URLs must be publicly accessible</li>
+                        <li>Should use HTTPS for security</li>
+                    </ul>
+
+                    <h6 class="mt-3">Transaction Limits</h6>
+                    <ul class="small">
+                        <li>Set minimum and maximum amounts for deposits/withdrawals</li>
+                        <li>Prevents fraudulent or irregular transactions</li>
+                        <li>Can be adjusted based on client needs</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="alert alert-warning">
+                <i class="bi bi-exclamation-triangle me-2"></i>
+                <strong>Important:</strong> After creating the site, provide the API key to the client securely. It will only be displayed once.
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

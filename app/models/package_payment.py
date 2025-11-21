@@ -1,4 +1,5 @@
 from datetime import datetime, timedelta
+from ..utils.timezone import now_eest
 from decimal import Decimal
 from app.extensions.extensions import db
 from .base import BaseModel
@@ -71,7 +72,7 @@ class PackageActivationPayment(BaseModel):
         from app.decorators import is_payment_exempt_client
         if self.client and is_payment_exempt_client(self.client):
             return False
-        return datetime.utcnow() > self.expires_at
+        return now_eest() > self.expires_at
     
     @property
     def time_remaining(self):
@@ -89,7 +90,7 @@ class PackageActivationPayment(BaseModel):
             return timedelta(days=365)  # Always show plenty of time remaining
         if self.is_expired:
             return timedelta(0)
-        return self.expires_at - datetime.utcnow()
+        return self.expires_at - now_eest()
     
     def activate_package(self):
         """Activate the client's package after successful payment"""
@@ -100,7 +101,7 @@ class PackageActivationPayment(BaseModel):
             if self.client.package.client_type == ClientType.FLAT_RATE:
                 if not self.is_activated:
                     self.is_activated = True
-                    self.activated_at = datetime.utcnow()
+                    self.activated_at = now_eest()
                     
                     # Update client's package status - Mark as active_client = True
                     self.client.is_active = True
@@ -113,7 +114,7 @@ class PackageActivationPayment(BaseModel):
         if self.client and is_payment_exempt_client(self.client):
             if not self.is_activated:
                 self.is_activated = True
-                self.activated_at = datetime.utcnow()
+                self.activated_at = now_eest()
                 
                 # Update client's package status - Mark as active_client = True
                 self.client.is_active = True
@@ -124,7 +125,7 @@ class PackageActivationPayment(BaseModel):
         # Standard activation for non-exempt clients
         if self.status == PaymentStatus.COMPLETED and not self.is_activated:
             self.is_activated = True
-            self.activated_at = datetime.utcnow()
+            self.activated_at = now_eest()
             
             # Update client's package status
             if self.client:
@@ -236,7 +237,7 @@ class FlatRateSubscriptionPayment(BaseModel):
         from app.decorators import is_payment_exempt_client
         if self.client and is_payment_exempt_client(self.client):
             return False
-        return datetime.utcnow() > self.expires_at
+        return now_eest() > self.expires_at
     
     @property
     def time_remaining(self):
@@ -254,7 +255,7 @@ class FlatRateSubscriptionPayment(BaseModel):
             return timedelta(days=365)  # Always show plenty of time remaining
         if self.is_expired:
             return timedelta(0)
-        return self.expires_at - datetime.utcnow()
+        return self.expires_at - now_eest()
     
     @property
     def is_subscription_active(self):
@@ -271,7 +272,7 @@ class FlatRateSubscriptionPayment(BaseModel):
         if self.client and is_payment_exempt_client(self.client):
             return True
             
-        now = datetime.utcnow()
+        now = now_eest()
         return (self.billing_period_start <= now <= self.billing_period_end 
                 and self.status == PaymentStatus.COMPLETED
                 and self.is_service_active)
@@ -285,7 +286,7 @@ class FlatRateSubscriptionPayment(BaseModel):
             if self.client.package.client_type == ClientType.FLAT_RATE:
                 if not self.is_service_active:
                     self.is_service_active = True
-                    self.service_activated_at = datetime.utcnow()
+                    self.service_activated_at = now_eest()
                     self.service_suspended_at = None
                     
                     # Update client's package status - Mark as active_client = True
@@ -299,7 +300,7 @@ class FlatRateSubscriptionPayment(BaseModel):
         if self.client and is_payment_exempt_client(self.client):
             if not self.is_service_active:
                 self.is_service_active = True
-                self.service_activated_at = datetime.utcnow()
+                self.service_activated_at = now_eest()
                 self.service_suspended_at = None
                 
                 # Update client's package status - Mark as active_client = True
@@ -311,7 +312,7 @@ class FlatRateSubscriptionPayment(BaseModel):
         # Standard activation for non-exempt clients
         if self.status == PaymentStatus.COMPLETED and not self.is_service_active:
             self.is_service_active = True
-            self.service_activated_at = datetime.utcnow()
+            self.service_activated_at = now_eest()
             self.service_suspended_at = None
             
             # Update client's package status
@@ -339,7 +340,7 @@ class FlatRateSubscriptionPayment(BaseModel):
             
         if self.is_service_active:
             self.is_service_active = False
-            self.service_suspended_at = datetime.utcnow()
+            self.service_suspended_at = now_eest()
             
             # Update client status
             if self.client:

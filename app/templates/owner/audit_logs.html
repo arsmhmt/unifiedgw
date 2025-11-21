@@ -1,0 +1,103 @@
+{% extends 'owner/base.html' %}
+
+{% block title %}Audit Logs - Owner Panel{% endblock %}
+
+{% block content %}
+<div class="d-flex flex-column flex-md-row align-items-center justify-content-between mb-4">
+    <div>
+        <h1 class="h3 mb-1 cyber-title">Audit Intelligence</h1>
+        <p class="text-muted mb-0 cyber-subtitle">Cross-branch trail for sensitive operations and Teminci activity.</p>
+    </div>
+</div>
+
+<div class="row g-4">
+    <div class="col-lg-6">
+        <div class="card shadow-sm h-100">
+            <div class="card-header bg-transparent border-bottom d-flex align-items-center justify-content-between">
+                <h5 class="mb-0"><i class="bi bi-clock-history me-2 text-primary"></i>Platform Audit Trail</h5>
+                <span class="text-muted small">Latest {{ audit_trail_entries|length }} entries</span>
+            </div>
+            <div class="card-body p-0">
+                {% if audit_trail_entries %}
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0 align-middle">
+                        <thead class="table-dark">
+                            <tr>
+                                <th>User</th>
+                                <th>Action</th>
+                                <th>Entity</th>
+                                <th>IP</th>
+                                <th class="text-end">Timestamp</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for entry in audit_trail_entries %}
+                            <tr>
+                                <td>#{{ entry.user_id }}</td>
+                                <td class="text-muted small text-uppercase">{{ entry.action_type }}</td>
+                                <td class="text-muted small">{{ entry.entity_type }} #{{ entry.entity_id }}</td>
+                                <td class="text-muted small">{{ entry.ip_address or '—' }}</td>
+                                <td class="text-end text-muted small">
+                                    {{ entry.created_at.strftime('%Y-%m-%d %H:%M') if entry.created_at else '—' }}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div class="text-center py-5">
+                    <i class="bi bi-clock-history fa-3x text-muted mb-3"></i>
+                    <h6 class="text-muted">No audit records yet</h6>
+                    <p class="text-muted small mb-0">System changes will show here for compliance monitoring.</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-6">
+        <div class="card shadow-sm h-100">
+            <div class="card-header bg-transparent border-bottom d-flex align-items-center justify-content-between">
+                <h5 class="mb-0"><i class="bi bi-diagram-3 me-2 text-success"></i>Branch Activity Logs</h5>
+                <span class="text-muted small">Latest {{ branch_audit_entries|length }} entries</span>
+            </div>
+            <div class="card-body p-0">
+                {% if branch_audit_entries %}
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0 align-middle">
+                        <thead class="table-dark">
+                            <tr>
+                                <th>Branch</th>
+                                <th>Action</th>
+                                <th>Actor</th>
+                                <th>Client</th>
+                                <th class="text-end">Timestamp</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for entry in branch_audit_entries %}
+                            <tr>
+                                <td>#{{ entry.branch_id }}</td>
+                                <td class="text-muted small">{{ entry.action }}</td>
+                                <td class="text-muted small">{{ entry.admin_id or '—' }}</td>
+                                <td class="text-muted small">{{ entry.client_id or '—' }}</td>
+                                <td class="text-end text-muted small">
+                                    {{ entry.timestamp.strftime('%Y-%m-%d %H:%M') if entry.timestamp else '—' }}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div class="text-center py-5">
+                    <i class="bi bi-shield-lock fa-3x text-muted mb-3"></i>
+                    <h6 class="text-muted">No branch events</h6>
+                    <p class="text-muted small mb-0">Teminci operational activity will populate this feed.</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

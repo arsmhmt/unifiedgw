@@ -4,6 +4,7 @@ Defines available packages, features, and pricing for different client types
 """
 
 from datetime import datetime
+from ..utils.timezone import now_eest
 from app.extensions import db
 from enum import Enum
 from sqlalchemy import Numeric
@@ -244,7 +245,7 @@ class ClientSubscription(db.Model):
     @property
     def is_current(self):
         """Check if this is the current active subscription"""
-        return self.is_active and (self.end_date is None or self.end_date > datetime.utcnow())
+        return self.is_active and (self.end_date is None or self.end_date > now_eest())
 
 
 # Revised Flat-Rate Pricing configurations (≥1.2% Margin Protection)
@@ -373,7 +374,7 @@ def create_default_flat_rate_packages():
             existing.max_api_calls_per_month = config['max_api_calls_per_month']
             existing.max_wallets = config['max_wallets']
             existing.description = config['description']
-            existing.updated_at = datetime.utcnow()
+            existing.updated_at = now_eest()
             packages_created.append(f"Updated: {existing.name}")
         else:
             # Create new package

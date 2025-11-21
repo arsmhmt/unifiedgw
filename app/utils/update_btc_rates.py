@@ -1,5 +1,6 @@
 import requests
 from app.models.currency import CurrencyRate
+from ..utils.timezone import now_eest
 from app.extensions import db
 from datetime import datetime
 
@@ -19,7 +20,7 @@ def update_btc_rates():
             existing = CurrencyRate.query.get(symbol.upper())
             if existing:
                 existing.btc_rate = btc_rate
-                existing.updated_at = datetime.utcnow()
+                existing.updated_at = now_eest()
             else:
                 db.session.add(CurrencyRate(
                     currency=symbol.upper(),

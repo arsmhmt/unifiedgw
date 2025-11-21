@@ -1,0 +1,607 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Owner Panel - Paycrypt{% endblock %}</title>
+
+    <!-- Favicon -->
+    <link rel="shortcut icon" href="{{ url_for('static', filename='img/favicon.png') }}">
+
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet">
+
+    <!-- Custom styles -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/paycrypt-theme.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/admin.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/admin-layout.css') }}">
+    <script src="{{ url_for('static', filename='js/theme-manager.js') }}"></script>
+    <style>
+        /* Cyber theme utility classes */
+        .text-cyber-primary { color: var(--cyber-primary) !important; }
+        .text-cyber-secondary { color: var(--cyber-secondary) !important; }
+        .text-cyber-success { color: var(--cyber-success) !important; }
+        .text-cyber-warning { color: var(--cyber-accent) !important; }
+        .text-cyber-danger { color: var(--cyber-danger) !important; }
+        .text-cyber-info { color: var(--cyber-info) !important; }
+        .text-cyber-text { color: var(--cyber-text) !important; }
+        .text-cyber-text-muted { color: var(--cyber-text-muted) !important; }
+        
+        .bg-cyber-primary { background-color: var(--cyber-primary) !important; }
+        .bg-cyber-secondary { background-color: var(--cyber-secondary) !important; }
+        .bg-cyber-success { background-color: var(--cyber-success) !important; }
+        .bg-cyber-warning { background-color: var(--cyber-accent) !important; }
+        .bg-cyber-danger { background-color: var(--cyber-danger) !important; }
+        .bg-cyber-info { background-color: var(--cyber-info) !important; }
+        
+        .border-cyber { border-color: var(--cyber-border) !important; }
+        
+        /* ===== READABLE TEXT COLORS (ORANGE TONES) ===== */
+        /* Replace gray text with orange tones for better readability */
+        
+        /* Subtitle and muted text - lighter orange */
+        .text-muted,
+        .cyber-subtitle,
+        small.text-muted,
+        .x-small.text-muted {
+            color: #FFB366 !important; /* Light orange - readable on dark */
+        }
+        
+        /* Dark theme - brighter orange for better contrast */
+        [data-theme="dark"] .text-muted,
+        [data-theme="dark"] .cyber-subtitle,
+        [data-theme="dark"] small.text-muted,
+        [data-theme="dark"] .x-small.text-muted {
+            color: #FFB366 !important; /* Bright light orange */
+        }
+        
+        /* Light theme - darker orange for contrast on white */
+        [data-theme="light"] .text-muted,
+        [data-theme="light"] .cyber-subtitle,
+        [data-theme="light"] small.text-muted,
+        [data-theme="light"] .x-small.text-muted {
+            color: #E67E22 !important; /* Darker orange */
+        }
+        
+        /* Secondary text */
+        .text-secondary {
+            color: #FF9F5A !important;
+        }
+        
+        [data-theme="dark"] .text-secondary {
+            color: #FFC285 !important;
+        }
+        
+        [data-theme="light"] .text-secondary {
+            color: #D97222 !important;
+        }
+        
+        /* Gray text in tables and cards */
+        .text-gray-500,
+        .text-gray-600,
+        .text-gray-400 {
+            color: #FFB366 !important;
+        }
+        
+        [data-theme="dark"] .text-gray-500,
+        [data-theme="dark"] .text-gray-600,
+        [data-theme="dark"] .text-gray-400 {
+            color: #FFB366 !important;
+        }
+        
+        [data-theme="light"] .text-gray-500,
+        [data-theme="light"] .text-gray-600,
+        [data-theme="light"] .text-gray-400 {
+            color: #D97222 !important;
+        }
+        
+        /* Search bar placeholder text */
+        .form-control::placeholder {
+            color: #FFB366 !important;
+            opacity: 0.8;
+        }
+        
+        [data-theme="dark"] .form-control::placeholder {
+            color: #FFB366 !important;
+            opacity: 0.8;
+        }
+        
+        [data-theme="light"] .form-control::placeholder {
+            color: #E67E22 !important;
+            opacity: 0.7;
+        }
+        
+        /* Search bar input text color */
+        .form-control {
+            color: inherit !important;
+        }
+        
+        [data-theme="dark"] .form-control {
+            color: #ffffff !important;
+            background-color: rgba(255, 255, 255, 0.1) !important;
+            border-color: rgba(255, 107, 53, 0.3) !important;
+        }
+        
+        [data-theme="light"] .form-control {
+            color: #212529 !important;
+            background-color: #ffffff !important;
+            border-color: #dee2e6 !important;
+        }
+        
+        /* Dropdown menu positioning fix */
+        .dropdown-menu-end {
+            right: 0 !important;
+            left: auto !important;
+        }
+        
+        .dropdown-menu {
+            min-width: 200px;
+            margin-top: 0.5rem;
+        }
+        
+        /* Ensure dropdowns don't overflow */
+        .navbar-nav .dropdown-menu {
+            position: absolute;
+            right: 0;
+            left: auto;
+        }
+        
+        /* User dropdown specific styling */
+        #userDropdown + .dropdown-menu {
+            min-width: 180px;
+        }
+        
+        /* Alerts dropdown specific styling */
+        #alertsDropdown + .dropdown-menu {
+            min-width: 300px;
+        }
+        
+        /* ===== DARK THEME: STEEL BLACK BACKGROUND ===== */
+        [data-theme="dark"] body {
+            background-color: #212529 !important;
+        }
+        
+        [data-theme="dark"] #layoutSidenav_content {
+            background-color: #212529 !important;
+        }
+        
+        [data-theme="dark"] main,
+        [data-theme="dark"] .container-fluid {
+            background-color: #212529 !important;
+        }
+        
+        /* ===== LIGHT THEME: WHITE BACKGROUND ===== */
+        [data-theme="light"] body {
+            background-color: #ffffff !important;
+        }
+        
+        [data-theme="light"] #layoutSidenav_content {
+            background-color: #ffffff !important;
+        }
+        
+        [data-theme="light"] main,
+        [data-theme="light"] .container-fluid {
+            background-color: #ffffff !important;
+        }
+        
+        /* ===== SIDEBAR: ALWAYS STEEL BLACK (THEME INDEPENDENT) ===== */
+        #layoutSidenav_nav,
+        #layoutSidenav_nav .sb-sidenav,
+        #layoutSidenav_nav .sb-sidenav-menu {
+            background-color: #212529 !important;
+        }
+        
+        /* Sidebar text colors - always white */
+        #layoutSidenav_nav .sb-sidenav-menu .nav-link,
+        #layoutSidenav_nav .sb-sidenav-menu-heading,
+        #layoutSidenav_nav .nav-link,
+        [data-theme="dark"] #layoutSidenav_nav .nav-link,
+        [data-theme="light"] #layoutSidenav_nav .nav-link {
+            color: #ffffff !important;
+        }
+        
+        /* Sidebar icons - always white */
+        #layoutSidenav_nav .sb-nav-link-icon,
+        #layoutSidenav_nav .sb-nav-link-icon i,
+        [data-theme="dark"] #layoutSidenav_nav .sb-nav-link-icon,
+        [data-theme="light"] #layoutSidenav_nav .sb-nav-link-icon {
+            color: #ffffff !important;
+        }
+        
+        /* Sidebar headings - always light gray */
+        #layoutSidenav_nav .sb-sidenav-menu-heading,
+        [data-theme="dark"] #layoutSidenav_nav .sb-sidenav-menu-heading,
+        [data-theme="light"] #layoutSidenav_nav .sb-sidenav-menu-heading {
+            color: #b0b3b6 !important;
+        }
+        
+        /* Ensure sidebar stays dark in light theme too */
+        [data-theme="light"] #layoutSidenav_nav,
+        [data-theme="light"] #layoutSidenav_nav .sb-sidenav,
+        [data-theme="light"] #layoutSidenav_nav .sb-sidenav-menu {
+            background-color: #212529 !important;
+        }
+        
+        /* Sidebar footer styling */
+        .sb-sidenav-footer {
+            background-color: rgba(0, 0, 0, 0.2) !important;
+            color: #ffffff !important;
+            padding: 0.75rem 1rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            position: sticky;
+            bottom: 0;
+        }
+        
+        .sb-sidenav-footer .small {
+            color: #b0b3b6 !important;
+            font-size: 0.75rem;
+            margin-bottom: 0.25rem;
+        }
+        
+        /* Make sure sidebar menu doesn't overlap footer */
+        #layoutSidenav_nav .sb-sidenav-menu {
+            flex-grow: 1;
+            overflow-y: auto;
+            padding: 0 !important;
+            margin: 0 !important;
+        }
+        
+        /* Remove extra spacing at top of sidebar nav */
+        #layoutSidenav_nav .sb-sidenav {
+            padding-top: 0 !important;
+            margin-top: 0 !important;
+            top: 0 !important;
+            height: 100vh !important;
+        }
+        
+        #layoutSidenav_nav .sb-sidenav-menu .nav {
+            padding: 0 !important;
+            margin: 0 !important;
+        }
+        
+        /* Remove ALL margin from menu headings */
+        #layoutSidenav_nav .sb-sidenav-menu-heading {
+            margin-top: 0 !important;
+            margin-bottom: 0.25rem !important;
+        }
+        
+        /* First menu heading should have minimal top padding */
+        #layoutSidenav_nav .sb-sidenav-menu .nav .sb-sidenav-menu-heading:first-child {
+            margin-top: 0 !important;
+            padding-top: 0.75rem !important;
+        }
+        
+        /* ===== CYBERPUNK NEON GLOW EFFECTS (DARK THEME ONLY) ===== */
+        
+        /* Cards with neon glow */
+        [data-theme="dark"] .card {
+            box-shadow: 
+                0 0 10px rgba(255, 107, 53, 0.2),
+                0 0 20px rgba(255, 107, 53, 0.1),
+                0 4px 16px rgba(0, 0, 0, 0.4) !important;
+            transition: all 0.3s ease;
+        }
+        
+        [data-theme="dark"] .card:hover {
+            box-shadow: 
+                0 0 20px rgba(255, 107, 53, 0.4),
+                0 0 40px rgba(255, 107, 53, 0.2),
+                0 8px 32px rgba(0, 0, 0, 0.5) !important;
+            transform: translateY(-4px);
+        }
+        
+        /* Stats cards with variant-specific glows */
+        [data-theme="dark"] .stats-card.primary {
+            box-shadow: 
+                0 0 15px rgba(255, 107, 53, 0.3),
+                0 0 30px rgba(255, 107, 53, 0.15),
+                0 4px 16px rgba(0, 0, 0, 0.4) !important;
+        }
+        
+        [data-theme="dark"] .stats-card.success {
+            box-shadow: 
+                0 0 15px rgba(0, 212, 170, 0.3),
+                0 0 30px rgba(0, 212, 170, 0.15),
+                0 4px 16px rgba(0, 0, 0, 0.4) !important;
+        }
+        
+        [data-theme="dark"] .stats-card.warning {
+            box-shadow: 
+                0 0 15px rgba(255, 149, 0, 0.3),
+                0 0 30px rgba(255, 149, 0, 0.15),
+                0 4px 16px rgba(0, 0, 0, 0.4) !important;
+        }
+        
+        [data-theme="dark"] .stats-card.danger {
+            box-shadow: 
+                0 0 15px rgba(255, 107, 107, 0.3),
+                0 0 30px rgba(255, 107, 107, 0.15),
+                0 4px 16px rgba(0, 0, 0, 0.4) !important;
+        }
+        
+        /* Buttons with neon glow */
+        [data-theme="dark"] .btn-primary {
+            box-shadow: 
+                0 0 10px rgba(255, 107, 53, 0.3),
+                0 2px 8px rgba(0, 0, 0, 0.4) !important;
+        }
+        
+        [data-theme="dark"] .btn-primary:hover {
+            box-shadow: 
+                0 0 20px rgba(255, 107, 53, 0.5),
+                0 0 40px rgba(255, 107, 53, 0.3),
+                0 4px 12px rgba(0, 0, 0, 0.5) !important;
+        }
+        
+        /* Icon backgrounds with glow */
+        [data-theme="dark"] .icon-bg {
+            box-shadow: 
+                0 0 15px currentColor,
+                inset 0 0 15px currentColor !important;
+        }
+        
+        /* Topbar with subtle glow */
+        [data-theme="dark"] .sb-topnav {
+            box-shadow: 
+                0 0 20px rgba(255, 107, 53, 0.15),
+                0 2px 10px rgba(0, 0, 0, 0.5) !important;
+        }
+        
+        /* Sidebar active link with orange glow */
+        [data-theme="dark"] #layoutSidenav_nav .nav-link.active {
+            box-shadow: 
+                inset 4px 0 0 #FF6B35,
+                0 0 20px rgba(255, 107, 53, 0.3) !important;
+        }
+        
+        /* Input fields with subtle glow on focus */
+        [data-theme="dark"] .form-control:focus {
+            box-shadow: 
+                0 0 10px rgba(255, 107, 53, 0.3),
+                0 0 20px rgba(255, 107, 53, 0.15) !important;
+            border-color: #FF6B35 !important;
+        }
+        
+        /* Table with glow */
+        [data-theme="dark"] .table {
+            box-shadow: 
+                0 0 10px rgba(255, 107, 53, 0.1),
+                0 4px 16px rgba(0, 0, 0, 0.4) !important;
+        }
+    </style>
+
+    {% block extra_head %}{% endblock %}
+</head>
+
+<body class="sb-nav-fixed">
+    <div id="layoutSidenav">
+        <!-- Sidebar -->
+        <div id="layoutSidenav_nav">
+            <nav class="sb-sidenav" id="sidenavAccordion">
+                <div class="sb-sidenav-menu">
+                    <div class="nav">
+                        <!-- Overview -->
+                        <div class="sb-sidenav-menu-heading">Overview</div>
+                        <a class="nav-link {% if request.endpoint == 'owner.owner_dashboard' %}active{% endif %}"
+                            href="{{ url_for('owner.owner_dashboard') }}">
+                            <div class="sb-nav-link-icon"><i class="bi bi-speedometer2"></i></div>
+                            Global Dashboard
+                        </a>
+
+                        <!-- Network Control -->
+                        <div class="sb-sidenav-menu-heading">Network Control</div>
+                        <a class="nav-link {% if request.endpoint in ['owner.list_branches', 'owner.edit_branch', 'owner.branch_api'] %}active{% endif %}"
+                            href="{{ url_for('owner.list_branches') }}">
+                            <div class="sb-nav-link-icon"><i class="bi bi-diagram-3"></i></div>
+                            Branch Management
+                        </a>
+                        <a class="nav-link {% if request.endpoint == 'owner.add_branch' %}active{% endif %}"
+                            href="{{ url_for('owner.add_branch') }}">
+                            <div class="sb-nav-link-icon"><i class="bi bi-plus-circle"></i></div>
+                            Add Branch
+                        </a>
+
+                        <!-- User Management -->
+                        <div class="sb-sidenav-menu-heading">User Management</div>
+                        <a class="nav-link {% if request.endpoint == 'owner.admin_users' %}active{% endif %}"
+                            href="{{ url_for('owner.admin_users') }}">
+                            <div class="sb-nav-link-icon"><i class="bi bi-people-fill"></i></div>
+                            Admin Users
+                        </a>
+                        <a class="nav-link {% if request.endpoint == 'owner.owner_clients' %}active{% endif %}"
+                            href="{{ url_for('owner.owner_clients') }}">
+                            <div class="sb-nav-link-icon"><i class="bi bi-building"></i></div>
+                            All Clients
+                        </a>
+                        <a class="nav-link {% if request.endpoint == 'owner.owner_providers' %}active{% endif %}"
+                            href="{{ url_for('owner.owner_providers') }}">
+                            <div class="sb-nav-link-icon"><i class="bi bi-handshake"></i></div>
+                            Provider Network
+                        </a>
+
+                        <!-- Operations -->
+                        <div class="sb-sidenav-menu-heading">Operations</div>
+                        <a class="nav-link {% if request.endpoint == 'owner.analytics' %}active{% endif %}"
+                            href="{{ url_for('owner.analytics') }}">
+                            <div class="sb-nav-link-icon"><i class="bi bi-bar-chart-line"></i></div>
+                            Global Analytics
+                        </a>
+                        <a class="nav-link {% if request.endpoint == 'owner.system_health' %}active{% endif %}"
+                            href="{{ url_for('owner.system_health') }}">
+                            <div class="sb-nav-link-icon"><i class="bi bi-hdd-network"></i></div>
+                            System Health
+                        </a>
+                        <a class="nav-link {% if request.endpoint == 'owner.owner_audit_logs' %}active{% endif %}"
+                            href="{{ url_for('owner.owner_audit_logs') }}">
+                            <div class="sb-nav-link-icon"><i class="bi bi-clock-history"></i></div>
+                            Audit Logs
+                        </a>
+
+                        <!-- Administration -->
+                        <div class="sb-sidenav-menu-heading">Administration</div>
+                        <a class="nav-link {% if request.endpoint == 'owner.api_management' %}active{% endif %}"
+                            href="{{ url_for('owner.api_management') }}">
+                            <div class="sb-nav-link-icon"><i class="bi bi-code-square"></i></div>
+                            API Management
+                        </a>
+                        <a class="nav-link {% if request.endpoint == 'owner.security_center' %}active{% endif %}"
+                            href="{{ url_for('owner.security_center') }}">
+                            <div class="sb-nav-link-icon"><i class="bi bi-shield-check"></i></div>
+                            Security Center
+                        </a>
+
+                    </div>
+                </div>
+                <div class="sb-sidenav-footer">
+                    <div class="small">Logged in as:</div>
+                    {{ current_user.username or (current_user.email.split('@')[0] if hasattr(current_user, 'email') and current_user.email else 'User') }}
+                </div>
+            </nav>
+        </div>
+
+        <!-- Content Wrapper -->
+        <div id="layoutSidenav_content">
+            <!-- Topbar -->
+            <nav class="sb-topnav navbar navbar-expand navbar-dark">
+                <!-- Sidebar toggle button-->
+                <button class="btn btn-link btn-sm order-1 order-lg-0 me-4 me-lg-0" id="sidebarToggle" type="button"
+                    title="Toggle Sidebar">
+                    <i class="fas fa-bars"></i>
+                </button>
+                <!-- Brand Logo in Top Navbar -->
+                <div class="d-flex align-items-center me-auto">
+                    <a href="{{ url_for('owner.owner_dashboard') }}" class="text-decoration-none me-3">
+                        <img src="{{ url_for('static', filename='img/paycrypt_logo_d.png') }}" alt="PayCrypt Logo"
+                            class="img-fluid sidebar-logo" style="height: 52px;">
+                    </a>
+                    <div class="vr text-secondary me-3" style="height: 30px;"></div>
+                    <h5 class="mb-0 text-white fw-normal">
+                        {% block page_title %}
+                        {% if request.endpoint == 'owner.owner_dashboard' %}Owner Dashboard
+                        {% elif request.endpoint == 'owner.list_branches' %}Branch Management
+                        {% elif request.endpoint == 'owner.add_branch' %}Create New Branch
+                        {% elif request.endpoint == 'owner.analytics' %}Global Analytics
+                        {% elif request.endpoint == 'owner.branch_api' %}Branch API
+                        {% elif request.endpoint == 'owner.edit_branch' %}Edit Branch
+                        {% else %}Owner Panel
+                        {% endif %}
+                        {% endblock %}
+                    </h5>
+                </div>
+                <!-- Navbar -->
+                <ul class="navbar-nav ms-auto me-0 me-lg-4 align-items-center flex-row">
+                    <li class="nav-item ms-3">
+                        <!-- Navbar Search -->
+                        <form class="d-none d-md-inline-block form-inline my-2 my-md-0" style="min-width: 220px;">
+                            <div class="input-group">
+                                <input class="form-control" type="text" placeholder="Search for..."
+                                    aria-label="Search for...">
+                                <button class="btn btn-primary" type="button">
+                                    <i class="fas fa-search"></i>
+                                </button>
+                            </div>
+                        </form>
+                    </li>
+                    <!-- Nav Item - Alerts -->
+                    <li class="nav-item dropdown no-arrow mx-1">
+                        <a class="nav-link dropdown-toggle" href="#" id="alertsDropdown" role="button"
+                            data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            <i class="bi bi-bell"></i>
+                            <!-- Counter - Alerts -->
+                            <span class="badge bg-danger badge-counter">0</span>
+                        </a>
+                        <!-- Dropdown - Alerts -->
+                        <div class="dropdown-list dropdown-menu dropdown-menu-end shadow animated--grow-in"
+                            aria-labelledby="alertsDropdown">
+                            <h6 class="dropdown-header">
+                                Alerts Center
+                            </h6>
+                            <a class="dropdown-item d-flex align-items-center" href="#">
+                                <div class="mr-3">
+                                    <div class="icon-circle bg-primary">
+                                        <i class="bi bi-check-circle text-white"></i>
+                                    </div>
+                                </div>
+                                <div>
+                                    <div class="small text-gray-500">System Status</div>
+                                    <span class="font-weight-bold">All systems operational</span>
+                                </div>
+                            </a>
+                            <a class="dropdown-item text-center small text-gray-500" href="#">Show All
+                                Alerts</a>
+                        </div>
+                    </li>
+                    <div class="topbar-divider d-none d-sm-block"></div>
+                    <!-- Nav Item - User Information -->
+                    <li class="nav-item dropdown no-arrow">
+                        <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button"
+                            data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            <span class="me-2 d-none d-lg-inline text-gray-300" style="font-size: 0.75rem;">{{
+                                current_user.username if current_user.is_authenticated else 'Guest' }}</span>
+                            <i class="bi bi-person-circle"></i>
+                        </a>
+                        <!-- Dropdown - User Information -->
+                        <div class="dropdown-menu dropdown-menu-end shadow animated--grow-in"
+                            aria-labelledby="userDropdown">
+                            <a class="dropdown-item" href="#">
+                                <i class="bi bi-person me-2 text-gray-400"></i>
+                                Profile
+                            </a>
+                            <a class="dropdown-item" href="#">
+                                <i class="bi bi-gear me-2 text-gray-400"></i>
+                                Settings
+                            </a>
+                            <div class="dropdown-divider"></div>
+                            <a class="dropdown-item" href="{{ url_for('auth.logout') }}">
+                                <i class="bi bi-box-arrow-right me-2 text-gray-400"></i>
+                                Logout
+                            </a>
+                        </div>
+                    </li>
+                </ul>
+            </nav>
+            <!-- End of Topbar -->
+
+            <!-- Begin Page Content -->
+            <main>
+                <div class="container-fluid px-4">
+                    {% with messages = get_flashed_messages(with_categories=true) %}
+                    {% if messages %}
+                    {% for category, message in messages %}
+                    <div class="alert alert-{{ category }} alert-dismissible fade show mt-3" role="alert">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                    {% endfor %}
+                    {% endif %}
+                    {% endwith %}
+
+                    {% block content %}{% endblock %}
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- Admin Layout Script -->
+    <script src="{{ url_for('static', filename='js/admin-layout.js') }}"></script>
+
+    {% block extra_js %}{% endblock %}
+</body>
+
+</html>

@@ -1,0 +1,234 @@
+{% extends "base.html" %}
+
+{% block title %}Python USDT Deposit API Guide for Betting Platforms | PayCrypt{% endblock %}
+
+{% block meta_tags %}
+<meta name="description" content="Python integration guide for PayCrypt's USDT deposit API, with examples for betting platforms and casinos using the requests library and Flask webhooks.">
+<link rel="canonical" href="{{ request.url }}">
+
+<!-- Open Graph -->
+<meta property="og:title" content="Python USDT Deposit API Guide for Betting Platforms | PayCrypt">
+<meta property="og:description" content="Step-by-step Python examples for creating USDT deposits and handling PayCrypt webhooks in betting platforms.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="{{ request.url }}">
+
+<!-- JSON-LD Schema -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "TechArticle",
+  "headline": "Python USDT Deposit API Integration Guide for Betting Platforms",
+  "description": "Python examples for integrating PayCrypt's USDT deposit API, including deposit creation and webhook handling for betting operators.",
+  "publisher": {
+    "@type": "Organization",
+    "name": "PayCrypt",
+    "url": "{{ request.url_root }}"
+  }
+}
+</script>
+{% endblock %}
+
+{% block content %}
+<section class="py-5 bg-dark text-white">
+  <div class="container py-md-5">
+    <div class="row g-4 align-items-center">
+      <div class="col-lg-7">
+        <span class="badge bg-warning text-dark mb-3 px-3 py-2">Python integration guide</span>
+        <h1 class="display-5 fw-bold mb-3">Python USDT Deposit API Guide</h1>
+        <p class="lead mb-3">
+          This guide shows how a <strong>betting or casino platform</strong> can call the PayCrypt USDT deposit API
+          from Python and receive webhooks when deposits are confirmed.
+        </p>
+        <ul class="list-unstyled small mb-4">
+          <li class="d-flex gap-2 mb-2"><i class="fas fa-check-circle text-success mt-1"></i><span>Use the <code>requests</code> library to create USDT deposits.</span></li>
+          <li class="d-flex gap-2 mb-2"><i class="fas fa-check-circle text-success mt-1"></i><span>Receive webhooks in a simple Flask endpoint.</span></li>
+          <li class="d-flex gap-2 mb-2"><i class="fas fa-check-circle text-success mt-1"></i><span>Update player balances when status is <code>confirmed</code>.</span></li>
+        </ul>
+        <a href="https://t.me/paycryptonline" class="btn btn-warning fw-semibold px-4" target="_blank" rel="noopener">
+          <i class="fab fa-telegram me-2"></i> Get API Keys on Telegram
+        </a>
+      </div>
+      <div class="col-lg-5">
+        <div class="bg-secondary bg-opacity-25 rounded-4 p-3 p-md-4 small">
+          <div class="d-flex justify-content-between align-items-center mb-2">
+            <span class="text-uppercase text-muted fw-semibold">Endpoint</span>
+            <span class="badge bg-success">POST</span>
+          </div>
+<pre class="mb-0 small text-white"><code>POST /api/v1/crypto/deposits
+Authorization: Bearer &lt;YOUR_API_KEY&gt;
+Content-Type: application/json
+
+{
+  "fiat_amount": 100,
+  "fiat_currency": "USD",
+  "crypto_currency": "USDT",
+  "crypto_network": "TRC20"
+}</code></pre>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="py-5">
+  <div class="container">
+    <div class="row g-4">
+      <div class="col-lg-6">
+        <h2 class="h3 fw-bold mb-3">1. Create a USDT deposit from Python</h2>
+        <p class="text-muted small mb-3">
+          The example below uses <code>requests</code> to create a USDT deposit session. Replace <code>&lt;API_KEY&gt;</code>
+          with your PayCrypt API key.
+        </p>
+<pre class="bg-dark text-light rounded-3 p-3 small"><code class="language-python">import os
+import requests
+
+API_BASE = "https://paycrypt.online"
+API_KEY = os.environ.get("PAYCRYPT_API_KEY", "&lt;API_KEY&gt;")
+
+payload = {
+    "fiat_amount": 250,
+    "fiat_currency": "USD",
+    "crypto_currency": "USDT",
+    "crypto_network": "TRC20",
+}
+
+resp = requests.post(
+    f"{API_BASE}/api/v1/crypto/deposits",
+    headers={
+        "Authorization": f"Bearer {API_KEY}",
+        "Content-Type": "application/json",
+    },
+    json=payload,
+    timeout=10,
+)
+
+print(resp.status_code)
+print(resp.json())</code></pre>
+        <p class="text-muted small mt-3 mb-0">
+          Store the <code>payment_id</code>, <code>crypto_amount</code>, and <code>deposit_address</code> from the response
+          so you can reconcile tickets and balances later.
+        </p>
+      </div>
+      <div class="col-lg-6">
+        <h2 class="h3 fw-bold mb-3">2. Display the deposit address to your player</h2>
+        <p class="text-muted small mb-3">
+          In your own betting platform, you typically show the returned address and QR code on a cashier screen.
+          The exact implementation depends on your stack, but the general idea is:
+        </p>
+        <ul class="list-unstyled small mb-3">
+          <li class="mb-2"><i class="fas fa-arrow-right text-secondary me-2"></i>Store the JSON response from PayCrypt alongside the user session or ticket.</li>
+          <li class="mb-2"><i class="fas fa-arrow-right text-secondary me-2"></i>Render the <code>deposit_address</code> and optionally the <code>qr_code</code> image.</li>
+          <li class="mb-2"><i class="fas fa-arrow-right text-secondary me-2"></i>Do not credit the balance yet – wait for the webhook.</li>
+        </ul>
+        <p class="text-muted small mb-0">
+          When the deposit is confirmed on-chain, PayCrypt will call your webhook URL with the final status so you can
+          safely update the balance.
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="py-5 bg-light">
+  <div class="container">
+    <div class="row g-4">
+      <div class="col-lg-6">
+        <h2 class="h3 fw-bold mb-3">3. Receive the webhook in Flask</h2>
+        <p class="text-muted small mb-3">
+          Set your webhook URL in the PayCrypt dashboard to something like
+          <code>https://your-domain.com/webhooks/paycrypt/deposit</code>. When a deposit is confirmed,
+          PayCrypt will send a POST request with JSON similar to the example on the main USDT API page.
+        </p>
+<pre class="bg-dark text-light rounded-3 p-3 small"><code class="language-python">from flask import Flask, request, jsonify
+
+app = Flask(__name__)
+
+@app.route("/webhooks/paycrypt/deposit", methods=["POST"])
+def paycrypt_deposit_webhook():
+    data = request.get_json(force=True, silent=True) or {}
+
+    payment_id = data.get("payment_id")
+    status = data.get("status")
+    amount = data.get("amount")
+    currency = data.get("currency")
+
+    if status == "confirmed":
+        # TODO: look up the pending deposit by payment_id
+        # and credit the player's balance in your own database.
+        pass
+
+    # Always return a 2xx status quickly so PayCrypt treats the webhook as delivered.
+    return jsonify({"received": True})</code></pre>
+        <p class="text-muted small mt-3 mb-0">
+          In production, you should add authentication, logging, and idempotency checks so duplicate webhooks do not
+          credit a deposit more than once.
+        </p>
+      </div>
+      <div class="col-lg-6">
+        <h2 class="h3 fw-bold mb-3">4. Basic error handling & logging</h2>
+        <p class="text-muted small mb-3">
+          For real-money betting flows, you should collect enough logs to investigate disputes and monitor uptime.
+        </p>
+        <ul class="list-unstyled small mb-3">
+          <li class="mb-2"><i class="fas fa-clipboard-check text-secondary me-2"></i>Log the full request/response when creating deposits (without storing secrets in plain text).</li>
+          <li class="mb-2"><i class="fas fa-clipboard-check text-secondary me-2"></i>Log webhook payloads together with your internal ticket IDs.</li>
+          <li class="mb-2"><i class="fas fa-clipboard-check text-secondary me-2"></i>Alert on unexpected statuses so your team can investigate.</li>
+        </ul>
+        <p class="text-muted small mb-0">
+          Exact logging requirements depend on your license and jurisdiction. Treat this page as a technical starting point,
+          not legal or compliance advice.
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="py-5">
+  <div class="container">
+    <div class="row g-3">
+      <div class="col-md-3">
+        <a href="{{ url_for('main.usdt_deposit_api') }}" class="card border-0 shadow-sm text-decoration-none h-100">
+          <div class="card-body">
+            <h5 class="fw-bold text-dark">USDT Deposit API Overview</h5>
+            <p class="text-muted small mb-0">See the main endpoint, JSON examples, and webhook format.</p>
+          </div>
+        </a>
+      </div>
+      <div class="col-md-3">
+        <a href="{{ url_for('main.betting_crypto_gateway') }}" class="card border-0 shadow-sm text-decoration-none h-100">
+          <div class="card-body">
+            <h5 class="fw-bold text-dark">Betting Crypto Gateway</h5>
+            <p class="text-muted small mb-0">How PayCrypt fits into your sportsbook or casino stack.</p>
+          </div>
+        </a>
+      </div>
+      <div class="col-md-3">
+        <a href="{{ url_for('main.crypto_gateway_for_casinos') }}" class="card border-0 shadow-sm text-decoration-none h-100">
+          <div class="card-body">
+            <h5 class="fw-bold text-dark">Crypto Gateway for Casinos</h5>
+            <p class="text-muted small mb-0">Global casino operators and multi-brand setups.</p>
+          </div>
+        </a>
+      </div>
+      <div class="col-md-3">
+        <a href="{{ url_for('tools.index') }}" class="card border-0 shadow-sm text-decoration-none h-100">
+          <div class="card-body">
+            <h5 class="fw-bold text-dark">Free Crypto Tools</h5>
+            <p class="text-muted small mb-0">RugCheck, Wallet Profiler, and more risk tools.</p>
+          </div>
+        </a>
+      </div>
+    </div>
+    <div class="row g-3 mt-3">
+      <div class="col-md-3">
+        <a href="{{ url_for('main.pricing') }}" class="card border-0 shadow-sm text-decoration-none h-100">
+          <div class="card-body">
+            <h5 class="fw-bold text-dark">Pricing</h5>
+            <p class="text-muted small mb-0">See setup fee tiers for betting operators using the USDT API.</p>
+          </div>
+        </a>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

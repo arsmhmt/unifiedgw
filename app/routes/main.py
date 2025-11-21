@@ -1,5 +1,6 @@
 from flask import Blueprint, render_template, request, redirect, url_for, flash, make_response, session, jsonify
 from app.models.payment_session import PaymentSession
+from ..utils.timezone import now_eest
 from app.extensions import db
 from datetime import datetime, timedelta
 from flask_login import current_user
@@ -24,8 +25,8 @@ def pay():
         coin = request.form.get('coin')
         email = request.form.get('email')
         client_id = 1
-        order_id = f'ORD_{int(datetime.utcnow().timestamp())}'
-        expires = datetime.utcnow() + timedelta(minutes=30)
+        order_id = f'ORD_{int(now_eest().timestamp())}'
+        expires = now_eest() + timedelta(minutes=30)
         # Store coin in currency field for PaymentSession
         ps = PaymentSession(
             public_id='ps_' + __import__('uuid').uuid4().hex[:12],
@@ -76,6 +77,59 @@ def payment_page(payment_id: int):
 @main_bp.route('/pricing')
 def pricing():
     return render_template('pricing.html')
+
+@main_bp.route('/blog')
+def blog_index():
+    """Blog index for Engine B articles and guides."""
+    return render_template('blog_index.html')
+
+@main_bp.route('/blog/usdt-deposits-for-betting-platforms')
+def blog_usdt_deposits_for_betting_platforms():
+    """Engine B article: USDT deposits for betting platforms."""
+    return render_template('blog_usdt_deposits_betting.html')
+
+# Engine A - Anchor Pages (SEO Money Pages)
+@main_bp.route('/betting-crypto-gateway')
+def betting_crypto_gateway():
+    """Primary SEO landing page for betting platforms"""
+    return render_template('betting_crypto_gateway.html')
+
+@main_bp.route('/usdt-deposit-api')
+def usdt_deposit_api():
+    """Technical page for developers looking for USDT deposit API"""
+    return render_template('usdt_deposit_api.html')
+
+@main_bp.route('/usdt-deposit-api/python')
+def usdt_deposit_api_python():
+    """Python integration guide for USDT deposit API"""
+    return render_template('usdt_deposit_api_python.html')
+
+@main_bp.route('/usdt-deposit-api/php')
+def usdt_deposit_api_php():
+    """PHP integration guide for USDT deposit API"""
+    return render_template('usdt_deposit_api_php.html')
+
+@main_bp.route('/usdt-deposit-api/nodejs')
+def usdt_deposit_api_nodejs():
+    """Node.js integration guide for USDT deposit API"""
+    return render_template('usdt_deposit_api_nodejs.html')
+
+@main_bp.route('/crypto-gateway-for-casinos')
+def crypto_gateway_for_casinos():
+    """Global casino market landing page"""
+    return render_template('crypto_gateway_for_casinos.html')
+
+
+@main_bp.route('/paycrypt-vs-coinspaid')
+def paycrypt_vs_coinspaid():
+    """Comparison page: PayCrypt vs CoinsPaid"""
+    return render_template('paycrypt_vs_coinspaid.html')
+
+
+@main_bp.route('/paycrypt-vs-danapay')
+def paycrypt_vs_danapay():
+    """Comparison page: PayCrypt vs Danapay"""
+    return render_template('paycrypt_vs_danapay.html')
 
 # --- API Blueprint and Heartbeat Endpoint (stub) ---
 api_bp = Blueprint('api', __name__, url_prefix='/api')

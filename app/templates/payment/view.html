@@ -20,7 +20,7 @@
             <dd class="col-sm-8"><code>{{ payment.transaction_id or '-' }}</code></dd>
 
             <dt class="col-sm-4">Created</dt>
-            <dd class="col-sm-8">{{ payment.created_at.strftime('%Y-%m-%d %H:%M UTC') if payment.created_at else '-' }}</dd>
+            <dd class="col-sm-8">{{ payment.created_at|datetime_eest('%Y-%m-%d %H:%M EEST') if payment.created_at else '-' }}</dd>
 
             <dt class="col-sm-4">Description</dt>
             <dd class="col-sm-8">{{ payment.description or '-' }}</dd>

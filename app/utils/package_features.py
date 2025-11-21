@@ -11,6 +11,7 @@ Centralized feature management with REVISED pricing structure respecting ≥1.2%
 """
 
 from datetime import datetime
+from ..utils.timezone import now_eest
 from decimal import Decimal
 
 # REVISED: Package Configuration with proper margin protection
@@ -518,7 +519,7 @@ def validate_all_packages():
     }
     
     validation_report = {
-        'timestamp': datetime.utcnow().isoformat(),
+        'timestamp': now_eest().isoformat(),
         'global_minimum_margin': 1.20,
         'packages': {},
         'summary': {

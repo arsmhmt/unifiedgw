@@ -1,4 +1,5 @@
 from datetime import datetime, timedelta
+from ..utils.timezone import now_eest
 from decimal import Decimal
 from app.extensions.extensions import db 
 from .base import BaseModel
@@ -83,7 +84,7 @@ class Payment(BaseModel):
             return None
             
         # Check if we have a valid rate that hasn't expired
-        if not force_refresh and self.exchange_rate and self.rate_expiry and self.rate_expiry > datetime.utcnow():
+        if not force_refresh and self.exchange_rate and self.rate_expiry and self.rate_expiry > now_eest():
             return self.exchange_rate
             
         # Get new rate
@@ -93,7 +94,7 @@ class Payment(BaseModel):
             
         # Update rate and expiry (15 minutes from now)
         self.exchange_rate = rate
-        self.rate_expiry = datetime.utcnow() + timedelta(minutes=15)
+        self.rate_expiry = now_eest() + timedelta(minutes=15)
         
         # Calculate crypto amount if we have fiat amount
         if self.fiat_amount:
@@ -122,13 +123,13 @@ class Payment(BaseModel):
         """Check if the exchange rate has expired"""
         if not self.rate_expiry:
             return True
-        return datetime.utcnow() > self.rate_expiry
+        return now_eest() > self.rate_expiry
     
     def time_until_expiry(self):
         """Return seconds until rate expiry"""
         if not self.rate_expiry:
             return 0
-        return max(0, (self.rate_expiry - datetime.utcnow()).total_seconds())
+        return max(0, (self.rate_expiry - now_eest()).total_seconds())
 
     def __repr__(self):
         if self.fiat_amount and self.fiat_currency:

@@ -258,8 +258,8 @@
                                 </td>
                                 <td>
                                     <div class="d-flex flex-column">
-                                        <span>{{ withdrawal.created_at.strftime('%Y-%m-%d') }}</span>
-                                        <small class="text-muted">{{ withdrawal.created_at.strftime('%H:%M') }}</small>
+                                        <span>{{ withdrawal.created_at|datetime_eest('%Y-%m-%d') }}</span>
+                                        <small class="text-muted">{{ withdrawal.created_at|datetime_eest('%H:%M') }}</small>
                                     </div>
                                 </td>
                                 <td>

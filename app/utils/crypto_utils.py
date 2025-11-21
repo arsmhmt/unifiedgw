@@ -4,6 +4,7 @@ import pyqrcode
 import base64
 from io import BytesIO
 from datetime import datetime
+from ..utils.timezone import now_eest
 
 def generate_address(client_id, coin='BTC'):
     """
@@ -11,7 +12,7 @@ def generate_address(client_id, coin='BTC'):
     In a real application, this would interface with a cryptocurrency wallet.
     For development, we'll generate a deterministic address based on client ID and timestamp.
     """
-    timestamp = int(datetime.utcnow().timestamp())
+    timestamp = int(now_eest().timestamp())
     unique_str = f"{client_id}_{timestamp}_{os.urandom(8).hex()}"
     address_hash = hashlib.sha256(unique_str.encode()).hexdigest()
     
@@ -28,7 +29,7 @@ def generate_order_id(client_id, length=12):
     """
     Generate a unique order ID for a payment.
     """
-    timestamp = int(datetime.utcnow().timestamp())
+    timestamp = int(now_eest().timestamp())
     unique_str = f"{client_id}_{timestamp}_{os.urandom(4).hex()}"
     return hashlib.sha256(unique_str.encode()).hexdigest()[:length].upper()
 

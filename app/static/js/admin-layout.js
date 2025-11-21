@@ -1,7 +1,7 @@
 // Sidebar Toggle Functionality
-const sidebarToggle = document.getElementById('sidebarToggle');
-if (sidebarToggle) {
-    sidebarToggle.addEventListener('click', (e) => {
+const sidebarToggleLayout = document.getElementById('sidebarToggle');
+if (sidebarToggleLayout) {
+    sidebarToggleLayout.addEventListener('click', (e) => {
         e.preventDefault();
         document.body.classList.toggle('sb-sidenav-toggled');
     });

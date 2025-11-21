@@ -9,9 +9,11 @@
     <div class="d-sm-flex align-items-center justify-content-between mb-4">
         <h1 class="h3 mb-0 text-gray-800">Payments</h1>
         <div class="d-flex">
+            <!-- Export functionality temporarily disabled - endpoint not implemented
             <button type="button" class="btn btn-primary me-2" data-bs-toggle="modal" data-bs-target="#exportModal">
                 <i class="bi bi-download me-1"></i> Export
             </button>
+            -->
             <a href="{{ url_for('admin.create_payment') }}" class="btn btn-success">
                 <i class="bi bi-plus-circle me-1"></i> New Payment
             </a>
@@ -30,12 +32,13 @@
                 <div class="col-md-3">
                     <label for="status" class="form-label">Status</label>
                     <select class="form-select" id="status" name="status">
-                        <option value="" {% if not request.args.get('status') %}selected{% endif %}>All Statuses</option>
-                        <option value="pending" {% if request.args.get('status') == 'pending' %}selected{% endif %}>Pending</option>
-                        <option value="completed" {% if request.args.get('status') == 'completed' %}selected{% endif %}>Completed</option>
-                        <option value="failed" {% if request.args.get('status') == 'failed' %}selected{% endif %}>Failed</option>
-                        <option value="refunded" {% if request.args.get('status') == 'refunded' %}selected{% endif %}>Refunded</option>
-                        <option value="cancelled" {% if request.args.get('status') == 'cancelled' %}selected{% endif %}>Cancelled</option>
+                        {% set selected_status = selected_status or '' %}
+                        <option value="" {% if not selected_status %}selected{% endif %}>All Statuses</option>
+                        <option value="pending" {% if selected_status == 'pending' %}selected{% endif %}>Pending</option>
+                        <option value="completed" {% if selected_status == 'completed' %}selected{% endif %}>Completed</option>
+                        <option value="failed" {% if selected_status == 'failed' %}selected{% endif %}>Failed</option>
+                        <option value="refunded" {% if selected_status == 'refunded' %}selected{% endif %}>Refunded</option>
+                        <option value="cancelled" {% if selected_status == 'cancelled' %}selected{% endif %}>Cancelled</option>
                     </select>
                 </div>
                 <div class="col-md-3">
@@ -43,7 +46,7 @@
                     <select class="form-select" id="client" name="client_id">
                         <option value="">All Clients</option>
                         {% for client in clients %}
-                        <option value="{{ client.id }}" {% if request.args.get('client_id', type=int) == client.id %}selected{% endif %}>
+                        <option value="{{ client.id }}" {% if selected_client_id == client.id %}selected{% endif %}>
                             {{ client.company_name or client.name }}
                         </option>
                         {% endfor %}
@@ -52,16 +55,16 @@
                 <div class="col-md-3">
                     <label for="start_date" class="form-label">From Date</label>
                     <input type="date" class="form-control" id="start_date" name="start_date" 
-                           value="{{ request.args.get('start_date', '') }}">
+                           value="{{ selected_start_date or '' }}">
                 </div>
                 <div class="col-md-3">
                     <label for="end_date" class="form-label">To Date</label>
                     <input type="date" class="form-control" id="end_date" name="end_date"
-                           value="{{ request.args.get('end_date', '') }}">
+                           value="{{ selected_end_date or '' }}">
                 </div>
                 <div class="col-md-6">
                     <label for="search" class="form-label">Search</label>
-                    <input type="text" class="form-control" id="search" name="search" placeholder="Search by transaction, client, or email" value="{{ request.args.get('search', '') }}">
+                    <input type="text" class="form-control" id="search" name="search" placeholder="Search by transaction, client, or email" value="{{ search_term or '' }}">
                 </div>
                 <div class="col-12">
                     <div class="d-flex justify-content-between">
@@ -168,6 +171,178 @@
             </div>
         </div>
         <div class="card-body">
+            <style>
+                /* Ensure status badges are fully visible with proper width */
+                #dataTable td:nth-child(4) {
+                    min-width: 140px !important;
+                    max-width: none !important;
+                    width: auto !important;
+                    white-space: nowrap !important;
+                }
+                
+                #dataTable th:nth-child(4) {
+                    min-width: 140px !important;
+                }
+                
+                /* Ensure amount column has enough space */
+                #dataTable td:nth-child(3) {
+                    min-width: 120px !important;
+                    white-space: nowrap !important;
+                }
+
+                /* Action button group styles */
+                .btn-group {
+                    display: inline-flex;
+                    gap: 0.25rem;
+                }
+                
+                .btn-group form {
+                    margin: 0;
+                }
+
+                /* Common button styles */
+                .btn-group .btn {
+                    display: inline-flex;
+                    align-items: center;
+                    justify-content: center;
+                    min-width: 32px;
+                }
+
+                .btn-group .bi {
+                    font-size: 1rem;
+                }
+
+                /* View/Edit button styles */
+                .btn-action {
+                    background-color: rgba(255, 107, 53, 0.1);
+                    border: 1px solid rgba(255, 107, 53, 0.3);
+                    color: #FF6B35 !important;
+                }
+
+                .btn-action:hover {
+                    background-color: rgba(255, 107, 53, 0.2);
+                    border-color: rgba(255, 107, 53, 0.5);
+                    color: #FF6B35 !important;
+                }
+
+                /* Approve/Reject button styles */
+                .btn-success,
+                .btn-danger {
+                    color: #fff !important;
+                }
+
+                .btn-success {
+                    border-color: rgba(40, 167, 69, 0.5);
+                }
+
+                .btn-danger {
+                    border-color: rgba(220, 53, 69, 0.5);
+                }
+
+                /* Dark theme adjustments */
+                [data-theme="dark"] .btn-action {
+                    background-color: rgba(255, 107, 53, 0.15);
+                    border-color: rgba(255, 107, 53, 0.4);
+                    color: #FF6B35 !important;
+                }
+
+                [data-theme="dark"] .btn-action:hover {
+                    background-color: rgba(255, 107, 53, 0.25);
+                    border-color: rgba(255, 107, 53, 0.6);
+                    color: #FF6B35 !important;
+                }
+                
+                /* Action buttons styling and spacing */
+                .btn-group {
+                    display: flex !important;
+                    gap: 0.5rem !important;
+                    flex-wrap: nowrap !important;
+                }
+                
+                .btn-group .btn,
+                .btn-group form {
+                    margin-right: 4px !important;
+                }
+                
+                .btn-group .btn:last-child,
+                .btn-group form:last-child {
+                    margin-right: 0 !important;
+                }
+                
+                /* Make action buttons ALWAYS visible with orange tones */
+                .btn-group .btn,
+                .btn-group .btn i {
+                    opacity: 1 !important;
+                    visibility: visible !important;
+                }
+                
+                /* Light theme button styling */
+                [data-theme="light"] .btn-primary {
+                    background-color: #FF6B35 !important;
+                    border-color: #FF6B35 !important;
+                    color: #ffffff !important;
+                }
+                
+                [data-theme="light"] .btn-info {
+                    background-color: #FF8B5E !important;
+                    border-color: #FF8B5E !important;
+                    color: #ffffff !important;
+                }
+                
+                /* Dark theme button styling */
+                [data-theme="dark"] .btn-primary {
+                    background-color: #FF6B35 !important;
+                    border-color: #FF6B35 !important;
+                    color: #ffffff !important;
+                }
+                
+                [data-theme="dark"] .btn-info {
+                    background-color: #FF8B5E !important;
+                    border-color: #FF8B5E !important;
+                    color: #ffffff !important;
+                }
+                
+                /* Consistent success/danger colors for both themes */
+                .btn-success,
+                [data-theme="light"] .btn-success,
+                [data-theme="dark"] .btn-success {
+                    background-color: #28a745 !important;
+                    border-color: #28a745 !important;
+                    color: #ffffff !important;
+                }
+                
+                .btn-danger,
+                [data-theme="light"] .btn-danger,
+                [data-theme="dark"] .btn-danger {
+                    background-color: #dc3545 !important;
+                    border-color: #dc3545 !important;
+                    color: #ffffff !important;
+                }
+                
+                /* Hover effects */
+                .btn-primary:hover,
+                .btn-info:hover {
+                    filter: brightness(110%) !important;
+                }
+                
+                /* Ensure badge text is always fully visible and readable - NO TRUNCATION */
+                .badge {
+                    min-width: 100px !important;
+                    max-width: none !important;
+                    text-align: center;
+                    padding: 0.5em 0.75em !important;
+                    font-size: 0.875rem !important;
+                    display: inline-block !important;
+                    white-space: nowrap !important;
+                    overflow: visible !important;
+                    text-overflow: clip !important;
+                }
+                
+                /* Table row hover effect */
+                [data-theme="dark"] #dataTable tbody tr:hover {
+                    background-color: rgba(255, 107, 53, 0.1) !important;
+                }
+            </style>
             <div class="table-responsive">
                 <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
                     <thead class="table-light">
@@ -194,30 +369,36 @@
                                 {% endif %}
                             </td>
                             <td class="text-nowrap">
-                                {{ "{:,.2f} {}".format(payment.amount, payment.currency) }}
+                                {{ payment.display_amount }}
                             </td>
                             <td>
-                                <span class="badge bg-{{ 'success' if payment.status == 'completed' else 'warning' if payment.status == 'pending' 
-                                    else 'danger' if payment.status in ['failed', 'cancelled'] else 'info' }}">
-                                    {{ payment.status|title }}
+                                <span class="badge bg-{{ 'success' if payment.status.value == 'completed' else 'warning' if payment.status.value == 'pending' 
+                                    else 'success' if payment.status.value == 'approved' else 'danger' if payment.status.value == 'rejected' else 'info' }}">
+                                    {{ payment.status.value|title }}
                                 </span>
                             </td>
                             <td class="text-nowrap">{{ payment.created_at.strftime('%Y-%m-%d %H:%M') }}</td>
                             <td class="text-nowrap">
                                 <div class="btn-group" role="group">
                                     <a href="{{ url_for('admin.view_payment', payment_id=payment.id) }}" 
-                                       class="btn btn-sm btn-primary" data-bs-toggle="tooltip" title="View">
-                                        <i class="bi bi-eye"></i>
+                                       class="btn btn-sm btn-action" data-bs-toggle="tooltip" title="View Details">
+                                        <i class="bi bi-eye-fill"></i>
                                     </a>
                                     <a href="{{ url_for('admin.edit_payment', payment_id=payment.id) }}" 
-                                       class="btn btn-sm btn-info text-white" data-bs-toggle="tooltip" title="Edit">
-                                        <i class="bi bi-pencil"></i>
+                                       class="btn btn-sm btn-action" data-bs-toggle="tooltip" title="Edit Payment">
+                                        <i class="bi bi-pencil-fill"></i>
                                     </a>
-                                    {% if payment.status == 'completed' %}
-                                    <button type="button" class="btn btn-sm btn-warning refund-payment" 
-                                            data-payment-id="{{ payment.id }}" data-payment-amount="{{ payment.amount }}" data-bs-toggle="tooltip" title="Refund">
-                                        <i class="bi bi-arrow-counterclockwise"></i>
-                                    </button>
+                                    {% if payment.status.value == 'pending' %}
+                                    <form action="{{ url_for('admin.mark_payment_status', payment_id=payment.id, status='approved') }}" method="POST">
+                                        <button type="submit" class="btn btn-sm btn-success" data-bs-toggle="tooltip" title="Approve Payment">
+                                            <i class="bi bi-check-lg"></i>
+                                        </button>
+                                    </form>
+                                    <form action="{{ url_for('admin.mark_payment_status', payment_id=payment.id, status='rejected') }}" method="POST">
+                                        <button type="submit" class="btn btn-sm btn-danger" data-bs-toggle="tooltip" title="Reject Payment">
+                                            <i class="bi bi-x-lg"></i>
+                                        </button>
+                                    </form>
                                     {% endif %}
                                 </div>
                             </td>
@@ -279,7 +460,7 @@
     </div>
 </div>
 
-<!-- Export Modal -->
+{# Export Modal - Temporarily disabled until endpoint is implemented
 <div class="modal fade" id="exportModal" tabindex="-1" aria-labelledby="exportModalLabel" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
@@ -328,6 +509,7 @@
         </div>
     </div>
 </div>
+#}
 
 <!-- Refund Modal -->
 <div class="modal fade" id="refundModal" tabindex="-1" aria-labelledby="refundModalLabel" aria-hidden="true">

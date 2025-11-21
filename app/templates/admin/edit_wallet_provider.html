@@ -100,11 +100,6 @@
     <div class="d-flex justify-content-between align-items-center mb-4">
         <div>
             <h1 class="mt-4 mb-0">Edit {{ provider.name }}</h1>
-            <ol class="breadcrumb">
-                <li class="breadcrumb-item"><a href="{{ url_for('admin.admin_dashboard') }}">Dashboard</a></li>
-                <li class="breadcrumb-item"><a href="{{ url_for('admin.wallet_providers') }}">Wallet Providers</a></li>
-                <li class="breadcrumb-item active">Edit {{ provider.name }}</li>
-            </ol>
         </div>
         <div>
             {% if provider.is_primary %}

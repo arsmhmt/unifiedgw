@@ -1,87 +1,862 @@
-{% extends 'base.html' %}
+{% extends 'client/base.html' %}
 {% block title %}API Management{% endblock %}
+
+{% block styles %}
+{{ super() }}
+<style>
+.api-credential-group {
+    background-color: #f8f9fa;
+    border: 1px solid #dee2e6;
+    border-radius: 8px;
+    padding: 15px;
+    margin-bottom: 15px;
+}
+.credential-input {
+    background-color: #ffffff;
+    border: 1px solid #ced4da;
+    font-family: 'Courier New', monospace;
+    font-size: 0.9em;
+}
+.copy-btn {
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    border: none;
+    background: none;
+    color: #6c757d;
+    cursor: pointer;
+}
+.copy-btn:hover {
+    color: #007bff;
+}
+.position-relative {
+    position: relative;
+}
+</style>
+{% endblock %}
+
 {% block content %}
 <div class="container py-4">
-  <div class="d-flex align-items-center justify-content-between mb-3">
-    <h1 class="h4 mb-0">API Management</h1>
-  <form method="post" action="{{ url_for('client.create_api_key_management') }}" class="d-flex gap-2">
-      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-      <input type="text" name="name" class="form-control" placeholder="Key name" style="max-width: 220px;">
-      <button class="btn btn-primary" type="submit">Create Key</button>
-    </form>
-  </div>
-
-  {% if api_keys %}
-  <div class="card mb-4">
-    <div class="card-body">
-      <h6 class="text-muted mb-3">Your API Keys</h6>
-      <div class="table-responsive">
-        <table class="table align-middle">
-          <thead>
-            <tr>
-              <th>Name</th>
-              <th>Prefix</th>
-              <th>Status</th>
-              <th>Rate Limit</th>
-              <th>Created</th>
-              <th></th>
-            </tr>
-          </thead>
-          <tbody>
-            {% for k in api_keys %}
-            <tr>
-              <td>{{ k.name }}</td>
-              <td><code>{{ k.key_prefix }}</code></td>
-              <td>
-                {% if k.is_active %}
-                  <span class="badge bg-success">Active</span>
-                {% else %}
-                  <span class="badge bg-secondary">Inactive</span>
-                {% endif %}
-              </td>
-              <td>{{ k.rate_limit or 60 }}/min</td>
-              <td>{{ k.created_at.strftime('%Y-%m-%d') if k.created_at else '' }}</td>
-              <td class="text-end">
-                {% if k.is_active %}
-                <form method="post" action="{{ url_for('client.deactivate_api_key', key_id=k.id) }}">
-                  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                  <button class="btn btn-sm btn-outline-danger">Deactivate</button>
-                </form>
-                {% endif %}
-              </td>
-            </tr>
-            {% endfor %}
-          </tbody>
-        </table>
+  <!-- Page Header -->
+  <div class="row mb-4">
+    <div class="col-12">
+      <div class="d-flex align-items-center justify-content-between">
+        <div>
+          <h1 class="h3 mb-1">API Management</h1>
+          <p class="text-muted mb-0">Manage your API keys and integration credentials for crypto payments and bank gateway</p>
+        </div>
+        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#createKeyModal">
+          <i class="fas fa-plus me-2"></i>Create New API Key
+        </button>
       </div>
     </div>
   </div>
-  {% endif %}
 
-  <div class="card">
-    <div class="card-body">
-      <h6 class="text-muted mb-3">Integration</h6>
-      <p class="mb-2">All requests must include HMAC headers:</p>
-      <ul>
-        <li><code>X-Paycrypt-Key</code>: your API key</li>
-        <li><code>X-Paycrypt-Timestamp</code>: unix seconds</li>
-        <li><code>X-Paycrypt-Signature</code>: hex sha256 hmac of <code>"&lt;timestamp&gt;.&lt;body&gt;"</code> using your secret</li>
-      </ul>
-      <p class="mb-2">Create payment session:</p>
-      <pre class="bg-light p-3 rounded small"><code>POST /api/v1/payment_sessions
+  <!-- Crypto Payment API Keys -->
+  <div class="row mb-4">
+    <div class="col-12">
+      <div class="card">
+        <div class="card-header d-flex align-items-center justify-content-between">
+          <div>
+            <h5 class="mb-1"><i class="fas fa-bitcoin text-warning me-2"></i>Crypto Payment API Keys</h5>
+            <small class="text-muted">For cryptocurrency payment processing and hosted checkout</small>
+          </div>
+          <span class="badge bg-primary">{{ api_keys|length }} Active</span>
+        </div>
+        <div class="card-body">
+          {% if api_keys %}
+            {% for k in api_keys %}
+            <div class="api-credential-group">
+              <div class="row align-items-center mb-3">
+                <div class="col-md-6">
+                  <h6 class="mb-1">{{ k.name }}</h6>
+                  <small class="text-muted">
+                    Created: {{ k.created_at.strftime('%Y-%m-%d %H:%M') if k.created_at else 'Unknown' }} • 
+                    Rate Limit: {{ k.rate_limit or 60 }}/min • 
+                    {% if k.is_active %}
+                      <span class="badge bg-success">Active</span>
+                    {% else %}
+                      <span class="badge bg-secondary">Inactive</span>
+                    {% endif %}
+                  </small>
+                </div>
+                <div class="col-md-6 text-end">
+                  <div class="btn-group">
+                    <button class="btn btn-sm btn-outline-primary" onclick="regenerateKey({{ k.id }})">
+                      <i class="fas fa-sync me-1"></i>Regenerate
+                    </button>
+                    {% if k.is_active %}
+                    <form method="post" action="{{ url_for('client.deactivate_api_key', key_id=k.id) }}" class="d-inline">
+                      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                      <button class="btn btn-sm btn-outline-danger" onclick="return confirm('Are you sure?')">
+                        <i class="fas fa-times me-1"></i>Deactivate
+                      </button>
+                    </form>
+                    {% endif %}
+                  </div>
+                </div>
+              </div>
+              
+              <div class="row">
+                <div class="col-md-6 mb-3">
+                  <label class="form-label small fw-bold">API Key</label>
+                  <div class="position-relative">
+                    <input type="text" class="form-control credential-input" 
+                           value="{{ k.key if k.key else k.key_prefix + '***[Hidden]***' }}" 
+                           id="key-{{ k.id }}" readonly>
+                    <button type="button" class="copy-btn" onclick="copyToClipboard('key-{{ k.id }}')">
+                      <i class="fas fa-copy"></i>
+                    </button>
+                  </div>
+                </div>
+                <div class="col-md-6 mb-3">
+                  <label class="form-label small fw-bold">Secret Key</label>
+                  <div class="position-relative">
+                    <input type="password" class="form-control credential-input" 
+                           value="{{ k.secret_key if k.secret_key else '***[Hidden - Regenerate to view]***' }}" 
+                           id="secret-{{ k.id }}" readonly>
+                    <button type="button" class="copy-btn" onclick="togglePassword('secret-{{ k.id }}')">
+                      <i class="fas fa-eye"></i>
+                    </button>
+                  </div>
+                </div>
+              </div>
+              
+              {% if k.webhook_secret %}
+              <div class="row">
+                <div class="col-md-6 mb-3">
+                  <label class="form-label small fw-bold">Webhook Secret</label>
+                  <div class="position-relative">
+                    <input type="password" class="form-control credential-input" 
+                           value="{{ k.webhook_secret }}" 
+                           id="webhook-{{ k.id }}" readonly>
+                    <button type="button" class="copy-btn" onclick="togglePassword('webhook-{{ k.id }}')">
+                      <i class="fas fa-eye"></i>
+                    </button>
+                  </div>
+                </div>
+                <div class="col-md-6 mb-3">
+                  <label class="form-label small fw-bold">Permissions</label>
+                  <div>
+                    {% for perm in k.permissions %}
+                      <span class="badge bg-light text-dark me-1">{{ perm }}</span>
+                    {% endfor %}
+                  </div>
+                </div>
+              </div>
+              {% endif %}
+            </div>
+            {% endfor %}
+          {% else %}
+            <div class="text-center py-4">
+              <i class="fas fa-key fa-3x text-muted mb-3"></i>
+              <h6>No Crypto API Keys</h6>
+              <p class="text-muted">Create your first API key to start accepting cryptocurrency payments</p>
+              <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#createKeyModal">
+                <i class="fas fa-plus me-2"></i>Create First API Key
+              </button>
+            </div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bank Gateway API Keys -->
+  <div class="row mb-4">
+    <div class="col-12">
+      <div class="card">
+        <div class="card-header d-flex align-items-center justify-content-between">
+          <div>
+            <h5 class="mb-1"><i class="fas fa-university text-success me-2"></i>Bank Gateway API Keys</h5>
+            <small class="text-muted">For traditional bank payment processing and transfers</small>
+          </div>
+          <span class="badge bg-success">{{ client.bank_gateway_sites|length }} Sites</span>
+        </div>
+        <div class="card-body">
+          {% if client.bank_gateway_sites %}
+            {% for site in client.bank_gateway_sites %}
+            <div class="api-credential-group">
+              <div class="row align-items-center mb-3">
+                <div class="col-md-8">
+                  <h6 class="mb-1">{{ site.site_name }}</h6>
+                  <small class="text-muted">
+                    URL: <a href="{{ site.site_url }}" target="_blank">{{ site.site_url }}</a> • 
+                    {% if site.is_active %}
+                      <span class="badge bg-success">Active</span>
+                    {% else %}
+                      <span class="badge bg-secondary">Inactive</span>
+                    {% endif %}
+                  </small>
+                </div>
+                <div class="col-md-4 text-end">
+                  <button class="btn btn-sm btn-outline-primary" onclick="regenerateBankKey({{ site.id }})">
+                    <i class="fas fa-sync me-1"></i>Regenerate
+                  </button>
+                </div>
+              </div>
+              
+              <div class="row">
+                <div class="col-md-6 mb-3">
+                  <label class="form-label small fw-bold">Bank API Key</label>
+                  <div class="position-relative">
+                    <input type="text" class="form-control credential-input" 
+                           value="{{ site.api_key.key if site.api_key else 'No API Key Generated' }}" 
+                           id="bank-key-{{ site.id }}" readonly>
+                    <button type="button" class="copy-btn" onclick="copyToClipboard('bank-key-{{ site.id }}')">
+                      <i class="fas fa-copy"></i>
+                    </button>
+                  </div>
+                </div>
+                <div class="col-md-6 mb-3">
+                  <label class="form-label small fw-bold">Callback URL</label>
+                  <div class="position-relative">
+                    <input type="text" class="form-control credential-input" 
+                           value="{{ site.callback_url or 'Not configured' }}" 
+                           readonly>
+                  </div>
+                </div>
+              </div>
+              
+              <div class="row">
+                <div class="col-md-4 mb-3">
+                  <label class="form-label small fw-bold">Success URL</label>
+                  <input type="text" class="form-control credential-input" 
+                         value="{{ site.success_url or 'Not configured' }}" readonly>
+                </div>
+                <div class="col-md-4 mb-3">
+                  <label class="form-label small fw-bold">Fail URL</label>
+                  <input type="text" class="form-control credential-input" 
+                         value="{{ site.fail_url or 'Not configured' }}" readonly>
+                </div>
+                <div class="col-md-4 mb-3">
+                  <label class="form-label small fw-bold">Transactions</label>
+                  <div class="mt-2">
+                    <span class="badge bg-info">{{ site.transactions.count() }} Total</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+            {% endfor %}
+          {% else %}
+            <div class="text-center py-4">
+              <i class="fas fa-university fa-3x text-muted mb-3"></i>
+              <h6>No Bank Gateway Sites</h6>
+              <p class="text-muted">Contact support to set up bank gateway integration for your websites</p>
+              <a href="mailto:support@paycrypt.online" class="btn btn-success">
+                <i class="fas fa-envelope me-2"></i>Contact Support
+              </a>
+            </div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- API Documentation -->
+  <div class="row mb-4">
+    <div class="col-12">
+      <div class="card">
+        <div class="card-header">
+          <h5 class="mb-0"><i class="fas fa-book text-info me-2"></i>Integration Documentation</h5>
+        </div>
+        <div class="card-body">
+          <ul class="nav nav-tabs" id="docTabs" role="tablist">
+            <li class="nav-item" role="presentation">
+              <button class="nav-link active" id="crypto-tab" data-bs-toggle="tab" data-bs-target="#crypto-doc" type="button" role="tab">
+                <i class="fas fa-bitcoin me-2"></i>Crypto Payments
+              </button>
+            </li>
+            <li class="nav-item" role="presentation">
+              <button class="nav-link" id="bank-tab" data-bs-toggle="tab" data-bs-target="#bank-doc" type="button" role="tab">
+                <i class="fas fa-university me-2"></i>Bank Gateway
+              </button>
+            </li>
+            <li class="nav-item" role="presentation">
+              <button class="nav-link" id="examples-tab" data-bs-toggle="tab" data-bs-target="#examples-doc" type="button" role="tab">
+                <i class="fas fa-code me-2"></i>Code Examples
+              </button>
+            </li>
+          </ul>
+          
+          <div class="tab-content" id="docTabsContent">
+            <!-- Crypto Payments Documentation -->
+            <div class="tab-pane fade show active" id="crypto-doc" role="tabpanel">
+              <div class="mt-4">
+                <h6>Crypto Payment API Endpoints</h6>
+                <div class="table-responsive">
+                  <table class="table table-bordered">
+                    <thead>
+                      <tr>
+                        <th>Method</th>
+                        <th>Endpoint</th>
+                        <th>Description</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr>
+                        <td><span class="badge bg-success">POST</span></td>
+                        <td><code>/api/v1/payment_sessions</code></td>
+                        <td>Create a new payment session</td>
+                      </tr>
+                      <tr>
+                        <td><span class="badge bg-primary">GET</span></td>
+                        <td><code>/api/v1/payment_sessions/{id}</code></td>
+                        <td>Get payment session status</td>
+                      </tr>
+                      <tr>
+                        <td><span class="badge bg-success">POST</span></td>
+                        <td><code>/api/v1/betslip/generate</code></td>
+                        <td>Generate betslip for gaming</td>
+                      </tr>
+                      <tr>
+                        <td><span class="badge bg-primary">GET</span></td>
+                        <td><code>/api/v1/betslip/status/{id}</code></td>
+                        <td>Check betslip status</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+
+                <h6 class="mt-4">Authentication Headers (Required)</h6>
+                <ul class="list-unstyled">
+                  <li><code>X-Paycrypt-Key</code>: Your API key</li>
+                  <li><code>X-Paycrypt-Timestamp</code>: Unix timestamp (UTC)</li>
+                  <li><code>X-Paycrypt-Signature</code>: HMAC-SHA256 of "<timestamp>.<request_body>" using your secret</li>
+                </ul>
+
+                <h6 class="mt-4">Sample Payment Session Request</h6>
+                <pre class="bg-light p-3 rounded"><code>POST /api/v1/payment_sessions
+Content-Type: application/json
+X-Paycrypt-Key: your_api_key_here
+X-Paycrypt-Timestamp: 1694692800
+X-Paycrypt-Signature: computed_hmac_signature
+
 {
-  "order_id": "ORD-123",
-  "amount": "49.00",
+  "order_id": "ORD-12345",
+  "amount": "99.99",
   "currency": "USD",
-  "customer": {"email": "a@b.com"},
-  "metadata": {"source": "smartbetslip"},
-  "success_url": "https://merchant.tld/pay/success?oid=ORD-123",
-  "cancel_url": "https://merchant.tld/pay/cancel?oid=ORD-123",
-  "webhook_url": "https://merchant.tld/api/paycrypt/webhook"
+  "customer": {
+    "email": "customer@example.com"
+  },
+  "metadata": {
+    "source": "your_app",
+    "user_id": "12345"
+  },
+  "success_url": "https://yoursite.com/payment/success?order=ORD-12345",
+  "cancel_url": "https://yoursite.com/payment/cancel?order=ORD-12345",
+  "webhook_url": "https://yoursite.com/api/paycrypt/webhook"
+}</code></pre>
+              </div>
+            </div>
+            
+            <!-- Bank Gateway Documentation -->
+            <div class="tab-pane fade" id="bank-doc" role="tabpanel">
+              <div class="mt-4">
+                <h6>Bank Gateway API Endpoints</h6>
+                <div class="table-responsive">
+                  <table class="table table-bordered">
+                    <thead>
+                      <tr>
+                        <th>Method</th>
+                        <th>Endpoint</th>
+                        <th>Description</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr>
+                        <td><span class="badge bg-success">POST</span></td>
+                        <td><code>/bank-api/deposit/request</code></td>
+                        <td>Create deposit request</td>
+                      </tr>
+                      <tr>
+                        <td><span class="badge bg-success">POST</span></td>
+                        <td><code>/bank-api/withdraw/request</code></td>
+                        <td>Create withdrawal request</td>
+                      </tr>
+                      <tr>
+                        <td><span class="badge bg-primary">GET</span></td>
+                        <td><code>/bank-api/transaction/{reference}</code></td>
+                        <td>Check transaction status</td>
+                      </tr>
+                      <tr>
+                        <td><span class="badge bg-primary">GET</span></td>
+                        <td><code>/bank-api/balance</code></td>
+                        <td>Get account balance</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+
+                <h6 class="mt-4">Authentication Headers (Required)</h6>
+                <ul class="list-unstyled">
+                  <li><code>X-API-Key</code>: Your bank gateway API key</li>
+                  <li><code>Content-Type</code>: application/json</li>
+                </ul>
+
+                <h6 class="mt-4">Sample Deposit Request</h6>
+                <pre class="bg-light p-3 rounded"><code>POST /bank-api/deposit/request
+Content-Type: application/json
+X-API-Key: your_bank_api_key_here
+
+{
+  "amount": "500.00",
+  "currency": "TRY",
+  "user_name": "John Doe",
+  "user_email": "john@example.com",
+  "user_phone": "+90555123456",
+  "callback_url": "https://yoursite.com/api/bank/callback",
+  "external_transaction_id": "TXN-67890"
+}</code></pre>
+              </div>
+            </div>
+            
+            <!-- Code Examples -->
+            <div class="tab-pane fade" id="examples-doc" role="tabpanel">
+              <div class="mt-4">
+                <h6>JavaScript/Node.js Example</h6>
+                <pre class="bg-light p-3 rounded"><code>const crypto = require('crypto');
+
+// Crypto Payment Example
+async function createPaymentSession() {
+  const apiKey = 'your_crypto_api_key';
+  const secret = 'your_crypto_secret';
+  const timestamp = Math.floor(Date.now() / 1000).toString();
+  
+  const body = JSON.stringify({
+    order_id: 'ORD-123',
+    amount: '49.99',
+    currency: 'USD',
+    customer: { email: 'customer@example.com' },
+    success_url: 'https://yoursite.com/success',
+    cancel_url: 'https://yoursite.com/cancel',
+    webhook_url: 'https://yoursite.com/webhook'
+  });
+  
+  const signature = crypto
+    .createHmac('sha256', secret)
+    .update(`${timestamp}.${body}`)
+    .digest('hex');
+  
+  const response = await fetch('{{ request.host_url }}api/v1/payment_sessions', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'X-Paycrypt-Key': apiKey,
+      'X-Paycrypt-Timestamp': timestamp,
+      'X-Paycrypt-Signature': signature
+    },
+    body: body
+  });
+  
+  return await response.json();
 }
-</code></pre>
-      <p class="mb-2">Webhook events are sent to your <code>webhook_url</code> with the same headers.</p>
+
+// Bank Gateway Example
+async function createDepositRequest() {
+  const response = await fetch('{{ request.host_url }}bank-api/deposit/request', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'X-API-Key': 'your_bank_api_key'
+    },
+    body: JSON.stringify({
+      amount: '100.00',
+      currency: 'TRY',
+      user_name: 'Customer Name',
+      user_email: 'customer@example.com',
+      callback_url: 'https://yoursite.com/callback'
+    })
+  });
+  
+  return await response.json();
+}</code></pre>
+
+                <h6 class="mt-4">Python Example</h6>
+                <pre class="bg-light p-3 rounded"><code>import requests
+import json
+import time
+import hmac
+import hashlib
+
+# Crypto Payment Example
+def create_payment_session():
+    api_key = 'your_crypto_api_key'
+    secret = 'your_crypto_secret'
+    timestamp = str(int(time.time()))
+    
+    body = json.dumps({
+        'order_id': 'ORD-123',
+        'amount': '49.99',
+        'currency': 'USD',
+        'customer': {'email': 'customer@example.com'},
+        'success_url': 'https://yoursite.com/success',
+        'cancel_url': 'https://yoursite.com/cancel',
+        'webhook_url': 'https://yoursite.com/webhook'
+    })
+    
+    signature = hmac.new(
+        secret.encode(),
+        f"{timestamp}.{body}".encode(),
+        hashlib.sha256
+    ).hexdigest()
+    
+    response = requests.post(
+        '{{ request.host_url }}api/v1/payment_sessions',
+        headers={
+            'Content-Type': 'application/json',
+            'X-Paycrypt-Key': api_key,
+            'X-Paycrypt-Timestamp': timestamp,
+            'X-Paycrypt-Signature': signature
+        },
+        data=body
+    )
+    
+    return response.json()
+
+# Bank Gateway Example
+def create_deposit_request():
+    response = requests.post(
+        '{{ request.host_url }}bank-api/deposit/request',
+        headers={
+            'Content-Type': 'application/json',
+            'X-API-Key': 'your_bank_api_key'
+        },
+        json={
+            'amount': '100.00',
+            'currency': 'TRY',
+            'user_name': 'Customer Name',
+            'user_email': 'customer@example.com',
+            'callback_url': 'https://yoursite.com/callback'
+        }
+    )
+    
+    return response.json()</code></pre>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  <!-- API Testing Interface -->
+  <div class="row mb-4">
+    <div class="col-12">
+      <div class="card">
+        <div class="card-header">
+          <h5 class="mb-0"><i class="fas fa-flask text-warning me-2"></i>API Testing</h5>
+        </div>
+        <div class="card-body">
+          <p class="text-muted mb-4">Test your API integration directly from this interface</p>
+          
+          <div class="row">
+            <div class="col-md-6">
+              <h6>Test Crypto Payment Session</h6>
+              <form id="testCryptoForm">
+                <div class="mb-3">
+                  <label class="form-label">API Key</label>
+                  <select class="form-select" id="cryptoApiKey">
+                    <option value="">Select API Key</option>
+                    {% for k in api_keys if k.is_active %}
+                      <option value="{{ k.key }}" data-secret="{{ k.secret_key }}">{{ k.name }}</option>
+                    {% endfor %}
+                  </select>
+                </div>
+                <div class="mb-3">
+                  <label class="form-label">Order ID</label>
+                  <input type="text" class="form-control" id="orderID" value="TEST-{{ range(1000, 9999) | random }}">
+                </div>
+                <div class="mb-3">
+                  <label class="form-label">Amount</label>
+                  <input type="number" class="form-control" id="amount" value="99.99" step="0.01">
+                </div>
+                <button type="button" class="btn btn-primary" onclick="testCryptoAPI()">
+                  <i class="fas fa-play me-2"></i>Test Crypto API
+                </button>
+              </form>
+            </div>
+            
+            <div class="col-md-6">
+              <h6>Test Bank Deposit Request</h6>
+              <form id="testBankForm">
+                <div class="mb-3">
+                  <label class="form-label">Bank Site</label>
+                  <select class="form-select" id="bankApiKey">
+                    <option value="">Select Bank Site</option>
+                    {% for site in client.bank_gateway_sites if site.is_active and site.api_key %}
+                      <option value="{{ site.api_key.key }}">{{ site.site_name }}</option>
+                    {% endfor %}
+                  </select>
+                </div>
+                <div class="mb-3">
+                  <label class="form-label">Amount (TRY)</label>
+                  <input type="number" class="form-control" id="bankAmount" value="100.00" step="0.01">
+                </div>
+                <div class="mb-3">
+                  <label class="form-label">Customer Email</label>
+                  <input type="email" class="form-control" id="customerEmail" value="test@example.com">
+                </div>
+                <button type="button" class="btn btn-success" onclick="testBankAPI()">
+                  <i class="fas fa-play me-2"></i>Test Bank API
+                </button>
+              </form>
+            </div>
+          </div>
+          
+          <div class="row mt-4">
+            <div class="col-12">
+              <h6>API Response</h6>
+              <pre id="apiResponse" class="bg-light p-3 rounded" style="min-height: 100px; max-height: 300px; overflow-y: auto;">
+Select an API and click test to see the response here...
+              </pre>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 </div>
+
+<!-- Create API Key Modal -->
+<div class="modal fade" id="createKeyModal" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Create New API Key</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <form method="post" action="{{ url_for('client.create_api_key_management') }}">
+        <div class="modal-body">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+          
+          <div class="mb-3">
+            <label class="form-label">API Key Name</label>
+            <input type="text" name="name" class="form-control" placeholder="e.g., Production Key, Development Key" required>
+            <small class="form-text text-muted">Give your API key a descriptive name</small>
+          </div>
+          
+          <div class="mb-3">
+            <label class="form-label">Rate Limit (requests per minute)</label>
+            <select name="rate_limit" class="form-select">
+              <option value="30">30 requests/min (Recommended for testing)</option>
+              <option value="60" selected>60 requests/min (Standard)</option>
+              <option value="100">100 requests/min (High volume)</option>
+              <option value="200">200 requests/min (Premium)</option>
+            </select>
+          </div>
+          
+          <div class="mb-3">
+            <label class="form-label">Permissions</label>
+            <div class="form-check">
+              <input class="form-check-input" type="checkbox" name="permissions" value="payment:create" id="perm1" checked>
+              <label class="form-check-label" for="perm1">Create Payments</label>
+            </div>
+            <div class="form-check">
+              <input class="form-check-input" type="checkbox" name="permissions" value="payment:read" id="perm2" checked>
+              <label class="form-check-label" for="perm2">Read Payments</label>
+            </div>
+            <div class="form-check">
+              <input class="form-check-input" type="checkbox" name="permissions" value="balance:read" id="perm3" checked>
+              <label class="form-check-label" for="perm3">Read Balance</label>
+            </div>
+            <div class="form-check">
+              <input class="form-check-input" type="checkbox" name="permissions" value="withdrawal:create" id="perm4">
+              <label class="form-check-label" for="perm4">Create Withdrawals</label>
+            </div>
+          </div>
+          
+          <div class="alert alert-info">
+            <i class="fas fa-info-circle me-2"></i>
+            <strong>Important:</strong> Your API key and secret will only be shown once after creation. Make sure to copy and store them securely.
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+          <button type="submit" class="btn btn-primary">Create API Key</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<script>
+// Copy to clipboard functionality
+function copyToClipboard(elementId) {
+  const element = document.getElementById(elementId);
+  element.select();
+  document.execCommand('copy');
+  
+  // Show success feedback
+  const btn = element.nextElementSibling;
+  const originalIcon = btn.innerHTML;
+  btn.innerHTML = '<i class="fas fa-check text-success"></i>';
+  setTimeout(() => {
+    btn.innerHTML = originalIcon;
+  }, 2000);
+}
+
+// Toggle password visibility
+function togglePassword(elementId) {
+  const element = document.getElementById(elementId);
+  const btn = element.nextElementSibling;
+  
+  if (element.type === 'password') {
+    element.type = 'text';
+    btn.innerHTML = '<i class="fas fa-eye-slash"></i>';
+  } else {
+    element.type = 'password';
+    btn.innerHTML = '<i class="fas fa-eye"></i>';
+  }
+}
+
+// Regenerate API key
+function regenerateKey(keyId) {
+  if (confirm('Are you sure you want to regenerate this API key? The old key will stop working immediately.')) {
+    fetch(`{{ url_for('client.api_management').rstrip('/') }}/keys/${keyId}/regenerate`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRFToken': '{{ csrf_token() }}'
+      }
+    })
+    .then(response => response.json())
+    .then(data => {
+      if (data.success) {
+        alert(`New API Key: ${data.key}\nNew Secret: ${data.secret}\n\nPlease copy these now - they won't be shown again!`);
+        location.reload();
+      } else {
+        alert('Error: ' + data.error);
+      }
+    })
+    .catch(error => {
+      alert('Error regenerating key: ' + error);
+    });
+  }
+}
+
+// Regenerate bank API key
+function regenerateBankKey(siteId) {
+  if (confirm('Are you sure you want to regenerate this bank API key? The old key will stop working immediately.')) {
+    fetch(`{{ url_for('client.api_management').rstrip('/') }}/bank-keys/${siteId}/regenerate`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRFToken': '{{ csrf_token() }}'
+      }
+    })
+    .then(response => response.json())
+    .then(data => {
+      if (data.success) {
+        alert(`New Bank API Key: ${data.key}\n\nPlease copy this now - it won't be shown again!`);
+        location.reload();
+      } else {
+        alert('Error: ' + data.error);
+      }
+    })
+    .catch(error => {
+      alert('Error regenerating bank key: ' + error);
+    });
+  }
+}
+
+// Test Crypto API
+async function testCryptoAPI() {
+  const apiKey = document.getElementById('cryptoApiKey').value;
+  const secret = document.getElementById('cryptoApiKey').selectedOptions[0]?.dataset.secret;
+  const orderID = document.getElementById('orderID').value;
+  const amount = document.getElementById('amount').value;
+  
+  if (!apiKey || !secret) {
+    alert('Please select an API key');
+    return;
+  }
+  
+  const timestamp = Math.floor(Date.now() / 1000).toString();
+  const body = JSON.stringify({
+    order_id: orderID,
+    amount: amount,
+    currency: 'USD',
+    customer: { email: 'test@example.com' },
+    success_url: '{{ request.host_url }}client/dashboard',
+    cancel_url: '{{ request.host_url }}client/dashboard',
+    webhook_url: '{{ request.host_url }}api/webhook/test'
+  });
+  
+  try {
+    // Create HMAC signature (simplified - in production use crypto library)
+    const signature = await createHMAC(secret, `${timestamp}.${body}`);
+    
+    const response = await fetch('{{ request.host_url }}api/v1/payment_sessions', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-Paycrypt-Key': apiKey,
+        'X-Paycrypt-Timestamp': timestamp,
+        'X-Paycrypt-Signature': signature
+      },
+      body: body
+    });
+    
+    const result = await response.json();
+    document.getElementById('apiResponse').textContent = JSON.stringify(result, null, 2);
+  } catch (error) {
+    document.getElementById('apiResponse').textContent = 'Error: ' + error.message;
+  }
+}
+
+// Test Bank API
+async function testBankAPI() {
+  const bankKey = document.getElementById('bankApiKey').value;
+  const amount = document.getElementById('bankAmount').value;
+  const email = document.getElementById('customerEmail').value;
+  
+  if (!bankKey) {
+    alert('Please select a bank site');
+    return;
+  }
+  
+  try {
+    const response = await fetch('{{ request.host_url }}bank-api/deposit/request', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-API-Key': bankKey
+      },
+      body: JSON.stringify({
+        amount: amount,
+        currency: 'TRY',
+        user_name: 'Test User',
+        user_email: email,
+        user_phone: '+90555123456',
+        callback_url: '{{ request.host_url }}client/dashboard',
+        external_transaction_id: 'TEST-' + Date.now()
+      })
+    });
+    
+    const result = await response.json();
+    document.getElementById('apiResponse').textContent = JSON.stringify(result, null, 2);
+  } catch (error) {
+    document.getElementById('apiResponse').textContent = 'Error: ' + error.message;
+  }
+}
+
+// Simple HMAC implementation for demo (use proper crypto library in production)
+async function createHMAC(secret, message) {
+  const encoder = new TextEncoder();
+  const keyData = encoder.encode(secret);
+  const messageData = encoder.encode(message);
+  
+  const cryptoKey = await crypto.subtle.importKey(
+    'raw',
+    keyData,
+    { name: 'HMAC', hash: 'SHA-256' },
+    false,
+    ['sign']
+  );
+  
+  const signature = await crypto.subtle.sign('HMAC', cryptoKey, messageData);
+  const hashArray = Array.from(new Uint8Array(signature));
+  return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+}
+</script>
 {% endblock %}

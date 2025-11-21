@@ -1,0 +1,287 @@
+{% extends "admin/base.html" %}
+
+{% block title %}Branch Dashboard - {{ current_user.managed_branch.name }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Page Heading -->
+    <div class="d-flex flex-column flex-md-row align-items-center justify-content-between mb-4">
+        <div class="mb-3 mb-md-0">
+            <h1 class="h3 mb-1 cyber-title">{{ current_user.managed_branch.name }} Dashboard</h1>
+            <p class="text-muted mb-0 cyber-subtitle">Branch SuperAdmin Panel - Manage your clients and transactions</p>
+        </div>
+        <div class="btn-toolbar">
+            <div class="btn-group me-2">
+                <div class="dropdown">
+                    <button class="btn btn-outline-primary dropdown-toggle" type="button" id="timeFilter"
+                        data-bs-toggle="dropdown" aria-expanded="false">
+                        <i class="bi bi-calendar me-1"></i>
+                        <span id="selectedTime">Last 30 Days</span>
+                    </button>
+                    <ul class="dropdown-menu" aria-labelledby="timeFilter">
+                        <li><a class="dropdown-item" href="#" data-time="7">Last 7 Days</a></li>
+                        <li><a class="dropdown-item" href="#" data-time="30">Last 30 Days</a></li>
+                        <li><a class="dropdown-item" href="#" data-time="90">Last 90 Days</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="btn-group">
+                <button type="button" class="btn btn-outline-secondary dropdown-toggle" data-bs-toggle="dropdown"
+                    aria-expanded="false">
+                    <i class="bi bi-download me-1"></i> Export
+                </button>
+                <ul class="dropdown-menu dropdown-menu-end">
+                    <li><a class="dropdown-item" href="#"><i class="bi bi-file-earmark-pdf me-2"></i>PDF</a></li>
+                    <li><a class="dropdown-item" href="#"><i class="bi bi-file-earmark-excel me-2"></i>Excel</a></li>
+                    <li><a class="dropdown-item" href="#"><i class="bi bi-file-earmark-text me-2"></i>CSV</a></li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- Stats Cards -->
+    <div class="row g-4 mb-4">
+        <!-- Total Clients Card -->
+        <div class="col-12 col-sm-6 col-xl-3">
+            <div class="card stats-card primary h-100">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="flex-grow-1">
+                            <h6 class="text-uppercase fw-bold mb-1">Total Clients</h6>
+                            <h3 class="mb-0">{{ total_clients }}</h3>
+                            <p class="text-success small mb-0 mt-2">
+                                <i class="bi bi-people me-1"></i> <span>Active clients</span>
+                            </p>
+                        </div>
+                        <div class="icon-bg">
+                            <i class="bi bi-people"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Monthly Deposits Card -->
+        <div class="col-12 col-sm-6 col-xl-3">
+            <div class="card stats-card success h-100">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="flex-grow-1">
+                            <h6 class="text-uppercase fw-bold mb-1">Monthly Deposits</h6>
+                            <h3 class="mb-0">${{ "%.2f"|format(total_deposits) }}</h3>
+                            <p class="text-success small mb-0 mt-2">
+                                <i class="bi bi-arrow-down me-1"></i> <span>This month</span>
+                            </p>
+                        </div>
+                        <div class="icon-bg">
+                            <i class="bi bi-cash-coin"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Monthly Withdrawals Card -->
+        <div class="col-12 col-sm-6 col-xl-3">
+            <div class="card stats-card warning h-100">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="flex-grow-1">
+                            <h6 class="text-uppercase fw-bold mb-1">Monthly Withdrawals</h6>
+                            <h3 class="mb-0">${{ "%.2f"|format(total_withdrawals) }}</h3>
+                            <p class="small mb-0 mt-2" style="color: var(--cyber-warning);">
+                                <i class="bi bi-arrow-up me-1"></i> <span>This month</span>
+                            </p>
+                        </div>
+                        <div class="icon-bg">
+                            <i class="bi bi-arrow-up-circle"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Commission Earned Card -->
+        <div class="col-12 col-sm-6 col-xl-3">
+            <div class="card stats-card info h-100">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="flex-grow-1">
+                            <h6 class="text-uppercase fw-bold mb-1">Commission Earned</h6>
+                            <h3 class="mb-0">${{ "%.2f"|format(commission_earned) }}</h3>
+                            <p class="small mb-0 mt-2" style="color: var(--cyber-info);">
+                                <i class="bi bi-pie-chart me-1"></i> <span>Total earnings</span>
+                            </p>
+                        </div>
+                        <div class="icon-bg">
+                            <i class="bi bi-pie-chart"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header bg-transparent border-bottom">
+                    <h5 class="mb-0"><i class="bi bi-lightning-charge me-2 text-warning"></i>Quick Actions</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row g-3">
+                        <div class="col-md-3 col-sm-6">
+                            <a href="{{ url_for('branch.transactions') }}" class="btn btn-outline-primary w-100 h-100 d-flex flex-column align-items-center justify-content-center p-4 text-decoration-none" style="min-height: 120px;">
+                                <i class="bi bi-receipt fs-2 mb-2"></i>
+                                <span class="fw-bold">View Transactions</span>
+                                <small class="text-muted mt-1">Approve/Reject payments</small>
+                            </a>
+                        </div>
+                        <div class="col-md-3 col-sm-6">
+                            <a href="{{ url_for('branch.clients') }}" class="btn btn-outline-success w-100 h-100 d-flex flex-column align-items-center justify-content-center p-4 text-decoration-none" style="min-height: 120px;">
+                                <i class="bi bi-people fs-2 mb-2"></i>
+                                <span class="fw-bold">Manage Clients</span>
+                                <small class="text-muted mt-1">View client details</small>
+                            </a>
+                        </div>
+                        <div class="col-md-3 col-sm-6">
+                            <a href="{{ url_for('branch.bank_gateway_dashboard') }}" class="btn btn-outline-info w-100 h-100 d-flex flex-column align-items-center justify-content-center p-4 text-decoration-none" style="min-height: 120px;">
+                                <i class="bi bi-bank fs-2 mb-2"></i>
+                                <span class="fw-bold">Bank Gateway</span>
+                                <small class="text-muted mt-1">View bank transactions</small>
+                            </a>
+                        </div>
+                        <div class="col-md-3 col-sm-6">
+                            <a href="{{ url_for('branch.audit_logs') }}" class="btn btn-outline-warning w-100 h-100 d-flex flex-column align-items-center justify-content-center p-4 text-decoration-none" style="min-height: 120px;">
+                                <i class="bi bi-journal-text fs-2 mb-2"></i>
+                                <span class="fw-bold">Audit Logs</span>
+                                <small class="text-muted mt-1">View activity logs</small>
+                            </a>
+                        </div>
+                    </div>
+                    <div class="row g-3 mt-2">
+                        <div class="col-md-3 col-sm-6">
+                            <a href="{{ url_for('admin.clients') }}" class="btn btn-outline-secondary w-100 h-100 d-flex flex-column align-items-center justify-content-center p-4 text-decoration-none" style="min-height: 120px;">
+                                <i class="bi bi-plus-circle fs-2 mb-2"></i>
+                                <span class="fw-bold">Add Client</span>
+                                <small class="text-muted mt-1">Create new client</small>
+                            </a>
+                        </div>
+                    </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Transactions & Client Activity -->
+    <div class="row g-4">
+        <!-- Recent Transactions -->
+        <div class="col-xl-8">
+            <div class="card h-100">
+                <div class="card-header bg-transparent border-bottom d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0"><i class="bi bi-clock-history me-2 text-primary"></i>Recent Transactions</h5>
+                    <a href="{{ url_for('branch.transactions') }}" class="btn btn-sm btn-outline-primary">View All</a>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Type</th>
+                                    <th>Client</th>
+                                    <th>Amount</th>
+                                    <th>Status</th>
+                                    <th>Date</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for transaction in recent_transactions %}
+                                <tr>
+                                    <td>
+                                        {% if transaction.type == 'deposit' %}
+                                        <span class="badge" style="background-color: var(--cyber-success); color: white;">
+                                            <i class="bi bi-arrow-down"></i> Deposit
+                                        </span>
+                                        {% else %}
+                                        <span class="badge" style="background-color: var(--cyber-warning); color: white;">
+                                            <i class="bi bi-arrow-up"></i> Withdrawal
+                                        </span>
+                                        {% endif %}
+                                    </td>
+                                    <td class="fw-semibold">{{ transaction.client }}</td>
+                                    <td class="fw-bold text-primary">{{ transaction.amount }} {{ transaction.currency }}</td>
+                                    <td>
+                                        {% if transaction.status == 'approved' %}
+                                        <span class="badge" style="background-color: var(--cyber-success); color: white;">
+                                            <i class="bi bi-check-circle me-1"></i>Approved
+                                        </span>
+                                        {% elif transaction.status == 'pending' %}
+                                        <span class="badge" style="background-color: var(--cyber-warning); color: white;">
+                                            <i class="bi bi-clock me-1"></i>Pending
+                                        </span>
+                                        {% elif transaction.status == 'rejected' %}
+                                        <span class="badge" style="background-color: var(--cyber-danger); color: white;">
+                                            <i class="bi bi-x-circle me-1"></i>Rejected
+                                        </span>
+                                        {% else %}
+                                        <span class="badge bg-secondary">{{ transaction.status.title() }}</span>
+                                        {% endif %}
+                                    </td>
+                                    <td class="text-muted">{{ transaction.date|datetime_eest('%Y-%m-%d %H:%M') }}</td>
+                                </tr>
+                                {% else %}
+                                <tr>
+                                    <td colspan="5" class="text-center py-5">
+                                        <i class="bi bi-receipt fs-1 text-muted d-block mb-3"></i>
+                                        <p class="text-muted mb-0">No recent transactions</p>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Client Activity -->
+        <div class="col-xl-4">
+            <div class="card h-100">
+                <div class="card-header bg-transparent border-bottom">
+                    <h5 class="mb-0"><i class="bi bi-graph-up me-2 text-success"></i>Top Clients (30 Days)</h5>
+                </div>
+                <div class="card-body">
+                    {% for client in client_stats[:5] %}
+                    <div class="d-flex justify-content-between align-items-center mb-3 pb-3 {% if not loop.last %}border-bottom{% endif %}">
+                        <div class="flex-grow-1">
+                            <div class="fw-bold mb-1">{{ client.name }}</div>
+                            <small class="text-muted">
+                                <i class="bi bi-receipt me-1"></i>{{ client.transactions }} transactions
+                            </small>
+                        </div>
+                        <div class="text-end">
+                            <div class="fw-bold" style="color: var(--cyber-success);">${{ "%.2f"|format(client.deposits) }}</div>
+                            <small class="text-muted">deposits</small>
+                        </div>
+                    </div>
+                    {% else %}
+                    <div class="text-center py-5">
+                        <i class="bi bi-graph-up fs-1 text-muted d-block mb-3"></i>
+                        <p class="text-muted mb-0">No client activity data</p>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% if client_stats %}
+                <div class="card-footer bg-transparent border-top text-center">
+                    <a href="{{ url_for('branch.clients') }}" class="btn btn-sm btn-outline-primary">
+                        View All Clients <i class="bi bi-arrow-right ms-1"></i>
+                    </a>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

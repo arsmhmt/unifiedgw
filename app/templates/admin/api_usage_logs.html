@@ -1,0 +1,253 @@
+{% extends 'admin/admin_base.html' %}
+
+{% block title %}API Usage Logs{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="h3 mb-0">
+                <i class="bi bi-graph-down me-2"></i>{{ _('API Usage Logs') }}
+            </h1>
+            <p class="text-muted mb-0">Monitor API activity, performance, and error rates.</p>
+        </div>
+        <a href="{{ url_for('admin.api_keys_management') }}" class="btn btn-outline-primary">
+            <i class="bi bi-key me-2"></i>Manage API Keys
+        </a>
+    </div>
+
+    <!-- Statistics Cards -->
+    <div class="row g-3 mb-4">
+        <div class="col-xxl-2 col-lg-3 col-sm-6">
+            <div class="card border-left-primary shadow h-100">
+                <div class="card-body">
+                    <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">Total Requests</div>
+                    <div class="h5 mb-0 font-weight-bold text-gray-800">{{ stats.total_requests }}</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xxl-2 col-lg-3 col-sm-6">
+            <div class="card border-left-success shadow h-100">
+                <div class="card-body">
+                    <div class="text-xs font-weight-bold text-success text-uppercase mb-1">Avg Response Time</div>
+                    <div class="h5 mb-0 font-weight-bold text-gray-800">{{ '%.2f'|format(stats.avg_response_time or 0) }} ms</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xxl-2 col-lg-3 col-sm-6">
+            <div class="card border-left-info shadow h-100">
+                <div class="card-body">
+                    <div class="text-xs font-weight-bold text-info text-uppercase mb-1">Success Rate</div>
+                    <div class="h5 mb-0 font-weight-bold text-gray-800">{{ '%.1f'|format(stats.success_rate or 0) }}%</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xxl-2 col-lg-3 col-sm-6">
+            <div class="card border-left-warning shadow h-100">
+                <div class="card-body">
+                    <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">2xx Responses</div>
+                    <div class="h5 mb-0 font-weight-bold text-gray-800">{{ stats.status_2xx }}</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xxl-2 col-lg-3 col-sm-6">
+            <div class="card border-left-danger shadow h-100">
+                <div class="card-body">
+                    <div class="text-xs font-weight-bold text-danger text-uppercase mb-1">4xx Responses</div>
+                    <div class="h5 mb-0 font-weight-bold text-gray-800">{{ stats.status_4xx }}</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xxl-2 col-lg-3 col-sm-6">
+            <div class="card border-left-dark shadow h-100">
+                <div class="card-body">
+                    <div class="text-xs font-weight-bold text-dark text-uppercase mb-1">5xx Responses</div>
+                    <div class="h5 mb-0 font-weight-bold text-gray-800">{{ stats.status_5xx }}</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filters -->
+    <div class="card shadow-sm border-0 mb-4">
+        <div class="card-header bg-white border-0">
+            <h6 class="mb-0"><i class="bi bi-funnel me-2"></i>Filter Logs</h6>
+        </div>
+        <div class="card-body">
+            <form method="get" class="row g-3 align-items-end">
+                <div class="col-xl-2 col-md-4">
+                    <label class="form-label small text-muted">Client</label>
+                    <select class="form-select" name="client_id">
+                        <option value="">All Clients</option>
+                        {% for client in clients %}
+                        <option value="{{ client.id }}" {% if request.args.get('client_id', type=int) == client.id %}selected{% endif %}>
+                            {{ client.company_name or client.email }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-xl-2 col-md-4">
+                    <label class="form-label small text-muted">Endpoint</label>
+                    <input type="text" class="form-control" name="endpoint" value="{{ request.args.get('endpoint', '') }}" placeholder="/v1/payments">
+                </div>
+                <div class="col-xl-2 col-md-4">
+                    <label class="form-label small text-muted">Method</label>
+                    <select class="form-select" name="method">
+                        <option value="">All</option>
+                        {% for option in ['GET', 'POST', 'PUT', 'DELETE'] %}
+                        <option value="{{ option }}" {% if request.args.get('method') == option %}selected{% endif %}>{{ option }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-xl-2 col-md-4">
+                    <label class="form-label small text-muted">Status Code</label>
+                    <input type="number" class="form-control" name="status_code" value="{{ request.args.get('status_code', '') }}" placeholder="200">
+                </div>
+                <div class="col-xl-2 col-md-4">
+                    <label class="form-label small text-muted">Start Date</label>
+                    <input type="date" class="form-control" name="start_date" value="{{ request.args.get('start_date', '') }}">
+                </div>
+                <div class="col-xl-2 col-md-4">
+                    <label class="form-label small text-muted">End Date</label>
+                    <input type="date" class="form-control" name="end_date" value="{{ request.args.get('end_date', '') }}">
+                </div>
+                <div class="col-xl-2 col-md-4">
+                    <label class="form-label small text-muted">Items per page</label>
+                    <select class="form-select" name="per_page">
+                        {% for option in [25, 50, 100] %}
+                        <option value="{{ option }}" {% if request.args.get('per_page', type=int) == option %}selected{% endif %}>{{ option }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-xl-4 col-md-8 text-md-end">
+                    <button type="submit" class="btn btn-primary me-2">
+                        <i class="bi bi-filter me-2"></i>Apply Filters
+                    </button>
+                    <a href="{{ url_for('admin.api_usage_logs') }}" class="btn btn-outline-secondary">
+                        <i class="bi bi-x-circle me-2"></i>Reset
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        <div class="col-xxl-8">
+            <div class="card shadow-sm border-0">
+                <div class="card-header bg-white border-0">
+                    <h6 class="mb-0"><i class="bi bi-list-check me-2"></i>Request Logs</h6>
+                </div>
+                <div class="card-body">
+                    {% if api_logs.items %}
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle">
+                            <thead>
+                                <tr>
+                                    <th>Timestamp</th>
+                                    <th>Client</th>
+                                    <th>Endpoint</th>
+                                    <th>Method</th>
+                                    <th>Status</th>
+                                    <th>Response Time</th>
+                                    <th>IP</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for log in api_logs.items %}
+                                <tr>
+                                    <td>{{ log.timestamp.strftime('%Y-%m-%d %H:%M:%S') }}</td>
+                                    <td>
+                                        <div class="fw-semibold">{{ log.client.company_name if log.client else 'Unknown' }}</div>
+                                        <div class="text-muted small">Key: {{ log.api_key }}</div>
+                                    </td>
+                                    <td><code>{{ log.endpoint }}</code></td>
+                                    <td><span class="badge bg-info">{{ log.method }}</span></td>
+                                    <td>
+                                        {% if 200 <= log.status_code < 300 %}
+                                        <span class="badge bg-success">{{ log.status_code }}</span>
+                                        {% elif 400 <= log.status_code < 500 %}
+                                        <span class="badge bg-warning text-dark">{{ log.status_code }}</span>
+                                        {% else %}
+                                        <span class="badge bg-danger">{{ log.status_code }}</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>{{ '%.2f'|format(log.response_time) }} ms</td>
+                                    <td>{{ log.ip_address or '—' }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+
+                    {% if api_logs.pages > 1 %}
+                    <nav aria-label="API logs pagination">
+                        <ul class="pagination justify-content-center">
+                            {% if api_logs.has_prev %}
+                            <li class="page-item">
+                                <a class="page-link" href="{{ url_for('admin.api_usage_logs', page=api_logs.prev_num, **request.args.to_dict(flat=True)) }}">Previous</a>
+                            </li>
+                            {% endif %}
+                            {% for page_num in api_logs.iter_pages(left_edge=1, right_edge=1, left_current=2, right_current=2) %}
+                                {% if page_num %}
+                                    {% if api_logs.page == page_num %}
+                                    <li class="page-item active"><span class="page-link">{{ page_num }}</span></li>
+                                    {% else %}
+                                    <li class="page-item"><a class="page-link" href="{{ url_for('admin.api_usage_logs', page=page_num, **request.args.to_dict(flat=True)) }}">{{ page_num }}</a></li>
+                                    {% endif %}
+                                {% else %}
+                                <li class="page-item disabled"><span class="page-link">…</span></li>
+                                {% endif %}
+                            {% endfor %}
+                            {% if api_logs.has_next %}
+                            <li class="page-item">
+                                <a class="page-link" href="{{ url_for('admin.api_usage_logs', page=api_logs.next_num, **request.args.to_dict(flat=True)) }}">Next</a>
+                            </li>
+                            {% endif %}
+                        </ul>
+                    </nav>
+                    {% endif %}
+                    {% else %}
+                    <div class="text-center text-muted py-5">
+                        <i class="bi bi-journal-x display-4 d-block mb-3"></i>
+                        <p class="mb-1">No API usage logs found for the selected criteria.</p>
+                        <small>Try adjusting the filters or check back later.</small>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xxl-4">
+            <div class="card shadow-sm border-0 mb-4">
+                <div class="card-header bg-white border-0">
+                    <h6 class="mb-0"><i class="bi bi-lightning-charge me-2"></i>Top Endpoints</h6>
+                </div>
+                <div class="card-body">
+                    {% if stats.top_endpoints %}
+                    <div class="list-group list-group-flush">
+                        {% for endpoint, count in stats.top_endpoints %}
+                        <div class="list-group-item d-flex justify-content-between align-items-center">
+                            <code class="text-truncate me-3" style="max-width: 70%">{{ endpoint }}</code>
+                            <span class="badge bg-primary">{{ count }}</span>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <p class="text-muted mb-0">No endpoint data available.</p>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="card shadow-sm border-0">
+                <div class="card-header bg-white border-0">
+                    <h6 class="mb-0"><i class="bi bi-clock-history me-2"></i>Last Updated</h6>
+                </div>
+                <div class="card-body">
+                    <p class="mb-0">{{ current_time.strftime('%Y-%m-%d %H:%M:%S') if current_time else _('Unavailable') }}</p>
+                    <small class="text-muted">Timestamps displayed in Eastern European Summer Time (EEST).</small>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

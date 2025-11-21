@@ -1,0 +1,208 @@
+{% extends "admin/base.html" %}
+
+{% block title %}Bank Gateway Management{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row mb-4">
+        <div class="col-12">
+            <h1 class="h3 mb-0">Bank Gateway Management</h1>
+            <p class="text-muted">Manage bank payment providers, accounts, and transactions</p>
+        </div>
+    </div>
+
+    <!-- Quick Stats -->
+    <div class="row mb-4">
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-primary shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">Total Providers</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ total_providers }}</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-building fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-success shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-success text-uppercase mb-1">Bank Accounts</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ total_accounts }}</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-university fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-info shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-info text-uppercase mb-1">Active Clients</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ total_clients }}</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-users fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-warning shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">Pending Transactions</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ pending_transactions }}</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-clock fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Revenue Card -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card shadow">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Monthly Revenue (Last 30 Days)</h6>
+                </div>
+                <div class="card-body">
+                    <div class="text-center">
+                        <h2 class="text-success">${{ "%.2f"|format(monthly_revenue) }}</h2>
+                        <p class="text-muted">Total commission from bank gateway transactions</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card shadow">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Quick Actions</h6>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-3 mb-3">
+                            <a href="{{ url_for('admin.bank_providers') }}" class="btn btn-primary btn-block">
+                                <i class="fas fa-building mr-2"></i>Manage Providers
+                            </a>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <a href="{{ url_for('admin.bank_accounts') }}" class="btn btn-success btn-block">
+                                <i class="fas fa-university mr-2"></i>Bank Accounts
+                            </a>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <a href="{{ url_for('admin.bank_transactions') }}" class="btn btn-info btn-block">
+                                <i class="fas fa-exchange-alt mr-2"></i>Transactions
+                            </a>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <a href="{{ url_for('admin.bank_clients') }}" class="btn btn-warning btn-block">
+                                <i class="fas fa-users mr-2"></i>Client Sites
+                            </a>
+                        </div>
+                    </div>
+                    <div class="row mt-2">
+                        <div class="col-md-4 mb-3">
+                            <a href="{{ url_for('admin.provider_commissions') }}" class="btn btn-outline-primary btn-block">
+                                <i class="fas fa-cash-register mr-2"></i>Provider Commissions
+                            </a>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <a href="{{ url_for('admin.withdrawal_requests') }}" class="btn btn-outline-warning btn-block">
+                                <i class="fas fa-arrow-up mr-2"></i>Withdrawal Requests
+                            </a>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <a href="{{ url_for('admin.bank_reports') }}" class="btn btn-outline-info btn-block">
+                                <i class="fas fa-chart-line mr-2"></i>Financial Reports
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Transactions -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card shadow">
+                <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                    <h6 class="m-0 font-weight-bold text-primary">Recent Bank Transactions</h6>
+                    <a href="{{ url_for('admin.bank_transactions') }}" class="btn btn-sm btn-primary">View All</a>
+                </div>
+                <div class="card-body">
+                    {% if recent_transactions %}
+                    <div class="table-responsive">
+                        <table class="table table-bordered">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Amount</th>
+                                    <th>Status</th>
+                                    <th>Client</th>
+                                    <th>Date</th>
+                                    <th>Commission</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for transaction in recent_transactions %}
+                                <tr>
+                                    <td>
+                                        <a href="{{ url_for('admin.bank_transaction_detail', transaction_id=transaction.id) }}">
+                                            #{{ transaction.id }}
+                                        </a>
+                                    </td>
+                                    <td>${{ "%.2f"|format(transaction.amount) }}</td>
+                                    <td>
+                                        {% if transaction.status == 'confirmed' %}
+                                            <span class="badge badge-success">{{ transaction.status.title() }}</span>
+                                        {% elif transaction.status == 'pending' %}
+                                            <span class="badge badge-warning">{{ transaction.status.title() }}</span>
+                                        {% elif transaction.status == 'failed' %}
+                                            <span class="badge badge-danger">{{ transaction.status.title() }}</span>
+                                        {% else %}
+                                            <span class="badge badge-secondary">{{ transaction.status.title() }}</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>{{ transaction.bank_account.provider.bank_name if transaction.bank_account and transaction.bank_account.provider else 'N/A' }}</td>
+                                    <td>{{ transaction.created_at.strftime('%Y-%m-%d %H:%M') }}</td>
+                                    <td>${{ "%.2f"|format(transaction.commission_amount or 0) }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <p class="text-muted text-center">No bank transactions found.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

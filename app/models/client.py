@@ -1,3 +1,4 @@
+from ..utils.timezone import now_eest
 from ..extensions import db  # Changed from 'from app import db'
 from datetime import datetime
 from decimal import Decimal
@@ -68,6 +69,10 @@ class Client(BaseModel, FeatureAccessMixin, UserMixin):
     # Package relationship
     package_id = db.Column(db.Integer, db.ForeignKey('client_packages.id'), nullable=True)
     package = db.relationship('ClientPackage', back_populates='clients', lazy=True)
+    
+    # Branch relationship - each client belongs to a branch (superadmin)
+    branch_id = db.Column(db.Integer, db.ForeignKey('branches.id'), nullable=True)
+    branch = db.relationship('Branch', back_populates='clients', lazy=True)
     
     # Feature overrides for manual admin control
     features_override = db.Column(db.PickleType, default=list)  # Optional custom features
@@ -210,7 +215,7 @@ class Client(BaseModel, FeatureAccessMixin, UserMixin):
         """Check if the client account is locked due to too many failed login attempts."""
         if not self.locked_at:
             return False
-        lock_duration = datetime.utcnow() - self.locked_at
+        lock_duration = now_eest() - self.locked_at
         return lock_duration.total_seconds() < 3600  # Lock for 1 hour
         
     @property
@@ -265,7 +270,7 @@ class Client(BaseModel, FeatureAccessMixin, UserMixin):
         from .payment import Payment
         from datetime import datetime, timedelta
         
-        thirty_days_ago = datetime.utcnow() - timedelta(days=30)
+        thirty_days_ago = now_eest() - timedelta(days=30)
         
         total = db.session.query(db.func.coalesce(db.func.sum(Payment.amount), 0)).\
             filter(Payment.client_id == self.id,
@@ -279,7 +284,7 @@ class Client(BaseModel, FeatureAccessMixin, UserMixin):
         from .payment import Payment
         from datetime import datetime, timedelta
         
-        thirty_days_ago = datetime.utcnow() - timedelta(days=30)
+        thirty_days_ago = now_eest() - timedelta(days=30)
         
         # Get all approved payments in the last 30 days
         payments = Payment.query.filter(
@@ -516,7 +521,7 @@ def log_client_update(mapper, connection, target):
         from datetime import datetime
         self.current_month_volume = Decimal('0.00')
         self.current_month_transactions = 0
-        self.last_usage_reset = datetime.utcnow()
+        self.last_usage_reset = now_eest()
         db.session.commit()
     
     def get_margin_status(self):

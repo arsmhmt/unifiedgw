@@ -5,6 +5,7 @@ Advanced algorithms for detecting suspicious patterns and potential fraud
 
 import logging
 from datetime import datetime, timedelta
+from ..utils.timezone import now_eest
 from typing import Dict, List, Tuple, Optional, Any
 from dataclasses import dataclass
 from enum import Enum
@@ -191,7 +192,7 @@ class FraudDetectionService:
         metadata = {}
         
         client_id = withdrawal.client_id
-        now = datetime.utcnow()
+        now = now_eest()
         
         # Check different time windows
         windows = {
@@ -242,7 +243,7 @@ class FraudDetectionService:
         # Get recent withdrawals (last 30 days)
         recent = WithdrawalRequest.query.filter(
             WithdrawalRequest.client_id == client_id,
-            WithdrawalRequest.created_at >= datetime.utcnow() - timedelta(days=30),
+            WithdrawalRequest.created_at >= now_eest() - timedelta(days=30),
             WithdrawalRequest.id != withdrawal.id
         ).order_by(WithdrawalRequest.created_at.desc()).all()
         
@@ -312,10 +313,10 @@ class FraudDetectionService:
             factors.append("inactive_client")
         
         # New client (registered recently)
-        if client.created_at >= datetime.utcnow() - timedelta(days=7):
+        if client.created_at >= now_eest() - timedelta(days=7):
             risk_score += 20
             factors.append("new_client")
-        elif client.created_at >= datetime.utcnow() - timedelta(days=30):
+        elif client.created_at >= now_eest() - timedelta(days=30):
             risk_score += 10
             factors.append("recently_registered_client")
         
@@ -350,7 +351,7 @@ class FraudDetectionService:
         last_withdrawal = WithdrawalRequest.query.filter(
             WithdrawalRequest.client_id == withdrawal.client_id,
             WithdrawalRequest.id != withdrawal.id,
-            WithdrawalRequest.created_at >= datetime.utcnow() - timedelta(minutes=30)
+            WithdrawalRequest.created_at >= now_eest() - timedelta(minutes=30)
         ).first()
         
         if last_withdrawal:

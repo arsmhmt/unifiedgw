@@ -6,12 +6,7 @@
 {% block content %}
 <div class="container-fluid px-4">
     <div class="d-flex justify-content-between align-items-center mb-4">
-        <nav aria-label="breadcrumb">
-            <ol class="breadcrumb mb-0">
-                <li class="breadcrumb-item"><a href="{{ url_for('admin.list_clients') }}">Clients</a></li>
-                <li class="breadcrumb-item active" aria-current="page">{{ client.company_name }}</li>
-            </ol>
-        </nav>
+        <div></div>
         <div class="btn-group">
             <a href="{{ url_for('admin.list_clients') }}" class="btn btn-outline-secondary">
                 <i class="bi bi-arrow-left me-1"></i> Back to List

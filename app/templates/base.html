@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>{% block title %}{% endblock %}</title>
+    {% block meta_tags %}{% endblock %}
     
     <!-- Google tag (gtag.js) -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-7CZLMMBED4"></script>
@@ -17,144 +18,289 @@
     </script>
     
     <!-- Favicon -->
-    <link rel="apple-touch-icon" sizes="180x180" href="{{ url_for('static', filename='img/favicon-180x180.png') }}">
-    <link rel="icon" type="image/png" sizes="32x32" href="{{ url_for('static', filename='img/favicon-32x32.png') }}">
-    <link rel="icon" type="image/png" sizes="16x16" href="{{ url_for('static', filename='img/favicon-16x16.png') }}">
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='img/favicon.png') }}">
+    <link rel="shortcut icon" href="{{ url_for('static', filename='img/favicon.png') }}" type="image/png">
     <link rel="manifest" href="{{ url_for('static', filename='site.webmanifest') }}">
-    <link rel="shortcut icon" href="{{ url_for('static', filename='img/favicon.ico') }}" type="image/x-icon">
-    <meta name="msapplication-TileColor" content="#ffffff">
-    <meta name="theme-color" content="#ffffff">
-    
+    <meta name="msapplication-TileColor" content="#050608">
+    <meta name="theme-color" content="#050608">
+    <meta http-equiv="x-dns-prefetch-control" content="on">
+    <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+    <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
+
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <!-- Bootstrap Icons -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
-    <!-- Font Awesome -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Font Awesome (deferred) -->
+    <link rel="preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" integrity="sha512-p6TI0mwTCg7HnbDlJZpk6pgUilwBCMq2q48n59N2FNLOGAGCF3nT44cG8E+5R4OAGJrKV+zLMRMwh8oQfRzBMw==" crossorigin="anonymous" referrerpolicy="no-referrer" onload="this.onload=null;this.rel='stylesheet'">
+    <noscript>
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" integrity="sha512-p6TI0mwTCg7HnbDlJZpk6pgUilwBCMq2q48n59N2FNLOGAGCF3nT44cG8E+5R4OAGJrKV+zLMRMwh8oQfRzBMw==" crossorigin="anonymous" referrerpolicy="no-referrer">
+    </noscript>
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     
+    <!-- PayCrypt Theme CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/paycrypt-theme.css') }}">
+    
+    {% block head %}{% endblock %}
+
     <!-- Custom CSS -->
     <style>
+        /* PayCrypt Branding Overrides */
         :root {
-            /* Brand Colors - Extracted from Logo */
-            --brand-primary: #4e73df;      /* Logo blue - main primary */
-            --brand-secondary: #FF6B35;    /* Logo orange - main secondary */
-            --brand-primary-dark: #3d5bc7; /* Darker blue for hover states */
-            --brand-secondary-dark: #e05d2e; /* Darker orange for hover states */
-            
-            /* Logo-based gradients */
-            --brand-gradient: linear-gradient(135deg, #4e73df 0%, #FF6B35 100%);
-            --brand-gradient-reverse: linear-gradient(135deg, #FF6B35 0%, #4e73df 100%);
-            --brand-gradient-light: linear-gradient(135deg, rgba(78, 115, 223, 0.1) 0%, rgba(255, 107, 53, 0.1) 100%);
-            --brand-gradient-dark: linear-gradient(135deg, #3d5bc7 0%, #e05d2e 100%);
-            
-            /* Extended palette based on logo colors */
-            --brand-blue-50: #eff6ff;
-            --brand-blue-100: #dbeafe;
-            --brand-blue-200: #bfdbfe;
-            --brand-blue-500: #4e73df;
-            --brand-blue-600: #3d5bc7;
-            --brand-blue-700: #2c4ba3;
-            
-            --brand-orange-50: #fff7ed;
-            --brand-orange-100: #ffedd5;
-            --brand-orange-200: #fed7aa;
-            --brand-orange-500: #FF6B35;
-            --brand-orange-600: #e05d2e;
-            --brand-orange-700: #c2410c;
-            
-            /* Semantic Colors - Harmonized with brand */
-            --success: #10b981;    /* Green that complements orange/blue */
-            --info: #0ea5e9;       /* Blue variant */
-            --warning: #f59e0b;    /* Amber that works with orange */
-            --danger: #ef4444;     /* Red */
-            
-            /* Neutral Colors */
-            --gray-50: #f9fafb;
-            --gray-100: #f3f4f6;
-            --gray-200: #e5e7eb;
-            --gray-300: #d1d5db;
-            --gray-400: #9ca3af;
-            --gray-500: #6b7280;
-            --gray-600: #4b5563;
-            --gray-700: #374151;
-            --gray-800: #1f2937;
-            --gray-900: #111827;
-            
-            /* Layout Colors */
-            --background: #f8fafc;
-            --surface: #ffffff;
-            --text-primary: #1f2937;
-            --text-secondary: #6b7280;
-            --border: #e5e7eb;
-            
-            /* Bootstrap Override - Use exact logo colors */
-            --bs-primary: var(--brand-primary);
-            --bs-secondary: var(--brand-secondary);
-            --bs-success: var(--success);
-            --bs-info: var(--info);
-            --bs-warning: var(--warning);
-            --bs-danger: var(--danger);
-            --bs-light: var(--gray-50);
-            --bs-dark: var(--gray-800);
+            /* Use theme variables for consistent branding */
+            --brand-gradient: linear-gradient(135deg, var(--cyber-primary) 0%, var(--cyber-secondary) 100%);
         }
         
-        /* Global Typography */
-        body {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background-color: var(--background);
-            color: var(--text-primary);
-            line-height: 1.6;
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-        }
-        
-        .main-content {
-            flex: 1;
-        }
-        
-        /* Enhanced Navigation */
+        /* Navigation styling */
         .navbar-brand img {
-            filter: brightness(0) invert(1);
+            filter: none !important;
+            -webkit-filter: none !important;
+            mix-blend-mode: normal !important;
+            opacity: 1 !important;
         }
         
-        .navbar-nav .dropdown-menu {
-            border: none;
-            box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
-            border-radius: 0.375rem;
+        /* Override any theme effects on navbar logos */
+        .navbar-dark .navbar-brand img,
+        .navbar img {
+            filter: none !important;
+            -webkit-filter: none !important;
         }
         
-        .dropdown-item {
-            padding: 0.5rem 1rem;
+        /* Ensure consistent card styling */
+        .card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-primary);
+            color: var(--text-primary);
+        }
+        
+        /* Ensure consistent button styling */
+        .btn-primary {
+            background: var(--cyber-primary);
+            border-color: var(--cyber-primary);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: var(--cyber-primary-hover);
+            border-color: var(--cyber-primary-hover);
+        }
+        
+        /* Override any dark theme effects on navbar logos */
+        .navbar-dark .navbar-brand img,
+        .navbar img {
+            filter: none !important;
+            -webkit-filter: none !important;
+        }
+
+        /* Premium Global Navigation */
+        .nav-premium {
+            background: linear-gradient(135deg, rgba(10, 12, 16, 0.96), rgba(18, 20, 24, 0.98));
+            backdrop-filter: blur(18px);
+            border-bottom: 1px solid rgba(247, 147, 26, 0.18);
+            position: sticky;
+            top: 0;
+            z-index: 1080;
+            transition: box-shadow 0.3s ease;
+        }
+
+        .nav-premium.scrolled {
+            box-shadow: 0 16px 44px rgba(10, 12, 16, 0.55);
+        }
+
+        .nav-premium .navbar-brand {
+            font-weight: 600;
+            color: #f8fafc !important;
+            letter-spacing: 0.02em;
+            gap: 0.6rem;
+        }
+
+        .nav-premium .navbar-brand img {
+            height: 34px;
+        }
+
+        .nav-premium .brand-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.25rem;
+            font-size: 0.75rem;
+            padding: 0.25rem 0.6rem;
+            border-radius: 999px;
+            background: rgba(247, 147, 26, 0.12);
+            color: #f8bf7c;
+        }
+
+        .nav-premium .nav-link {
+            color: rgba(250, 250, 250, 0.86) !important;
+            font-weight: 500;
+            letter-spacing: 0.01em;
+            padding: 0.65rem 0.85rem;
+            border-radius: 0.75rem;
             transition: all 0.2s ease;
         }
-        
-        .dropdown-item:hover {
-            background-color: var(--brand-primary);
-            color: white;
-            transform: translateX(5px);
+
+        .nav-premium .nav-link:hover,
+        .nav-premium .nav-link:focus,
+        .nav-premium .nav-link.active {
+            color: #0b0d10 !important;
+            background: linear-gradient(135deg, rgba(247, 147, 26, 0.95), rgba(255, 106, 0, 0.9));
+            box-shadow: 0 12px 28px rgba(255, 106, 0, 0.22);
         }
-        
-        .dropdown-item.disabled {
-            opacity: 0.5;
+
+        .nav-premium .dropdown-menu {
+            background: rgba(14, 16, 20, 0.98);
+            border: 1px solid rgba(247, 147, 26, 0.25);
+            border-radius: 1rem;
+            box-shadow: 0 28px 54px rgba(9, 9, 11, 0.6);
+            padding: 1rem;
+            min-width: 320px;
         }
-        
-        /* Enhanced Alerts */
-        .alert {
+
+        .nav-premium .dropdown-menu .dropdown-item {
+            color: rgba(245, 245, 245, 0.92);
+            border-radius: 0.75rem;
+            padding: 0.75rem 0.85rem;
+            transition: all 0.2s ease;
+            display: flex;
+            gap: 0.75rem;
+            align-items: flex-start;
+        }
+
+        .nav-premium .dropdown-menu .dropdown-item .nav-icon {
+            width: 34px;
+            height: 34px;
+            border-radius: 0.75rem;
+            display: grid;
+            place-items: center;
+            background: rgba(247, 147, 26, 0.12);
+            color: #f7931a;
+            font-size: 0.95rem;
+        }
+
+        .nav-premium .dropdown-menu .dropdown-item small {
+            color: rgba(226, 232, 240, 0.6);
+            display: block;
+            margin-top: 0.2rem;
+            font-size: 0.78rem;
+        }
+
+        .nav-premium .dropdown-menu .dropdown-item:hover {
+            background: linear-gradient(135deg, rgba(247, 147, 26, 0.22), rgba(255, 106, 0, 0.18));
+            color: #0b0d10;
+        }
+
+        .nav-premium .navbar-actions {
+            gap: 0.75rem;
+        }
+
+        .nav-premium .navbar-toggler {
+            border: 1px solid rgba(248, 249, 251, 0.35);
+            color: rgba(248, 249, 251, 0.9);
+            padding: 0.35rem 0.55rem;
+            border-radius: 0.75rem;
+            background: rgba(247, 147, 26, 0.08);
+        }
+
+        .nav-premium .navbar-toggler:focus {
+            box-shadow: 0 0 0 0.25rem rgba(247, 147, 26, 0.25);
+        }
+
+        .nav-premium .navbar-collapse {
+            transition: transform 0.3s ease, opacity 0.3s ease;
+        }
+
+        .nav-premium .btn-nav-primary {
+            background: linear-gradient(135deg, #f7931a 0%, #ff6a00 100%);
+            color: #0b0d10;
+            border-radius: 999px;
+            padding: 0.5rem 1.15rem;
+            font-weight: 600;
             border: none;
-            border-radius: 0.5rem;
-            box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+            box-shadow: 0 18px 40px rgba(255, 106, 0, 0.25);
         }
-        
-        .alert .fas {
-            font-size: 1.1em;
+
+        .nav-premium .btn-nav-primary:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 22px 52px rgba(255, 106, 0, 0.35);
         }
-        
-        /* Enhanced Breadcrumb */
+
+        .nav-premium .btn-nav-secondary {
+            border-radius: 999px;
+            padding: 0.48rem 1.1rem;
+            color: rgba(250, 250, 250, 0.85);
+            border: 1px solid rgba(247, 147, 26, 0.28);
+            background: rgba(247, 147, 26, 0.08);
+        }
+
+        .nav-premium .btn-nav-secondary:hover {
+            color: #0b0d10;
+            background: rgba(247, 147, 26, 0.22);
+        }
+
+        .nav-premium select.form-select {
+            background-color: rgba(14, 16, 20, 0.7);
+            border: 1px solid rgba(247, 147, 26, 0.18);
+            color: rgba(250, 250, 250, 0.85);
+            border-radius: 0.75rem;
+        }
+
+        .nav-premium .language-switcher label {
+            color: rgba(250, 250, 250, 0.65);
+            font-size: 0.8rem;
+        }
+
+        @media (max-width: 991.98px) {
+            .nav-premium {
+                padding-top: 0.85rem;
+                padding-bottom: 0.85rem;
+            }
+
+            .nav-premium .navbar-collapse {
+                background: rgba(10, 12, 16, 0.96);
+                border-radius: 1.25rem;
+                padding: 1.25rem;
+                border: 1px solid rgba(247, 147, 26, 0.25);
+                margin-top: 0.85rem;
+                box-shadow: 0 18px 40px rgba(0, 0, 0, 0.45);
+            }
+
+            .nav-premium .navbar-nav {
+                gap: 0.6rem;
+            }
+
+            .nav-premium .navbar-nav .nav-link {
+                width: 100%;
+                border-radius: 0.9rem;
+                text-align: center;
+                padding: 0.75rem 1rem;
+            }
+
+            .nav-premium .navbar-actions {
+                flex-direction: column;
+                align-items: stretch;
+                margin-top: 1.25rem;
+                gap: 0.65rem;
+            }
+
+            .nav-premium .language-switcher {
+                width: 100%;
+                justify-content: space-between;
+            }
+
+            .nav-premium .language-switcher select {
+                flex: 1;
+            }
+
+            .nav-premium .btn-nav-secondary,
+            .nav-premium .btn-nav-primary,
+            .nav-premium select.form-select {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+
         .breadcrumb {
             background: rgba(78, 115, 223, 0.05);
             border: 1px solid rgba(78, 115, 223, 0.1);
@@ -349,73 +495,58 @@
         }
 
         body {
-            background-color: var(--light);
+            background: linear-gradient(180deg, #050608 0%, #0f1114 55%, #13161c 100%) !important;
+            color: rgba(248, 249, 251, 0.92);
+            font-family: 'Inter', sans-serif;
+            min-height: 100vh;
         }
 
-        .sidebar {
-            background: #fff;
-            min-height: 100vh;
-            box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15);
+        body a {
+            color: #f7931a;
+        }
+
+        body a:hover {
+            color: #ff9f40;
         }
 
         .main-content {
-            width: calc(100% - 250px);
-            margin-left: 250px;
-            padding: 20px;
+            min-height: calc(100vh - 240px);
+            width: 100%;
+            margin: 0;
+            padding: 0;
+            background: transparent;
         }
 
-        /* Navbar with gradient */
-        .navbar.bg-primary {
-            background: var(--gradient) !important;
+        .main-content > section,
+        .main-content > div,
+        .main-content > article {
+            color: inherit;
         }
 
-        /* Card improvements */
-        .card {
-            border: none;
-            box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15);
-            border-radius: 0.375rem;
+        .main-content .container,
+        .main-content .container-fluid {
+            color: inherit;
         }
 
-        .card-header {
-            background: rgba(78, 115, 223, 0.1);
-            border-bottom: 1px solid rgba(78, 115, 223, 0.2);
+        .main-content section + section {
+            margin-top: 0;
         }
-        
-        @media (max-width: 768px) {
-            .main-content {
-                width: 100%;
-                margin-left: 0;
-            }
-            .sidebar {
-                position: fixed;
-                z-index: 1000;
-                width: 250px;
-                transform: translateX(-100%);
-                transition: transform 0.3s ease-in-out;
-            }
-            .sidebar.show {
-                transform: translateX(0);
-            }
+
+        .alert {
+            background: rgba(15, 17, 22, 0.85);
+            border: 1px solid rgba(247, 147, 26, 0.2);
+            color: rgba(248, 249, 251, 0.88);
         }
-        
-        /* Additional Mobile Responsive Styles */
+
         @media (max-width: 576px) {
             .container-fluid {
                 padding-left: 0.75rem;
                 padding-right: 0.75rem;
             }
-            
-            .navbar-brand span {
-                display: none; /* Hide text on very small screens */
-            }
-            
+
             .alert {
-                font-size: 0.875rem;
-                padding: 0.5rem 0.75rem;
-            }
-            
-            .card-body {
-                padding: 1rem;
+                font-size: 0.9rem;
+                padding: 0.6rem 0.85rem;
             }
         }
         
@@ -450,6 +581,341 @@
             filter: none !important;
             -webkit-filter: none !important;
         }
+
+        /* ===== UNIFIED THEME STYLES (FROM OWNER PANEL) ===== */
+        
+        /* ===== READABLE TEXT COLORS (ORANGE TONES) ===== */
+        /* Replace gray text with orange tones for better readability */
+        
+        /* Subtitle and muted text - lighter orange */
+        .text-muted,
+        .cyber-subtitle,
+        small.text-muted,
+        .x-small.text-muted {
+            color: #FFB366 !important; /* Light orange - readable on dark */
+        }
+        
+        /* Dark theme - brighter orange for better contrast */
+        [data-theme="dark"] .text-muted,
+        [data-theme="dark"] .cyber-subtitle,
+        [data-theme="dark"] small.text-muted,
+        [data-theme="dark"] .x-small.text-muted {
+            color: #FFB366 !important; /* Bright light orange */
+        }
+        
+        /* Light theme - darker orange for contrast on white */
+        [data-theme="light"] .text-muted,
+        [data-theme="light"] .cyber-subtitle,
+        [data-theme="light"] small.text-muted,
+        [data-theme="light"] .x-small.text-muted {
+            color: #E67E22 !important; /* Darker orange */
+        }
+        
+        /* Secondary text */
+        .text-secondary {
+            color: #FF9F5A !important;
+        }
+        
+        [data-theme="dark"] .text-secondary {
+            color: #FFC285 !important;
+        }
+        
+        [data-theme="light"] .text-secondary {
+            color: #D97222 !important;
+        }
+        
+        /* Gray text in tables and cards */
+        .text-gray-500,
+        .text-gray-600,
+        .text-gray-400 {
+            color: #FFB366 !important;
+        }
+        
+        [data-theme="dark"] .text-gray-500,
+        [data-theme="dark"] .text-gray-600,
+        [data-theme="dark"] .text-gray-400 {
+            color: #FFB366 !important;
+        }
+        
+        [data-theme="light"] .text-gray-500,
+        [data-theme="light"] .text-gray-600,
+        [data-theme="light"] .text-gray-400 {
+            color: #D97222 !important;
+        }
+        
+        /* Search bar placeholder text */
+        .form-control::placeholder {
+            color: #FFB366 !important;
+            opacity: 0.8;
+        }
+        
+        [data-theme="dark"] .form-control::placeholder {
+            color: #FFB366 !important;
+            opacity: 0.8;
+        }
+        
+        [data-theme="light"] .form-control::placeholder {
+            color: #E67E22 !important;
+            opacity: 0.7;
+        }
+        
+        /* Search bar input text color */
+        .form-control {
+            color: inherit !important;
+        }
+        
+        [data-theme="dark"] .form-control {
+            color: #ffffff !important;
+            background-color: rgba(255, 255, 255, 0.1) !important;
+            border-color: rgba(255, 107, 53, 0.3) !important;
+        }
+        
+        [data-theme="light"] .form-control {
+            color: #212529 !important;
+            background-color: #ffffff !important;
+            border-color: #dee2e6 !important;
+        }
+        
+        /* Dropdown menu positioning fix */
+        .dropdown-menu-end {
+            right: 0 !important;
+            left: auto !important;
+        }
+        
+        .dropdown-menu {
+            min-width: 200px;
+            margin-top: 0.5rem;
+        }
+        
+        /* Ensure dropdowns don't overflow */
+        .navbar-nav .dropdown-menu {
+            position: absolute;
+            right: 0;
+            left: auto;
+        }
+        
+        /* User dropdown specific styling */
+        #userDropdown + .dropdown-menu {
+            min-width: 180px;
+        }
+        
+        /* Alerts dropdown specific styling */
+        #alertsDropdown + .dropdown-menu {
+            min-width: 300px;
+        }
+        
+        /* ===== DARK THEME: STEEL BLACK BACKGROUND ===== */
+        [data-theme="dark"] body {
+            background-color: #212529 !important;
+        }
+        
+        [data-theme="dark"] #layoutSidenav_content {
+            background-color: #212529 !important;
+        }
+        
+        [data-theme="dark"] main,
+        [data-theme="dark"] .container-fluid {
+            background-color: #212529 !important;
+        }
+        
+        /* ===== LIGHT THEME: WHITE BACKGROUND ===== */
+        [data-theme="light"] body {
+            background-color: #ffffff !important;
+        }
+        
+        [data-theme="light"] #layoutSidenav_content {
+            background-color: #ffffff !important;
+        }
+        
+        [data-theme="light"] main,
+        [data-theme="light"] .container-fluid {
+            background-color: #ffffff !important;
+        }
+        
+        /* ===== SIDEBAR: ALWAYS STEEL BLACK (THEME INDEPENDENT) ===== */
+        #layoutSidenav_nav,
+        #layoutSidenav_nav .sb-sidenav,
+        #layoutSidenav_nav .sb-sidenav-menu {
+            background-color: #212529 !important;
+        }
+        
+        /* Sidebar text colors - always white */
+        #layoutSidenav_nav .sb-sidenav-menu .nav-link,
+        #layoutSidenav_nav .sb-sidenav-menu-heading,
+        #layoutSidenav_nav .nav-link,
+        [data-theme="dark"] #layoutSidenav_nav .nav-link,
+        [data-theme="light"] #layoutSidenav_nav .nav-link {
+            color: #ffffff !important;
+        }
+        
+        /* Sidebar icons - always white */
+        #layoutSidenav_nav .sb-nav-link-icon,
+        #layoutSidenav_nav .sb-nav-link-icon i,
+        [data-theme="dark"] #layoutSidenav_nav .sb-nav-link-icon,
+        [data-theme="light"] #layoutSidenav_nav .sb-nav-link-icon {
+            color: #ffffff !important;
+        }
+        
+        /* Sidebar headings - always light gray */
+        #layoutSidenav_nav .sb-sidenav-menu-heading,
+        [data-theme="dark"] #layoutSidenav_nav .sb-sidenav-menu-heading,
+        [data-theme="light"] #layoutSidenav_nav .sb-sidenav-menu-heading {
+            color: #b0b3b6 !important;
+        }
+        
+        /* Ensure sidebar stays dark in light theme too */
+        [data-theme="light"] #layoutSidenav_nav,
+        [data-theme="light"] #layoutSidenav_nav .sb-sidenav,
+        [data-theme="light"] #layoutSidenav_nav .sb-sidenav-menu {
+            background-color: #212529 !important;
+        }
+        
+        /* Sidebar footer styling */
+        .sb-sidenav-footer {
+            background-color: rgba(0, 0, 0, 0.2) !important;
+            color: #ffffff !important;
+            padding: 0.75rem 1rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            position: sticky;
+            bottom: 0;
+        }
+        
+        .sb-sidenav-footer .small {
+            color: #b0b3b6 !important;
+            font-size: 0.75rem;
+            margin-bottom: 0.25rem;
+        }
+        
+        /* Make sure sidebar menu doesn't overlap footer */
+        #layoutSidenav_nav .sb-sidenav-menu {
+            flex-grow: 1;
+            overflow-y: auto;
+            padding: 0 !important;
+            margin: 0 !important;
+        }
+        
+        /* Remove extra spacing at top of sidebar nav */
+        #layoutSidenav_nav .sb-sidenav {
+            padding-top: 0 !important;
+            margin-top: 0 !important;
+            top: 0 !important;
+            height: 100vh !important;
+        }
+        
+        #layoutSidenav_nav .sb-sidenav-menu .nav {
+            padding: 0 !important;
+            margin: 0 !important;
+        }
+        
+        /* Remove ALL margin from menu headings */
+        #layoutSidenav_nav .sb-sidenav-menu-heading {
+            margin-top: 0 !important;
+            margin-bottom: 0.25rem !important;
+        }
+        
+        /* First menu heading should have minimal top padding */
+        #layoutSidenav_nav .sb-sidenav-menu .nav .sb-sidenav-menu-heading:first-child {
+            margin-top: 0 !important;
+            padding-top: 0.75rem !important;
+        }
+        
+        /* ===== CYBERPUNK NEON GLOW EFFECTS (DARK THEME ONLY) ===== */
+        
+        /* Cards with neon glow */
+        [data-theme="dark"] .card {
+            box-shadow: 
+                0 0 10px rgba(255, 107, 53, 0.2),
+                0 0 20px rgba(255, 107, 53, 0.1),
+                0 4px 16px rgba(0, 0, 0, 0.4) !important;
+            transition: all 0.3s ease;
+        }
+        
+        [data-theme="dark"] .card:hover {
+            box-shadow: 
+                0 0 20px rgba(255, 107, 53, 0.4),
+                0 0 40px rgba(255, 107, 53, 0.2),
+                0 8px 32px rgba(0, 0, 0, 0.5) !important;
+            transform: translateY(-4px);
+        }
+        
+        /* Stats cards with variant-specific glows */
+        [data-theme="dark"] .stats-card.primary {
+            box-shadow: 
+                0 0 15px rgba(255, 107, 53, 0.3),
+                0 0 30px rgba(255, 107, 53, 0.15),
+                0 4px 16px rgba(0, 0, 0, 0.4) !important;
+        }
+        
+        [data-theme="dark"] .stats-card.success {
+            box-shadow: 
+                0 0 15px rgba(0, 212, 170, 0.3),
+                0 0 30px rgba(0, 212, 170, 0.15),
+                0 4px 16px rgba(0, 0, 0, 0.4) !important;
+        }
+        
+        [data-theme="dark"] .stats-card.warning {
+            box-shadow: 
+                0 0 15px rgba(255, 149, 0, 0.3),
+                0 0 30px rgba(255, 149, 0, 0.15),
+                0 4px 16px rgba(0, 0, 0, 0.4) !important;
+        }
+        
+        [data-theme="dark"] .stats-card.danger {
+            box-shadow: 
+                0 0 15px rgba(255, 107, 107, 0.3),
+                0 0 30px rgba(255, 107, 107, 0.15),
+                0 4px 16px rgba(0, 0, 0, 0.4) !important;
+        }
+        
+        /* Buttons with neon glow */
+        [data-theme="dark"] .btn-primary {
+            box-shadow: 
+                0 0 10px rgba(255, 107, 53, 0.3),
+                0 2px 8px rgba(0, 0, 0, 0.4) !important;
+        }
+        
+        [data-theme="dark"] .btn-primary:hover {
+            box-shadow: 
+                0 0 20px rgba(255, 107, 53, 0.5),
+                0 0 40px rgba(255, 107, 53, 0.3),
+                0 4px 12px rgba(0, 0, 0, 0.5) !important;
+        }
+        
+        /* Icon backgrounds with glow */
+        [data-theme="dark"] .icon-bg {
+            box-shadow: 
+                0 0 15px currentColor,
+                inset 0 0 15px currentColor !important;
+        }
+        
+        /* Topbar with subtle glow */
+        [data-theme="dark"] .sb-topnav {
+            box-shadow: 
+                0 0 20px rgba(255, 107, 53, 0.15),
+                0 2px 10px rgba(0, 0, 0, 0.5) !important;
+        }
+        
+        /* Sidebar active link with orange glow */
+        [data-theme="dark"] #layoutSidenav_nav .nav-link.active {
+            box-shadow: 
+                inset 4px 0 0 #FF6B35,
+                0 0 20px rgba(255, 107, 53, 0.3) !important;
+        }
+        
+        /* Input fields with subtle glow on focus */
+        [data-theme="dark"] .form-control:focus {
+            box-shadow: 
+                0 0 10px rgba(255, 107, 53, 0.3),
+                0 0 20px rgba(255, 107, 53, 0.15) !important;
+            border-color: #FF6B35 !important;
+        }
+        
+        /* Table with glow */
+        [data-theme="dark"] .table {
+            box-shadow: 
+                0 0 10px rgba(255, 107, 53, 0.1),
+                0 4px 16px rgba(0, 0, 0, 0.4) !important;
+        }
     </style>
     {% block extra_css %}{% endblock %}
     {% block styles %}{% endblock %}
@@ -458,116 +924,99 @@
 <body>
 
 <!-- Enhanced Navigation -->
-<nav class="navbar navbar-expand-lg navbar-dark shadow-sm" style="background: var(--brand-gradient);">
-  <div class="container-fluid">
-    <!-- Brand with Logo -->
-    <a class="navbar-brand d-flex align-items-center" href="{{ url_for('main.home') }}">
-      <img src="{{ url_for('static', filename='img/paycrypt_logo.png') }}" alt="PayCrypt" height="32" style="filter: none !important; mix-blend-mode: normal !important;">
+<nav class="navbar navbar-expand-lg navbar-dark nav-premium">
+  <div class="container-xl">
+    <a class="navbar-brand" href="{{ url_for('main.home') }}">
+      <img src="{{ url_for('static', filename='img/paycrypt_logo_d.png') }}" alt="PayCrypt logo">
+      <span class="brand-badge d-none d-lg-inline-flex"><i class="fas fa-bolt"></i> concierge crypto</span>
     </a>
-    
-    <!-- Mobile menu toggle -->
-    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#primaryNav" aria-controls="primaryNav" aria-expanded="false" aria-label="Toggle navigation">
       <span class="navbar-toggler-icon"></span>
     </button>
-    
-    <!-- Navigation Items -->
-    <div class="collapse navbar-collapse" id="navbarNav">
-      <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-        <!-- Tools Dropdown -->
+
+    <div class="collapse navbar-collapse" id="primaryNav">
+      <ul class="navbar-nav align-items-lg-center gap-lg-1 me-lg-4 mb-3 mb-lg-0">
+        <li class="nav-item">
+          <a class="nav-link {% if request.endpoint == 'main.home' %}active{% endif %}" href="{{ url_for('main.home') }}">Home</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link {% if request.endpoint and request.endpoint.startswith('demo_gateway.') %}active{% endif %}" href="{{ url_for('demo_gateway.landing') }}">Demo Gateway</a>
+        </li>
         <li class="nav-item dropdown">
-          <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
-            <i class="fas fa-tools me-1"></i>Tools
+          <a class="nav-link dropdown-toggle {% if request.endpoint and request.endpoint.startswith('tools.') %}active{% endif %}" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+            Solutions
           </a>
-          <ul class="dropdown-menu">
-            <li><a class="dropdown-item" href="{{ url_for('tools.index') }}">
-              <i class="fas fa-th-large me-2"></i>All Tools
-            </a></li>
-            <li><hr class="dropdown-divider"></li>
-            <li><h6 class="dropdown-header">Security Tools</h6></li>
-            <li><a class="dropdown-item" href="{{ url_for('tools.rugcheck') }}">
-              <i class="fas fa-shield-alt me-2"></i>Token Security Analyzer
-            </a></li>
-            <li><a class="dropdown-item" href="{{ url_for('tools.honeypot_check') }}">
-              <i class="fas fa-bug me-2"></i>Honeypot Detector
-            </a></li>
-            <li><a class="dropdown-item" href="{{ url_for('tools.mev_protection') }}">
-              <i class="fas fa-user-shield me-2"></i>MEV Protection
-            </a></li>
-            <li><a class="dropdown-item" href="{{ url_for('tools.rug_alert') }}">
-              <i class="fas fa-exclamation-triangle me-2"></i>Rug Pull Alerts
-            </a></li>
-            <li><hr class="dropdown-divider"></li>
-            <li><h6 class="dropdown-header">Analytics Tools</h6></li>
-            <li><a class="dropdown-item" href="{{ url_for('tools.gas_tracker') }}">
-              <i class="fas fa-gas-pump me-2"></i>Gas Price Tracker
-            </a></li>
-            <li><a class="dropdown-item" href="{{ url_for('tools.wallet_profiler') }}">
-              <i class="fas fa-whale me-2"></i>Whale Tracker
-            </a></li>
-            <li><a class="dropdown-item" href="{{ url_for('tools.dex_aggregator') }}">
-              <i class="fas fa-exchange-alt me-2"></i>DEX Analyzer
-            </a></li>
-            <li><a class="dropdown-item" href="{{ url_for('tools.airdrop_hunter') }}">
-              <i class="fas fa-parachute-box me-2"></i>Airdrop Hunter
-            </a></li>
-            <li><hr class="dropdown-divider"></li>
-            <li><h6 class="dropdown-header">More Tools</h6></li>
-            <li><a class="dropdown-item" href="{{ url_for('tools.token_explorer') }}">
-              <i class="fas fa-search me-2"></i>Token Explorer
-            </a></li>
-            <li><a class="dropdown-item" href="{{ url_for('tools.price_tracker') }}">
-              <i class="fas fa-chart-line me-2"></i>Price Tracker
-            </a></li>
-            <li><a class="dropdown-item" href="{{ url_for('tools.liquidity_lock') }}">
-              <i class="fas fa-lock me-2"></i>Liquidity Lock Checker
-            </a></li>
-            <li><a class="dropdown-item" href="{{ url_for('tools.audit_check') }}">
-              <i class="fas fa-clipboard-check me-2"></i>Smart Contract Audit
-            </a></li>
-            <li><a class="dropdown-item" href="{{ url_for('tools.yield_calculator') }}">
-              <i class="fas fa-calculator me-2"></i>Yield Calculator
-            </a></li>
-            <li><a class="dropdown-item" href="{{ url_for('tools.token_scan') }}">
-              <i class="fas fa-search-plus me-2"></i>Token Scanner
-            </a></li>
-          </ul>
+          <div class="dropdown-menu">
+            <a class="dropdown-item" href="{{ url_for('tools.rugcheck') }}">
+              <span class="nav-icon"><i class="fas fa-shield-alt"></i></span>
+              <span>
+                RugCheck&nbsp;AI
+                <small>Token risk intelligence and GPT summaries in seconds.</small>
+              </span>
+            </a>
+            <a class="dropdown-item" href="{{ url_for('tools.wallet_profiler') }}">
+              <span class="nav-icon"><i class="fas fa-wallet"></i></span>
+              <span>
+                Wallet Intelligence
+                <small>Behavioral scoring, portfolio health, and whale detection.</small>
+              </span>
+            </a>
+            <a class="dropdown-item" href="{{ url_for('tools.index') }}">
+              <span class="nav-icon"><i class="fas fa-th-large"></i></span>
+              <span>
+                DeFi Tool Stack
+                <small>Explore the full suite of security, analytics, and automation.</small>
+              </span>
+            </a>
+          </div>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link {% if request.endpoint == 'tools.index' %}active{% endif %}" href="{{ url_for('tools.index') }}">Tools</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link {% if request.endpoint and request.endpoint.startswith('main.blog') %}active{% endif %}" href="{{ url_for('main.blog_index') }}">Blog</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link d-flex align-items-center gap-1" href="https://t.me/paycryptonline" target="_blank" rel="noopener">
+            <i class="fas fa-life-ring"></i>
+            <span>Support</span>
+          </a>
         </li>
       </ul>
-      
-      <!-- Right side items -->
-      <div class="d-flex align-items-center">
-        <!-- Language Selector -->
-                <form method="get" action="{{ url_for('main.set_language') }}" class="d-flex align-items-center me-3">
-          <label for="language" class="form-label text-white me-2 mb-0">
-            <i class="fas fa-globe"></i>
-          </label>
-          <select name="language" id="language" class="form-select form-select-sm" onchange="this.form.submit()" style="min-width: 100px;">
+
+      <div class="navbar-actions d-flex align-items-center ms-lg-auto">
+        <form method="get" action="{{ url_for('main.set_language') }}" class="language-switcher d-flex align-items-center gap-2">
+          <label for="language" class="mb-0"><i class="fas fa-globe"></i></label>
+          <select name="language" id="language" class="form-select form-select-sm" onchange="this.form.submit()">
             <option value="en" {% if get_locale() == 'en' %}selected{% endif %}>English</option>
             <option value="tr" {% if get_locale() == 'tr' %}selected{% endif %}>Türkçe</option>
           </select>
-                    <noscript><button type="submit" class="btn btn-light btn-sm ms-2">Switch</button></noscript>
+          <noscript><button type="submit" class="btn btn-light btn-sm">Switch</button></noscript>
         </form>
-        
-        <!-- User Menu (if authenticated) -->
+
         {% if current_user and current_user.is_authenticated %}
         <div class="dropdown">
-          <button class="btn btn-outline-light dropdown-toggle" type="button" data-bs-toggle="dropdown">
-            <i class="fas fa-user me-1"></i>
-            {{ current_user.username if current_user.username else 'User' }}
+          <button class="btn btn-nav-secondary dropdown-toggle d-flex align-items-center gap-2" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+            <i class="fas fa-user"></i>
+            {{ current_user.username if current_user.username else 'Account' }}
           </button>
           <ul class="dropdown-menu dropdown-menu-end">
             <li><a class="dropdown-item" href="#"><i class="fas fa-user-cog me-2"></i>Profile</a></li>
             <li><hr class="dropdown-divider"></li>
-            <li><a class="dropdown-item" href="{{ url_for('auth.logout') if url_for('auth.logout') else '#' }}">
-              <i class="fas fa-sign-out-alt me-2"></i>Logout
-            </a></li>
+            <li><a class="dropdown-item" href="{{ url_for('auth.logout') }}"><i class="fas fa-sign-out-alt me-2"></i>Logout</a></li>
           </ul>
         </div>
         {% else %}
-        <a href="{{ url_for('auth.login') if url_for('auth.login') else '#' }}" class="btn btn-outline-light">
-          <i class="fas fa-sign-in-alt me-1"></i>Login
+        <a class="btn btn-nav-secondary" href="{{ url_for('auth.login') }}">
+          <i class="fas fa-sign-in-alt me-1"></i>Client Login
         </a>
         {% endif %}
+
+        <a class="btn btn-nav-primary" href="mailto:support@paycrypt.online">
+          Talk to sales
+        </a>
+
       </div>
     </div>
   </div>
@@ -607,7 +1056,7 @@
         <nav aria-label="breadcrumb" class="mb-3">
             <ol class="breadcrumb bg-light rounded p-2">
                 <li class="breadcrumb-item">
-                    <a href="{{ url_for('main.index') if url_for('main.index') else '#' }}" class="text-decoration-none">
+                    <a href="{{ url_for('main.home') }}" class="text-decoration-none">
                         <i class="fas fa-home"></i> Home
                     </a>
                 </li>
@@ -672,6 +1121,9 @@
     
     <!-- Bootstrap JS and dependencies -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- PayCrypt Theme Manager -->
+    <script src="{{ url_for('static', filename='js/theme-manager.js') }}"></script>
     
     <!-- CSRF Protection JS -->
     <script>

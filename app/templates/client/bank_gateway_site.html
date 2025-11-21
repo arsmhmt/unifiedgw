@@ -1,0 +1,259 @@
+{% extends 'client/base.html' %}
+
+{% block title %}{{ site.site_name }} - {{ _('Bank Gateway Site') }} - {{ client.company_name }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid" style="margin-top: 1.5rem;">
+    <!-- Page Header -->
+    <div class="d-flex flex-column flex-md-row align-items-center justify-content-between mb-4">
+        <div>
+            <h1 class="h3 mb-0 text-gray-800">
+                <i class="bi bi-globe2 me-2"></i>{{ site.site_name }}
+            </h1>
+            <p class="text-muted mb-0">{{ _('Bank Gateway Site Details') }}</p>
+        </div>
+        <div class="btn-toolbar">
+            <a href="{{ url_for('client.bank_gateway') }}" class="btn btn-outline-secondary me-2">
+                <i class="bi bi-arrow-left me-1"></i>{{ _('Back to Sites') }}
+            </a>
+        </div>
+    </div>
+
+    <!-- Site Information -->
+    <div class="row mb-4">
+        <div class="col-lg-8">
+            <div class="card shadow">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">
+                        <i class="bi bi-info-circle me-2"></i>{{ _('Site Information') }}
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <dl class="row">
+                                <dt class="col-sm-4">{{ _('Site Name') }}:</dt>
+                                <dd class="col-sm-8">{{ site.site_name }}</dd>
+                                
+                                <dt class="col-sm-4">{{ _('Site URL') }}:</dt>
+                                <dd class="col-sm-8">
+                                    <a href="{{ site.site_url }}" target="_blank" class="text-decoration-none">
+                                        {{ site.site_url }}
+                                        <i class="bi bi-box-arrow-up-right ms-1"></i>
+                                    </a>
+                                </dd>
+                                
+                                <dt class="col-sm-4">{{ _('Status') }}:</dt>
+                                <dd class="col-sm-8">
+                                    {% if site.is_active %}
+                                    <span class="badge bg-success">
+                                        <i class="bi bi-check-circle me-1"></i>{{ _('Active') }}
+                                    </span>
+                                    {% else %}
+                                    <span class="badge bg-secondary">
+                                        <i class="bi bi-pause-circle me-1"></i>{{ _('Inactive') }}
+                                    </span>
+                                    {% endif %}
+                                </dd>
+                            </dl>
+                        </div>
+                        <div class="col-md-6">
+                            <dl class="row">
+                                <dt class="col-sm-5">{{ _('Callback URL') }}:</dt>
+                                <dd class="col-sm-7">
+                                    {{ site.callback_url or _('Not set') }}
+                                </dd>
+                                
+                                <dt class="col-sm-5">{{ _('Success URL') }}:</dt>
+                                <dd class="col-sm-7">
+                                    {{ site.success_url or _('Not set') }}
+                                </dd>
+                                
+                                <dt class="col-sm-5">{{ _('Fail URL') }}:</dt>
+                                <dd class="col-sm-7">
+                                    {{ site.fail_url or _('Not set') }}
+                                </dd>
+                            </dl>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-lg-4">
+            <!-- Statistics -->
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">
+                        <i class="bi bi-bar-chart me-2"></i>{{ _('Statistics') }}
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="text-center mb-3">
+                        <div class="h2 text-primary">{{ stats.total_transactions }}</div>
+                        <div class="text-muted">{{ _('Total Transactions') }}</div>
+                    </div>
+                    
+                    <div class="row text-center">
+                        <div class="col-4">
+                            <div class="h5 text-success">{{ stats.success_count }}</div>
+                            <small class="text-muted">{{ _('Success') }}</small>
+                        </div>
+                        <div class="col-4">
+                            <div class="h5 text-warning">{{ stats.pending_count }}</div>
+                            <small class="text-muted">{{ _('Pending') }}</small>
+                        </div>
+                        <div class="col-4">
+                            <div class="h5 text-danger">{{ stats.failed_count }}</div>
+                            <small class="text-muted">{{ _('Failed') }}</small>
+                        </div>
+                    </div>
+                    
+                    <hr>
+                    
+                    <div class="text-center">
+                        <div class="h4 text-success">${{ "%.2f"|format(stats.total_volume) }}</div>
+                        <div class="text-muted">{{ _('Total Volume') }}</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Transactions -->
+    <div class="card shadow">
+        <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-primary">
+                <i class="bi bi-list me-2"></i>{{ _('Recent Transactions') }}
+            </h6>
+        </div>
+        <div class="card-body">
+            {% if transactions %}
+            <div class="table-responsive">
+                <table class="table table-hover align-middle">
+                    <thead class="table-light">
+                        <tr>
+                            <th>{{ _('Reference') }}</th>
+                            <th>{{ _('Type') }}</th>
+                            <th>{{ _('Amount') }}</th>
+                            <th>{{ _('Status') }}</th>
+                            <th>{{ _('User Info') }}</th>
+                            <th>{{ _('Date') }}</th>
+                            <th>{{ _('Actions') }}</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for transaction in transactions %}
+                        <tr>
+                            <td>
+                                <div class="fw-bold">{{ transaction.reference_code }}</div>
+                                {% if transaction.external_transaction_id %}
+                                <small class="text-muted">{{ transaction.external_transaction_id }}</small>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if transaction.transaction_type == 'deposit' %}
+                                <span class="badge bg-success">
+                                    <i class="bi bi-arrow-down me-1"></i>{{ _('Deposit') }}
+                                </span>
+                                {% else %}
+                                <span class="badge bg-info">
+                                    <i class="bi bi-arrow-up me-1"></i>{{ _('Withdraw') }}
+                                </span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <span class="fw-bold">{{ "%.2f"|format(transaction.amount) }}</span>
+                                <small class="text-muted">{{ transaction.currency }}</small>
+                            </td>
+                            <td>
+                                {% if transaction.status == 'confirmed' %}
+                                <span class="badge bg-success">{{ _('Confirmed') }}</span>
+                                {% elif transaction.status == 'pending' %}
+                                <span class="badge bg-warning">{{ _('Pending') }}</span>
+                                {% elif transaction.status == 'rejected' %}
+                                <span class="badge bg-danger">{{ _('Rejected') }}</span>
+                                {% elif transaction.status == 'expired' %}
+                                <span class="badge bg-secondary">{{ _('Expired') }}</span>
+                                {% else %}
+                                <span class="badge bg-secondary">{{ transaction.status|title }}</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if transaction.user_name %}
+                                <div>{{ transaction.user_name }}</div>
+                                {% endif %}
+                                {% if transaction.user_email %}
+                                <small class="text-muted">{{ transaction.user_email }}</small>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <div>{{ transaction.created_at.strftime('%b %d, %Y') }}</div>
+                                <small class="text-muted">{{ transaction.created_at.strftime('%H:%M:%S') }}</small>
+                            </td>
+                            <td>
+                                <button class="btn btn-sm btn-outline-primary" onclick="showTransactionDetails({{ transaction.id }})">
+                                    <i class="bi bi-eye"></i>
+                                </button>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div class="text-center py-5">
+                <i class="bi bi-receipt text-muted mb-3" style="font-size: 4rem;"></i>
+                <h5 class="text-muted">{{ _('No transactions yet') }}</h5>
+                <p class="text-muted">{{ _('Transactions will appear here once your site starts processing payments.') }}</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- Transaction Details Modal -->
+<div class="modal fade" id="transactionModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">{{ _('Transaction Details') }}</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div id="transactionDetails">
+                    <!-- Transaction details will be loaded here -->
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{{ _('Close') }}</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function showTransactionDetails(transactionId) {
+    // In a real implementation, you'd fetch transaction details via AJAX
+    document.getElementById('transactionDetails').innerHTML = `
+        <div class="text-center">
+            <div class="spinner-border" role="status">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+        </div>
+    `;
+    
+    new bootstrap.Modal(document.getElementById('transactionModal')).show();
+    
+    // Simulate loading
+    setTimeout(() => {
+        document.getElementById('transactionDetails').innerHTML = `
+            <div class="alert alert-info">
+                <i class="bi bi-info-circle me-2"></i>
+                Transaction ID: ${transactionId} details would be loaded here.
+            </div>
+        `;
+    }, 1000);
+}
+</script>
+{% endblock %}

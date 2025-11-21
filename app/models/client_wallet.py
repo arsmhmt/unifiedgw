@@ -46,6 +46,10 @@ class ClientWallet(BaseModel):
     # Supported Cryptocurrencies (JSON array)
     supported_currencies = db.Column(db.JSON)  # ['BTC', 'ETH', 'USDT', etc.]
     
+    # Wallet Addresses (JSON dict) - For manual wallets
+    # Format: {"BTC": "1A1zP1eP5QGefi2DMPTfTL5SLmv7DivfNa", "ETH": "0x...", "USDT-TRC20": "T..."}
+    wallet_addresses = db.Column(db.JSON, default=dict)
+    
     # configuration Settings
     settings = db.Column(db.JSON)  # Custom wallet settings
     
@@ -59,6 +63,55 @@ class ClientWallet(BaseModel):
     
     def __repr__(self):
         return f'<ClientWallet {self.wallet_name} - {self.wallet_type.value}>'
+    
+    def get_address(self, currency):
+        """Get wallet address for specific currency"""
+        if not self.wallet_addresses:
+            return None
+        return self.wallet_addresses.get(currency.upper())
+    
+    def set_address(self, currency, address):
+        """Set wallet address for specific currency"""
+        if not self.wallet_addresses:
+            self.wallet_addresses = {}
+        self.wallet_addresses[currency.upper()] = address
+    
+    def validate_addresses(self):
+        """Validate all wallet addresses"""
+        if not self.wallet_addresses:
+            return {'valid': False, 'errors': ['No wallet addresses configured']}
+        
+        errors = []
+        for currency, address in self.wallet_addresses.items():
+            if not address or len(address.strip()) < 10:
+                errors.append(f'Invalid {currency} address')
+        
+        return {
+            'valid': len(errors) == 0,
+            'errors': errors,
+            'addresses_count': len(self.wallet_addresses)
+        }
+    
+    def is_configured(self):
+        """Check if wallet is properly configured"""
+        if self.wallet_type == WalletType.CUSTOM_API:
+            return bool(self.api_key and self.api_endpoint)
+        elif self.wallet_type == WalletType.CUSTOM_MANUAL:
+            return bool(self.wallet_addresses and len(self.wallet_addresses) > 0)
+        return False
+    
+    def to_dict(self):
+        """Convert wallet to dictionary"""
+        return {
+            'id': self.id,
+            'wallet_name': self.wallet_name,
+            'wallet_type': self.wallet_type.value,
+            'status': self.status.value,
+            'supported_currencies': self.supported_currencies or [],
+            'configured_addresses': list(self.wallet_addresses.keys()) if self.wallet_addresses else [],
+            'is_configured': self.is_configured(),
+            'created_at': self.created_at.isoformat() if hasattr(self, 'created_at') and self.created_at else None
+        }
 
 class ClientPricingPlan(BaseModel):
     __tablename__ = 'client_pricing_plans'

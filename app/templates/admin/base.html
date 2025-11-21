@@ -33,34 +33,12 @@
             rel="stylesheet">
 
         <!-- Custom styles -->
+        <link rel="stylesheet" href="{{ url_for('static', filename='css/paycrypt-theme.css') }}">
         <link rel="stylesheet" href="{{ url_for('static', filename='css/admin.css') }}">
         <link rel="stylesheet" href="{{ url_for('static', filename='css/admin-layout.css') }}">
         <link rel="stylesheet" href="{{ url_for('static', filename='css/admin-dashboard-pro.css') }}">
+        <script src="{{ url_for('static', filename='js/theme-manager.js') }}"></script>
         <style>
-            /* Import unified brand variables */
-            :root {
-                /* Brand Colors - Exact logo colors as primary */
-                --brand-primary: #4e73df;
-                /* Logo blue */
-                --brand-secondary: #FF6B35;
-                /* Logo orange */
-                --brand-primary-dark: #3d5bc7;
-                /* Darker blue */
-                --brand-secondary-dark: #e05d2e;
-                /* Darker orange */
-
-                /* Logo-based gradients for admin */
-                --brand-gradient: linear-gradient(135deg, #4e73df 0%, #FF6B35 100%);
-                --brand-gradient-dark: linear-gradient(135deg, #3d5bc7 0%, #e05d2e 100%);
-                --brand-gradient-reverse: linear-gradient(135deg, #FF6B35 0%, #4e73df 100%);
-
-                /* Admin specific variants */
-                --admin-primary: var(--brand-primary);
-                --admin-secondary: var(--brand-secondary);
-                --admin-surface: #f8fafc;
-                --admin-surface-dark: #0f172a;
-            }
-
             /* Global font */
             body {
                 font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
@@ -233,6 +211,448 @@
                 filter: none !important;
                 -webkit-filter: none !important;
             }
+
+            /* ===== UNIFIED THEME STYLES (FROM OWNER PANEL) ===== */
+            
+            /* ===== DARK THEME: COMPREHENSIVE TEXT AND ELEMENT VISIBILITY ===== */
+            
+            /* General text color for dark theme */
+            [data-theme="dark"],
+            [data-theme="dark"] body,
+            [data-theme="dark"] .container-fluid {
+                color: #ffffff !important;
+            }
+            
+            /* Card text colors */
+            [data-theme="dark"] .card,
+            [data-theme="dark"] .card-body,
+            [data-theme="dark"] .card-header,
+            [data-theme="dark"] .card-footer {
+                background-color: rgba(30, 30, 30, 0.8) !important;
+                color: #ffffff !important;
+            }
+            
+            [data-theme="dark"] .card-header {
+                background-color: rgba(40, 40, 40, 0.9) !important;
+                border-bottom: 1px solid rgba(255, 107, 53, 0.3) !important;
+            }
+            
+            /* Table text colors */
+            [data-theme="dark"] .table,
+            [data-theme="dark"] .table td,
+            [data-theme="dark"] .table th {
+                color: #ffffff !important;
+            }
+            
+            [data-theme="dark"] .table thead th {
+                background-color: rgba(40, 40, 40, 0.9) !important;
+                border-color: rgba(255, 107, 53, 0.3) !important;
+            }
+            
+            [data-theme="dark"] .table tbody tr {
+                background-color: rgba(30, 30, 30, 0.6) !important;
+            }
+            
+            [data-theme="dark"] .table tbody tr:hover {
+                background-color: rgba(50, 50, 50, 0.8) !important;
+            }
+            
+            [data-theme="dark"] .table-bordered td,
+            [data-theme="dark"] .table-bordered th {
+                border-color: rgba(255, 107, 53, 0.2) !important;
+            }
+            
+            /* Form labels and plaintext */
+            [data-theme="dark"] .form-label,
+            [data-theme="dark"] label {
+                color: #FFB366 !important;
+                font-weight: 500;
+            }
+            
+            [data-theme="dark"] .form-control-plaintext {
+                color: #ffffff !important;
+            }
+            
+            /* Headings */
+            [data-theme="dark"] h1,
+            [data-theme="dark"] h2,
+            [data-theme="dark"] h3,
+            [data-theme="dark"] h4,
+            [data-theme="dark"] h5,
+            [data-theme="dark"] h6 {
+                color: #ffffff !important;
+            }
+            
+            /* Paragraphs and general text */
+            [data-theme="dark"] p {
+                color: #e0e0e0 !important;
+            }
+            
+            /* Badge fixes for visibility */
+            [data-theme="dark"] .badge {
+                border: 1px solid rgba(255, 255, 255, 0.2);
+            }
+            
+            /* Status badge text should always be visible */
+            .badge {
+                padding: 0.5em 0.8em !important;
+                font-size: 0.85rem !important;
+                white-space: nowrap !important;
+                min-width: 90px !important;
+                display: inline-block !important;
+                text-align: center !important;
+                overflow: visible !important;
+                text-overflow: clip !important;
+            }
+            
+            /* Fix badge text colors for better readability */
+            .badge.bg-warning,
+            [data-theme="dark"] .badge.bg-warning,
+            [data-theme="light"] .badge.bg-warning {
+                color: #000000 !important;
+                background-color: #ffc107 !important;
+                font-weight: 600 !important;
+            }
+            
+            .badge.bg-success,
+            [data-theme="dark"] .badge.bg-success,
+            [data-theme="light"] .badge.bg-success {
+                color: #ffffff !important;
+                background-color: #28a745 !important;
+                font-weight: 600 !important;
+            }
+            
+            .badge.bg-danger,
+            [data-theme="dark"] .badge.bg-danger,
+            [data-theme="light"] .badge.bg-danger {
+                color: #ffffff !important;
+                background-color: #dc3545 !important;
+                font-weight: 600 !important;
+            }
+            
+            .badge.bg-info,
+            [data-theme="dark"] .badge.bg-info,
+            [data-theme="light"] .badge.bg-info {
+                color: #ffffff !important;
+                background-color: #17a2b8 !important;
+                font-weight: 600 !important;
+            }
+            
+            .badge.bg-primary,
+            [data-theme="dark"] .badge.bg-primary,
+            [data-theme="light"] .badge.bg-primary {
+                color: #ffffff !important;
+                background-color: #007bff !important;
+                font-weight: 600 !important;
+            }
+            
+            /* Button group visibility */
+            [data-theme="dark"] .btn-group .btn {
+                border-color: rgba(255, 107, 53, 0.5) !important;
+            }
+            
+            /* Make action buttons always visible */
+            [data-theme="dark"] .btn-outline-primary,
+            [data-theme="dark"] .btn-outline-secondary,
+            [data-theme="dark"] .btn-outline-info {
+                color: #ffffff !important;
+                border-color: rgba(255, 107, 53, 0.5) !important;
+                background-color: rgba(255, 107, 53, 0.1) !important;
+            }
+            
+            [data-theme="dark"] .btn-outline-primary:hover,
+            [data-theme="dark"] .btn-outline-secondary:hover,
+            [data-theme="dark"] .btn-outline-info:hover {
+                background-color: rgba(255, 107, 53, 0.3) !important;
+                border-color: rgba(255, 107, 53, 0.8) !important;
+            }
+            
+            /* Light theme: ensure dark text */
+            [data-theme="light"] .card,
+            [data-theme="light"] .card-body,
+            [data-theme="light"] .table {
+                color: #212529 !important;
+            }
+            
+            /* ===== READABLE TEXT COLORS (ORANGE TONES) ===== */
+            /* Subtitle and muted text - lighter orange */
+            .text-muted,
+            .cyber-subtitle,
+            small.text-muted,
+            .x-small.text-muted {
+                color: #FFB366 !important;
+            }
+            
+            [data-theme="dark"] .text-muted,
+            [data-theme="dark"] .cyber-subtitle,
+            [data-theme="dark"] small.text-muted,
+            [data-theme="dark"] .x-small.text-muted {
+                color: #FFB366 !important;
+            }
+            
+            [data-theme="light"] .text-muted,
+            [data-theme="light"] .cyber-subtitle,
+            [data-theme="light"] small.text-muted,
+            [data-theme="light"] .x-small.text-muted {
+                color: #E67E22 !important;
+            }
+            
+            /* Secondary text */
+            .text-secondary {
+                color: #FF9F5A !important;
+            }
+            
+            [data-theme="dark"] .text-secondary {
+                color: #FFC285 !important;
+            }
+            
+            [data-theme="light"] .text-secondary {
+                color: #D97222 !important;
+            }
+            
+            /* Gray text in tables and cards */
+            .text-gray-500,
+            .text-gray-600,
+            .text-gray-400 {
+                color: #FFB366 !important;
+            }
+            
+            [data-theme="dark"] .text-gray-500,
+            [data-theme="dark"] .text-gray-600,
+            [data-theme="dark"] .text-gray-400 {
+                color: #FFB366 !important;
+            }
+            
+            [data-theme="light"] .text-gray-500,
+            [data-theme="light"] .text-gray-600,
+            [data-theme="light"] .text-gray-400 {
+                color: #D97222 !important;
+            }
+            
+            /* Search bar placeholder text */
+            .form-control::placeholder {
+                color: #FFB366 !important;
+                opacity: 0.8;
+            }
+            
+            [data-theme="dark"] .form-control::placeholder {
+                color: #FFB366 !important;
+                opacity: 0.8;
+            }
+            
+            [data-theme="light"] .form-control::placeholder {
+                color: #E67E22 !important;
+                opacity: 0.7;
+            }
+            
+            /* Search bar input text color */
+            [data-theme="dark"] .form-control {
+                color: #ffffff !important;
+                background-color: rgba(255, 255, 255, 0.1) !important;
+                border-color: rgba(255, 107, 53, 0.3) !important;
+            }
+            
+            [data-theme="light"] .form-control {
+                color: #212529 !important;
+                background-color: #ffffff !important;
+                border-color: #dee2e6 !important;
+            }
+            
+            /* Dropdown menu positioning fix */
+            .dropdown-menu-end {
+                right: 0 !important;
+                left: auto !important;
+            }
+            
+            .dropdown-menu {
+                min-width: 200px;
+                margin-top: 0.5rem;
+            }
+            
+            .navbar-nav .dropdown-menu {
+                position: absolute;
+                right: 0;
+                left: auto;
+            }
+            
+            #userDropdown + .dropdown-menu {
+                min-width: 180px;
+            }
+            
+            #alertsDropdown + .dropdown-menu {
+                min-width: 300px;
+            }
+            
+            /* ===== DARK THEME: STEEL BLACK BACKGROUND ===== */
+            [data-theme="dark"] body {
+                background-color: #212529 !important;
+            }
+            
+            [data-theme="dark"] #layoutSidenav_content {
+                background-color: #212529 !important;
+            }
+            
+            [data-theme="dark"] main,
+            [data-theme="dark"] .container-fluid {
+                background-color: #212529 !important;
+            }
+            
+            /* ===== LIGHT THEME: WHITE BACKGROUND ===== */
+            [data-theme="light"] body {
+                background-color: #ffffff !important;
+            }
+            
+            [data-theme="light"] #layoutSidenav_content {
+                background-color: #ffffff !important;
+            }
+            
+            [data-theme="light"] main,
+            [data-theme="light"] .container-fluid {
+                background-color: #ffffff !important;
+            }
+            
+            /* ===== SIDEBAR: ALWAYS STEEL BLACK (THEME INDEPENDENT) ===== */
+            #layoutSidenav_nav .sb-sidenav-menu .nav-link,
+            #layoutSidenav_nav .sb-sidenav-menu-heading,
+            #layoutSidenav_nav .nav-link,
+            [data-theme="dark"] #layoutSidenav_nav .nav-link,
+            [data-theme="light"] #layoutSidenav_nav .nav-link {
+                color: #ffffff !important;
+            }
+            
+            #layoutSidenav_nav .sb-nav-link-icon,
+            #layoutSidenav_nav .sb-nav-link-icon i,
+            [data-theme="dark"] #layoutSidenav_nav .sb-nav-link-icon,
+            [data-theme="light"] #layoutSidenav_nav .sb-nav-link-icon {
+                color: #ffffff !important;
+            }
+            
+            #layoutSidenav_nav .sb-sidenav-menu-heading,
+            [data-theme="dark"] #layoutSidenav_nav .sb-sidenav-menu-heading,
+            [data-theme="light"] #layoutSidenav_nav .sb-sidenav-menu-heading {
+                color: #b0b3b6 !important;
+            }
+            
+            /* Sidebar footer styling */
+            .sb-sidenav-footer {
+                background-color: rgba(0, 0, 0, 0.2) !important;
+                color: #ffffff !important;
+                padding: 0.75rem 1rem;
+                border-top: 1px solid rgba(255, 255, 255, 0.1);
+                position: sticky;
+                bottom: 0;
+            }
+            
+            .sb-sidenav-footer .small {
+                color: #b0b3b6 !important;
+                font-size: 0.75rem;
+                margin-bottom: 0.25rem;
+            }
+            
+            /* Remove extra spacing from sidebar */
+            #layoutSidenav_nav .sb-sidenav {
+                top: 0 !important;
+                height: 100vh !important;
+            }
+            
+            #layoutSidenav_nav .sb-sidenav-menu-heading {
+                margin-top: 0 !important;
+                margin-bottom: 0.25rem !important;
+            }
+            
+            #layoutSidenav_nav .sb-sidenav-menu .nav .sb-sidenav-menu-heading:first-child {
+                margin-top: 0 !important;
+                padding-top: 0.75rem !important;
+            }
+            
+            /* ===== CYBERPUNK NEON GLOW EFFECTS (DARK THEME ONLY) ===== */
+            [data-theme="dark"] .card {
+                box-shadow: 
+                    0 0 10px rgba(255, 107, 53, 0.2),
+                    0 0 20px rgba(255, 107, 53, 0.1),
+                    0 4px 16px rgba(0, 0, 0, 0.4) !important;
+                transition: all 0.3s ease;
+            }
+            
+            [data-theme="dark"] .card:hover {
+                box-shadow: 
+                    0 0 20px rgba(255, 107, 53, 0.4),
+                    0 0 40px rgba(255, 107, 53, 0.2),
+                    0 8px 32px rgba(0, 0, 0, 0.5) !important;
+                transform: translateY(-4px);
+            }
+            
+            [data-theme="dark"] .stats-card.primary {
+                box-shadow: 
+                    0 0 15px rgba(255, 107, 53, 0.3),
+                    0 0 30px rgba(255, 107, 53, 0.15),
+                    0 4px 16px rgba(0, 0, 0, 0.4) !important;
+            }
+            
+            [data-theme="dark"] .stats-card.success {
+                box-shadow: 
+                    0 0 15px rgba(0, 212, 170, 0.3),
+                    0 0 30px rgba(0, 212, 170, 0.15),
+                    0 4px 16px rgba(0, 0, 0, 0.4) !important;
+            }
+            
+            [data-theme="dark"] .stats-card.warning {
+                box-shadow: 
+                    0 0 15px rgba(255, 149, 0, 0.3),
+                    0 0 30px rgba(255, 149, 0, 0.15),
+                    0 4px 16px rgba(0, 0, 0, 0.4) !important;
+            }
+            
+            [data-theme="dark"] .stats-card.danger {
+                box-shadow: 
+                    0 0 15px rgba(255, 107, 107, 0.3),
+                    0 0 30px rgba(255, 107, 107, 0.15),
+                    0 4px 16px rgba(0, 0, 0, 0.4) !important;
+            }
+            
+            [data-theme="dark"] .btn-primary {
+                box-shadow: 
+                    0 0 10px rgba(255, 107, 53, 0.3),
+                    0 2px 8px rgba(0, 0, 0, 0.4) !important;
+            }
+            
+            [data-theme="dark"] .btn-primary:hover {
+                box-shadow: 
+                    0 0 20px rgba(255, 107, 53, 0.5),
+                    0 0 40px rgba(255, 107, 53, 0.3),
+                    0 4px 12px rgba(0, 0, 0, 0.5) !important;
+            }
+            
+            [data-theme="dark"] .icon-bg {
+                box-shadow: 
+                    0 0 15px currentColor,
+                    inset 0 0 15px currentColor !important;
+            }
+            
+            [data-theme="dark"] .sb-topnav {
+                box-shadow: 
+                    0 0 20px rgba(255, 107, 53, 0.15),
+                    0 2px 10px rgba(0, 0, 0, 0.5) !important;
+            }
+            
+            [data-theme="dark"] #layoutSidenav_nav .nav-link.active {
+                box-shadow: 
+                    inset 4px 0 0 #FF6B35,
+                    0 0 20px rgba(255, 107, 53, 0.3) !important;
+            }
+            
+            [data-theme="dark"] .form-control:focus {
+                box-shadow: 
+                    0 0 10px rgba(255, 107, 53, 0.3),
+                    0 0 20px rgba(255, 107, 53, 0.15) !important;
+                border-color: #FF6B35 !important;
+            }
+            
+            [data-theme="dark"] .table {
+                box-shadow: 
+                    0 0 10px rgba(255, 107, 53, 0.1),
+                    0 4px 16px rgba(0, 0, 0, 0.4) !important;
+            }
         </style>
         {% block styles %}{% endblock %}
     </head>
@@ -251,13 +671,13 @@
                         <div class="nav">
                             <!-- Dashboard -->
                             <div class="sb-sidenav-menu-heading menu-orange">Overview</div>
-                            <a class="nav-link {% if request.endpoint == 'admin.dashboard' %}active{% endif %}"
-                                href="{{ url_for('admin.admin_dashboard') }}">
-                                <div class="sb-nav-link-icon"><i class="bi bi-speedometer2"></i></div>
-                                Dashboard
-                            </a>
-                            <a class="nav-link {% if request.endpoint == 'admin.analytics' %}active{% endif %}"
+                            <a class="nav-link {% if request.endpoint == 'admin.list_clients' %}active{% endif %}"
                                 href="{{ url_for('admin.list_clients') }}">
+                                <div class="sb-nav-link-icon"><i class="bi bi-people"></i></div>
+                                Clients
+                            </a>
+                            <a class="nav-link {% if request.endpoint == 'admin.admin_dashboard' %}active{% endif %}"
+                                href="{{ url_for('admin.admin_dashboard') }}">
                                 <div class="sb-nav-link-icon"><i class="bi bi-graph-up"></i></div>
                                 Analytics
                             </a>
@@ -274,13 +694,13 @@
                             <div class="collapse {% if 'payments' in request.path %}show{% endif %}"
                                 id="transactionsCollapse">
                                 <nav class="sb-sidenav-menu-nested nav">
-                                    <a class="nav-link" href="{{ url_for('admin.list_clients') }}">
+                                    <a class="nav-link" href="{{ url_for('admin.payments_list') }}">
                                         <i class="bi bi-list me-2"></i>All Payments
                                     </a>
-                                    <!-- <a class="nav-link" href="#">New Payment (endpoint missing)</a> -->
+                                    <a class="nav-link" href="{{ url_for('admin.create_payment') }}">
                                         <i class="bi bi-plus-circle me-2"></i>Create Payment
                                     </a>
-                                    <!-- <a class="nav-link" href="#">Recurring Payments (endpoint missing)</a> -->
+                                    <a class="nav-link" href="{{ url_for('admin.recurring_payments') }}">
                                         <i class="bi bi-arrow-repeat me-2"></i>Recurring Payments
                                     </a>
                                 </nav>
@@ -303,7 +723,7 @@
                                 <nav class="sb-sidenav-menu-nested nav">
                                     <div class="nav-section-title">User Requests (B2C)</div>
                                     <a class="nav-link"
-                                        <!-- href="#" (withdrawal requests endpoint missing) -->
+                                        href="{{ url_for('withdrawal_admin.user_withdrawal_requests') }}">
                                         <i class="bi bi-person-circle me-2"></i>User Withdrawals
                                         {% if sidebar_stats is defined and sidebar_stats.get('pending_user_withdrawals',
                                         0) > 0 %}
@@ -363,7 +783,7 @@
                                         <i class="bi bi-person-plus me-2"></i>Add Client
                                     </a>
 
-                                    {# <a class="nav-link" href="{{ url_for('admin.pricing_plans') }}"> #}
+                                    <a class="nav-link" href="#" onclick="showToast('Feature coming soon!', 'info')">
                                         <i class="bi bi-tags me-2"></i>Pricing Plans
                                     </a>
 
@@ -374,11 +794,71 @@
                                     <a class="nav-link" href="{{ url_for('admin.payments_list') }}">
                                         <i class="bi bi-credit-card-2-front me-2"></i>Payment History
                                     </a>
-                                    <a class="nav-link" href="#">
-                                        <i class="bi bi-bank me-2"></i>Withdrawals
+                                    <a class="nav-link" href="{{ url_for('admin.payment_sessions_list') }}">
+                                        <i class="bi bi-currency-exchange me-2"></i>Payment Sessions
+                                    </a>
+                                    <a class="nav-link" href="{{ url_for('withdrawal_admin.client_withdrawal_requests') }}">
+                                        <i class="bi bi-cash-coin me-2"></i>Client Withdrawals
                                     </a>
                                     <a class="nav-link" href="#" onclick="showToast('Feature coming soon!', 'info')">
                                         <i class="bi bi-percent me-2"></i>Commission Settings
+                                    </a>
+                                </nav>
+                            </div>
+
+                            <!-- Bank Gateway Management -->
+                            <div class="sb-sidenav-menu-heading menu-orange">
+                                <i class="bi bi-bank me-1"></i>Bank Gateway
+                            </div>
+                            <a class="nav-link collapsed {% if 'bank-gateway' in request.path %}active{% endif %}"
+                                href="javascript:void(0)" data-bs-toggle="collapse" data-bs-target="#bankGatewayCollapse"
+                                aria-expanded="{% if 'bank-gateway' in request.path %}true{% else %}false{% endif %}">
+                                <div class="sb-nav-link-icon"><i class="bi bi-bank"></i></div>
+                                Bank Gateway
+                                {% if sidebar_stats is defined and sidebar_stats.get('pending_bank_transactions', 0) > 0 %}
+                                <span class="badge bg-warning rounded-pill ms-2">{{ sidebar_stats.get('pending_bank_transactions', 0) }}</span>
+                                {% endif %}
+                                <div class="sb-sidenav-collapse-arrow"><i class="fas fa-angle-down"></i></div>
+                            </a>
+                            <div class="collapse {% if 'bank-gateway' in request.path %}show{% endif %}" id="bankGatewayCollapse">
+                                <nav class="sb-sidenav-menu-nested nav">
+                                    <a class="nav-link {% if request.endpoint == 'admin.bank_gateway_dashboard' %}active{% endif %}" 
+                                       href="{{ url_for('admin.bank_gateway_dashboard') }}">
+                                        <i class="bi bi-speedometer2 me-2"></i>Dashboard
+                                    </a>
+                                    <a class="nav-link {% if request.endpoint in ['admin.bank_providers', 'admin.add_bank_provider'] %}active{% endif %}" 
+                                       href="{{ url_for('admin.bank_providers') }}">
+                                        <i class="bi bi-people me-2"></i>Providers
+                                    </a>
+                                    <a class="nav-link {% if request.endpoint == 'admin.bank_accounts' %}active{% endif %}" 
+                                       href="{{ url_for('admin.bank_accounts') }}">
+                                        <i class="bi bi-bank2 me-2"></i>Bank Accounts
+                                    </a>
+                                    <a class="nav-link {% if request.endpoint in ['admin.bank_clients', 'admin.add_bank_client'] %}active{% endif %}" 
+                                       href="{{ url_for('admin.bank_clients') }}">
+                                        <i class="bi bi-building me-2"></i>Client Sites
+                                    </a>
+                                    <a class="nav-link {% if request.endpoint == 'admin.bank_transactions' %}active{% endif %}" 
+                                       href="{{ url_for('admin.bank_transactions') }}">
+                                        <i class="bi bi-arrow-left-right me-2"></i>Transactions
+                                    </a>
+                                    <a class="nav-link {% if request.endpoint in ['admin.withdrawal_requests', 'admin.withdrawal_request_detail'] %}active{% endif %}" 
+                                       href="{{ url_for('admin.withdrawal_requests') }}">
+                                        <i class="bi bi-cash-stack me-2"></i>Withdrawals
+                                        {% if sidebar_stats is defined and sidebar_stats.get('pending_withdrawals', 0) > 0 %}
+                                        <span class="badge bg-danger rounded-pill ms-1">{{ sidebar_stats.get('pending_withdrawals', 0) }}</span>
+                                        {% endif %}
+                                    </a>
+                                    <a class="nav-link {% if request.endpoint in ['admin.provider_commissions', 'admin.provider_commission_report'] %}active{% endif %}" 
+                                       href="{{ url_for('admin.provider_commissions') }}">
+                                        <i class="bi bi-percent me-2"></i>Commissions
+                                        {% if sidebar_stats is defined and sidebar_stats.get('unpaid_commissions', 0) > 0 %}
+                                        <span class="badge bg-info rounded-pill ms-1">{{ sidebar_stats.get('unpaid_commissions', 0) }}</span>
+                                        {% endif %}
+                                    </a>
+                                    <a class="nav-link {% if request.endpoint == 'admin.bank_reports' %}active{% endif %}" 
+                                       href="{{ url_for('admin.bank_reports') }}">
+                                        <i class="bi bi-file-earmark-bar-graph me-2"></i>Reports
                                     </a>
                                 </nav>
                             </div>
@@ -405,7 +885,7 @@
                                     <a class="nav-link" href="{{ url_for('admin.wallet_balances') }}">
                                         <i class="bi bi-bar-chart me-2"></i>Balance Overview
                                     </a>
-                                    {% if current_user.has_permission('manage_wallets') %}
+                                    {% if current_user.is_authenticated and hasattr(current_user, 'has_permission') and current_user.has_permission('manage_wallets') %}
                                     <div class="nav-section-title mt-2">Management</div>
                                     <a class="nav-link" href="{{ url_for('admin.create_wallet_provider') }}">
                                         <i class="bi bi-plus-circle me-2"></i>Add Provider
@@ -438,7 +918,7 @@
                                     <a class="nav-link" href="{{ url_for('admin.list_clients') }}">
                                         <i class="bi bi-people me-2"></i>User Management
                                     </a>
-                                    <a class="nav-link" href="{{ url_for('admin.settings') }}">
+                                    <a class="nav-link" href="{{ url_for('admin.list_admins') }}">
                                         <i class="bi bi-person-gear me-2"></i>Admin Users
                                     </a>
                                 </nav>
@@ -456,7 +936,7 @@
                                     0) }}</span>
                                 {% endif %}
                             </a>
-                            <a class="nav-link" href="{{ url_for('client.notification_preferences') }}">
+                            <a class="nav-link" href="{{ url_for('admin.notifications') }}">
                                 <div class="sb-nav-link-icon"><i class="bi bi-bell"></i></div>
                                 Notifications
                                 {% if notification_count %}
@@ -480,7 +960,11 @@
                                     <a class="nav-link" href="{{ url_for('admin.api_docs') }}">
                                         <i class="bi bi-code-square me-2"></i>API Documentation
                                     </a>
-                                    <a class="nav-link" href="#" onclick="showToast('Feature coming soon!', 'info')">
+                                    <a class="nav-link {% if request.endpoint and 'api_keys' in request.endpoint %}active{% endif %}" 
+                                       href="{{ url_for('admin.api_keys_management') }}">
+                                        <i class="bi bi-key me-2"></i>API Keys Management
+                                    </a>
+                                    <a class="nav-link" href="{{ url_for('admin.api_usage_logs') }}">
                                         <i class="bi bi-graph-down me-2"></i>API Usage Logs
                                     </a>
 
@@ -488,10 +972,10 @@
                                     <a class="nav-link" href="{{ url_for('admin.settings') }}">
                                         <i class="bi bi-gear me-2"></i>Platform Settings
                                     </a>
-                                    <a class="nav-link" href="#" onclick="showToast('Feature coming soon!', 'info')">
+                                    <a class="nav-link" href="{{ url_for('admin.database_management') }}">
                                         <i class="bi bi-database me-2"></i>Database Management
                                     </a>
-                                    <a class="nav-link" href="#" onclick="showToast('Feature coming soon!', 'info')">
+                                    <a class="nav-link" href="{{ url_for('admin.backup_restore') }}">
                                         <i class="bi bi-cloud-upload me-2"></i>Backup & Restore
                                     </a>
                                 </nav>
@@ -501,7 +985,7 @@
                 </nav>
                 <div class="sb-sidenav-footer">
                     <div class="small">Logged in as:</div>
-                    {{ current_user.username or current_user.email.split('@')[0] }}
+                    {{ current_user.username or (current_user.email.split('@')[0] if hasattr(current_user, 'email') and current_user.email else 'User') }}
                 </div>
             </div>
 
@@ -514,14 +998,31 @@
                         title="Toggle Sidebar">
                         <i class="fas fa-bars"></i>
                     </button>
-                    <!-- Brand -->
-                    <div class="sidebar-brand d-flex align-items-center justify-content-center py-3">
-                        <a class="sb-sidenav-menu-heading text-center m-0 p-0"
-                            href="{{ url_for('admin.admin_dashboard') }}" style="background: transparent;">
+                    <!-- Brand Logo in Top Navbar -->
+                    <div class="d-flex align-items-center me-auto">
+                        <a href="{{ url_for('admin.admin_dashboard') }}" class="text-decoration-none me-3">
                             <img src="{{ url_for('static', filename='img/paycrypt_logo_d.png') }}" alt="PayCrypt Logo"
-                                class="img-fluid sidebar-logo" 
-                                style="max-height: 50px; width: auto; filter: none !important; mix-blend-mode: normal !important; opacity: 1 !important;">
+                                class="img-fluid sidebar-logo" style="height: 52px;">
                         </a>
+                        <div class="vr text-secondary me-3" style="height: 30px;"></div>
+                        <h5 class="mb-0 text-white fw-normal">
+                            {% block page_title %}
+                            {% if request.endpoint == 'admin.admin_dashboard' %}{{ _('Dashboard') }}
+                            {% elif request.endpoint == 'admin.list_clients' %}{{ _('Clients') }}
+                            {% elif request.endpoint == 'admin.payments_list' %}{{ _('Payments') }}
+                            {% elif request.endpoint == 'withdrawal_admin.client_withdrawal_requests' %}{{ _('Withdrawals') }}
+                            {% elif request.endpoint == 'admin.settings' %}{{ _('Settings') }}
+                            {% elif request.endpoint == 'admin.support_tickets' %}{{ _('Support') }}
+                            {% elif request.endpoint == 'admin.audit_trail' %}{{ _('Audit Trail') }}
+                            {% elif request.endpoint == 'admin.wallet_providers' %}{{ _('Wallet Providers') }}
+                            {% elif request.endpoint == 'admin.add_client' %}{{ _('Add Client') }}
+                            {% elif request.endpoint == 'admin.list_admins' %}{{ _('Admin Users') }}
+                            {% elif request.endpoint == 'admin.api_docs' %}{{ _('API Documentation') }}
+                            {% elif request.endpoint == 'admin.access_control' %}{{ _('Access Control') }}
+                            {% else %}{{ _('Admin Panel') }}
+                            {% endif %}
+                            {% endblock %}
+                        </h5>
                     </div>
                     <!-- Navbar -->
                     <ul class="navbar-nav ms-auto me-0 me-lg-4 align-items-center flex-row">
@@ -577,19 +1078,14 @@
                             </div>
                         </li>
                         <div class="topbar-divider d-none d-sm-block"></div>
-                        <!-- Dark/Light Mode Toggle -->
-                        <li class="nav-item dropdown no-arrow">
-                            <a class="nav-link" href="#" id="themeToggle" title="Toggle Dark/Light Mode">
-                                <i class="bi bi-moon-fill" id="themeIcon"></i>
-                            </a>
-                        </li>
+                        
                         <div class="topbar-divider d-none d-sm-block"></div>
                         <!-- Nav Item - User Information -->
                         <li class="nav-item dropdown no-arrow">
                             <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button"
                                 data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                                 <span class="me-2 d-none d-lg-inline text-gray-300" style="font-size: 0.75rem;">{{
-                                    current_user.username or current_user.email.split('@')[0] }}</span>
+                                    current_user.username or (current_user.email.split('@')[0] if hasattr(current_user, 'email') and current_user.email else 'User') }}</span>
                                 <i class="bi bi-person-circle"></i>
                             </a>
                             <!-- Dropdown - User Information -->
@@ -684,56 +1180,9 @@
                 });
             }
 
-            // Dark/Light Mode Toggle
-            function initThemeToggle() {
-                const themeToggle = document.getElementById('themeToggle');
-                const themeIcon = document.getElementById('themeIcon');
-                const body = document.body;
-
-                // Get saved theme or default to light
-                const savedTheme = localStorage.getItem('theme') || 'light';
-
-                // Apply saved theme
-                if (savedTheme === 'dark') {
-                    body.setAttribute('data-theme', 'dark');
-                    themeIcon.className = 'bi bi-sun-fill';
-                } else {
-                    body.removeAttribute('data-theme');
-                    themeIcon.className = 'bi bi-moon-fill';
-                }
-
-                // Theme toggle event listener
-                themeToggle.addEventListener('click', function (e) {
-                    e.preventDefault();
-
-                    const currentTheme = body.getAttribute('data-theme');
-
-                    if (currentTheme === 'dark') {
-                        // Switch to light mode
-                        body.removeAttribute('data-theme');
-                        themeIcon.className = 'bi bi-moon-fill';
-                        localStorage.setItem('theme', 'light');
-                        showToast("Switched to Light Mode", 'info');
-                    } else {
-                        // Switch to dark mode
-                        body.setAttribute('data-theme', 'dark');
-                        themeIcon.className = 'bi bi-sun-fill';
-                        localStorage.setItem('theme', 'dark');
-                        showToast("Switched to Dark Mode", 'info');
-                    }
-
-                    // Update logo colors
-                    setTimeout(() => {
-                        if (window.updateLogoColors) {
-                            updateLogoColors();
-                        }
-                    }, 100);
-                });
-            }
-
-            // Initialize theme toggle when DOM is loaded
+            // Initialize when DOM is loaded
             document.addEventListener('DOMContentLoaded', function () {
-                initThemeToggle();
+                // Theme manager is handled by theme-manager.js
             });
 
             window.showToast = showToast;

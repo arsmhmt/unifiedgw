@@ -25,6 +25,11 @@ class User(BaseModel, UserMixin):
     role_id = db.Column(db.Integer, db.ForeignKey('roles.id'))
     role = db.relationship('Role', back_populates='users')
     
+    # Branch relationships
+    branch_id = db.Column(db.Integer, db.ForeignKey('branches.id'), nullable=True)  # For admins under a branch
+    branch = db.relationship('Branch', back_populates='admins', foreign_keys=[branch_id], lazy=True)
+    managed_branch = db.relationship('Branch', back_populates='superadmin', uselist=False, foreign_keys='Branch.superadmin_id')  # For superadmins who manage a branch
+    
     # Package selection
     selected_package_id = db.Column(db.Integer, db.ForeignKey('client_packages.id'), nullable=True)
     selected_package = db.relationship('ClientPackage', foreign_keys=[selected_package_id])

@@ -1,0 +1,97 @@
+{% extends 'demo/base.html' %}
+
+{% block title %}{{ _('Demo Gateway Experience') }}{% endblock %}
+
+{% block demo_content %}
+<section class="demo-hero py-5">
+    <div class="container py-4">
+        <div class="row align-items-center g-5">
+            <div class="col-lg-6">
+                <div class="demo-badge mb-3">
+                    <i class="bi bi-lightning-charge"></i>
+                    {{ _('Live Sandbox') }}
+                </div>
+                <h1 class="display-5 fw-semibold mb-3 text-white">
+                    {{ _('Explore the PayCrypt Gateway in Minutes') }}
+                </h1>
+                <p class="lead text-white-50 mb-4">
+                    {{ _('Walk through a guided wallet experience with login, deposits, withdrawals, and API ready examples. Designed for fintech and gaming partners evaluating our platform.') }}
+                </p>
+                <div class="d-flex flex-wrap gap-3">
+                    <a class="btn btn-primary btn-lg" href="{{ url_for('demo_gateway.wallet_demo') }}">
+                        <i class="bi bi-controller me-2"></i>
+                        {{ _('Launch Player Wallet Demo') }}
+                    </a>
+                    <a class="btn btn-outline-light btn-lg" href="{{ url_for('demo_gateway.branch_tour') }}">
+                        <i class="bi bi-building-gear me-2"></i>
+                        {{ _('View Branch Admin Tour') }}
+                    </a>
+                </div>
+            </div>
+            <div class="col-lg-5 ms-lg-auto">
+                <div class="demo-card p-4 p-lg-5 text-white-50">
+                    <div class="d-flex align-items-center justify-content-between mb-3">
+                        <span class="fs-6 text-uppercase text-white-50">{{ _('Demo Personas') }}</span>
+                        <span class="badge bg-primary-subtle text-primary">{{ _('Sandbox') }}</span>
+                    </div>
+                    <div class="d-flex align-items-start gap-3 mb-3">
+                        <div class="demo-grid-icon bg-primary-subtle text-primary">
+                            <i class="bi bi-person-badge"></i>
+                        </div>
+                        <div>
+                            <h5 class="text-white mb-1">{{ _('Player Wallet User') }}</h5>
+                            <p class="mb-0">{{ _('Experience deposits, withdrawals, and balance tracking in a responsive one-page wallet interface.') }}</p>
+                        </div>
+                    </div>
+                    <div class="d-flex align-items-start gap-3 mb-3">
+                        <div class="demo-grid-icon bg-success-subtle text-success">
+                            <i class="bi bi-gear-wide-connected"></i>
+                        </div>
+                        <div>
+                            <h5 class="text-white mb-1">{{ _('API Integrator') }}</h5>
+                            <p class="mb-0">{{ _('Copy-paste REST examples with a demo API key to see how rapid integration feels.') }}</p>
+                        </div>
+                    </div>
+                    <div class="d-flex align-items-start gap-3">
+                        <div class="demo-grid-icon bg-warning-subtle text-warning">
+                            <i class="bi bi-diagram-3"></i>
+                        </div>
+                        <div>
+                            <h5 class="text-white mb-1">{{ _('Branch Superadmin') }}</h5>
+                            <p class="mb-0">{{ _('Preview oversight dashboards monitoring transactions, Teminci bank gateways, and client profitability.') }}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="demo-section bg-body">
+    <div class="container">
+        <div class="row g-4">
+            <div class="col-md-4">
+                <div class="demo-card h-100 p-4">
+                    <div class="demo-grid-icon"><i class="bi bi-wallet2"></i></div>
+                    <h4 class="fw-semibold">{{ _('Player Wallet Simulation') }}</h4>
+                    <p class="text-muted mb-0">{{ _('Log in with demo credentials, fund balances, submit withdrawals, and inspect real-time API responses without risking funds.') }}</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="demo-card h-100 p-4">
+                    <div class="demo-grid-icon"><i class="bi bi-code-slash"></i></div>
+                    <h4 class="fw-semibold">{{ _('API Ready Examples') }}</h4>
+                    <p class="text-muted mb-0">{{ _('Jump straight to code with prepared fetch and cURL snippets covering deposits, withdrawals, and webhook simulation.') }}</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="demo-card h-100 p-4">
+                    <div class="demo-grid-icon"><i class="bi bi-graph-up"></i></div>
+                    <h4 class="fw-semibold">{{ _('Operations Oversight') }}</h4>
+                    <p class="text-muted mb-0">{{ _('Branch leaders can tour dashboards that highlight key metrics, Teminci status, and live commission capture.') }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

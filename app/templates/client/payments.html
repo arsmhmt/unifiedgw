@@ -1,52 +1,233 @@
 {% extends 'client/base.html' %}
-{% block title %}{{ _('Payments') }} - PayCrypt{% endblock %}
+{% block title %}{{ _('Unified Payments') }} - PayCrypt{% endblock %}
 {% block content %}
-<div class="container py-4">
-    <h1 class="mb-4">{{ _('Payments') }}</h1>
-    {% if payments.items|length == 0 %}
-    <div class="alert alert-info">{{ _('No payments found.') }}</div>
-    {% else %}
-    <table class="table table-striped table-hover">
-        <thead>
-            <tr>
-                <th>{{ _('Date') }}</th>
-                <th>{{ _('Amount') }}</th>
-                <th>{{ _('Status') }}</th>
-                <th>{{ _('Details') }}</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for payment in payments.items %}
-            <tr>
-                <td>{{ payment.created_at.strftime('%Y-%m-%d %H:%M') }}</td>
-                <td>{{ payment.amount }}</td>
-                <td>
-                    {% set status_value = payment.status.value if payment.status and hasattr(payment.status, 'value') else (payment.status|string|lower if payment.status else 'unknown') %}
-                    <span class="badge bg-{{ {'completed':'success','pending':'warning','failed':'danger', 'approved': 'success', 'rejected': 'danger', 'cancelled': 'secondary'}.get(status_value, 'secondary') }}">
-                        {{ status_value|title }}
-                    </span>
-                </td>
-                <td><a href="{{ url_for('client.view_payment', payment_id=payment.id) }}"
-                        class="btn btn-sm btn-outline-primary">{{ _('View') }}</a></td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
-    {% if payments.pages > 1 %}
-    <nav>
-        <ul class="pagination">
-            {% for page_num in payments.iter_pages() %}
-            {% if page_num %}
-            <li class="page-item {% if page_num == payments.page %}active{% endif %}">
-                <a class="page-link" href="{{ url_for('client.payments', page=page_num) }}">{{ page_num }}</a>
-            </li>
+<div class="container-fluid" style="margin-top: 1.5rem;">
+    <!-- Page Header -->
+    <div class="d-flex flex-column flex-md-row align-items-center justify-content-between mb-4">
+        <div>
+            <h1 class="h3 mb-0 text-gray-800">
+                <i class="bi bi-credit-card me-2"></i>{{ _('Unified Payments') }}
+            </h1>
+            <p class="text-muted mb-0">{{ _('All your crypto and bank gateway transactions in one place') }}</p>
+        </div>
+        <div class="btn-toolbar">
+            <div class="btn-group me-2">
+                <button type="button" class="btn btn-outline-primary dropdown-toggle" data-bs-toggle="dropdown">
+                    <i class="bi bi-funnel me-1"></i>{{ _('Filter') }}
+                </button>
+                <ul class="dropdown-menu">
+                    <li><a class="dropdown-item" href="{{ url_for('client.payments') }}">{{ _('All Payments') }}</a></li>
+                    <li><a class="dropdown-item" href="{{ url_for('client.payments') }}?filter=crypto">{{ _('Crypto Only') }}</a></li>
+                    <li><a class="dropdown-item" href="{{ url_for('client.payments') }}?filter=bank">{{ _('Bank Only') }}</a></li>
+                </ul>
+            </div>
+            <a href="{{ url_for('client.client_dashboard') }}" class="btn btn-outline-secondary">
+                <i class="bi bi-arrow-left me-1"></i>{{ _('Back to Dashboard') }}
+            </a>
+        </div>
+    </div>
+
+    <!-- Payment Type Summary -->
+    <div class="row g-4 mb-4">
+        <div class="col-md-4">
+            <div class="card border-primary">
+                <div class="card-body text-center">
+                    <i class="bi bi-currency-bitcoin text-primary mb-2" style="font-size: 2rem;"></i>
+                    <h4 class="card-title">{{ crypto_count|default(0) }}</h4>
+                    <p class="card-text text-muted">{{ _('Crypto Payments') }}</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card border-info">
+                <div class="card-body text-center">
+                    <i class="bi bi-bank text-info mb-2" style="font-size: 2rem;"></i>
+                    <h4 class="card-title">{{ bank_count|default(0) }}</h4>
+                    <p class="card-text text-muted">{{ _('Bank Payments') }}</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card border-success">
+                <div class="card-body text-center">
+                    <i class="bi bi-collection text-success mb-2" style="font-size: 2rem;"></i>
+                    <h4 class="card-title">{{ (crypto_count|default(0)) + (bank_count|default(0)) }}</h4>
+                    <p class="card-text text-muted">{{ _('Total Payments') }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Payments Table -->
+    <div class="card shadow">
+        <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-primary">
+                <i class="bi bi-list me-2"></i>{{ _('Payment History') }}
+            </h6>
+        </div>
+        <div class="card-body">
+            {% if payments.items|length == 0 %}
+            <div class="text-center py-5">
+                <i class="bi bi-receipt text-muted mb-3" style="font-size: 4rem;"></i>
+                <h5 class="text-muted">{{ _('No payments found') }}</h5>
+                <p class="text-muted">{{ _('Your payment transactions will appear here once you start processing payments.') }}</p>
+            </div>
             {% else %}
-            <li class="page-item disabled"><span class="page-link">…</span></li>
+            <div class="table-responsive">
+                <table class="table table-hover align-middle">
+                    <thead class="table-light">
+                        <tr>
+                            <th>{{ _('Type') }}</th>
+                            <th>{{ _('Date') }}</th>
+                            <th>{{ _('Reference') }}</th>
+                            <th>{{ _('Description') }}</th>
+                            <th>{{ _('Amount') }}</th>
+                            <th>{{ _('Status') }}</th>
+                            <th>{{ _('Actions') }}</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for payment in payments.items %}
+                        <tr>
+                            <td>
+                                {% if payment.type == 'crypto' %}
+                                <span class="badge bg-primary">
+                                    <i class="bi bi-currency-bitcoin me-1"></i>{{ _('Crypto') }}
+                                </span>
+                                {% else %}
+                                <span class="badge bg-info">
+                                    <i class="bi bi-bank me-1"></i>{{ _('Bank') }}
+                                </span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <div>{{ payment.created_at.strftime('%b %d, %Y') }}</div>
+                                <small class="text-muted">{{ payment.created_at.strftime('%H:%M:%S') }}</small>
+                            </td>
+                            <td>
+                                <code class="text-primary">{{ payment.reference|truncate(15) }}</code>
+                            </td>
+                            <td>{{ payment.description|truncate(40) }}</td>
+                            <td>
+                                <span class="fw-bold">{{ "%.2f"|format(payment.amount) }}</span>
+                                <small class="text-muted">{{ payment.currency }}</small>
+                            </td>
+                            <td>
+                                {% set status_value = payment.status|string|lower if payment.status else 'unknown' %}
+                                {% set status_class = {
+                                    'completed': 'success',
+                                    'confirmed': 'success',
+                                    'pending': 'warning',
+                                    'failed': 'danger',
+                                    'rejected': 'danger',
+                                    'cancelled': 'secondary',
+                                    'expired': 'secondary'
+                                } %}
+                                <span class="badge bg-{{ status_class.get(status_value, 'secondary') }}">
+                                    {{ status_value|title }}
+                                </span>
+                            </td>
+                            <td>
+                                <div class="btn-group btn-group-sm">
+                                    <button class="btn btn-outline-primary" onclick="showPaymentDetails('{{ payment.type }}', {{ payment.id }})">
+                                        <i class="bi bi-eye"></i>
+                                    </button>
+                                    {% if payment.type == 'bank' and payment.status == 'pending' %}
+                                    <button class="btn btn-outline-info" data-bs-toggle="tooltip" title="{{ _('Bank transaction pending') }}">
+                                        <i class="bi bi-clock"></i>
+                                    </button>
+                                    {% endif %}
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            
+            <!-- Pagination -->
+            {% if payments.pages > 1 %}
+            <nav aria-label="Payment pagination" class="mt-4">
+                <ul class="pagination justify-content-center">
+                    {% for page_num in payments.iter_pages() %}
+                    {% if page_num %}
+                    <li class="page-item {% if page_num == payments.page %}active{% endif %}">
+                        <a class="page-link" href="{{ url_for('client.payments', page=page_num) }}">{{ page_num }}</a>
+                    </li>
+                    {% else %}
+                    <li class="page-item disabled"><span class="page-link">…</span></li>
+                    {% endif %}
+                    {% endfor %}
+                </ul>
+            </nav>
             {% endif %}
-            {% endfor %}
-        </ul>
-    </nav>
-    {% endif %}
-    {% endif %}
+            {% endif %}
+        </div>
+    </div>
 </div>
+
+<!-- Payment Details Modal -->
+<div class="modal fade" id="paymentModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">{{ _('Payment Details') }}</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div id="paymentDetails">
+                    <!-- Payment details will be loaded here -->
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{{ _('Close') }}</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function showPaymentDetails(type, paymentId) {
+    document.getElementById('paymentDetails').innerHTML = `
+        <div class="text-center">
+            <div class="spinner-border" role="status">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+        </div>
+    `;
+    
+    new bootstrap.Modal(document.getElementById('paymentModal')).show();
+    
+    // Simulate loading payment details
+    setTimeout(() => {
+        let detailsHTML = '';
+        if (type === 'crypto') {
+            detailsHTML = `
+                <div class="alert alert-primary">
+                    <i class="bi bi-currency-bitcoin me-2"></i>
+                    <strong>Crypto Payment #${paymentId}</strong>
+                </div>
+                <p>Detailed crypto payment information would be loaded here via AJAX.</p>
+            `;
+        } else {
+            detailsHTML = `
+                <div class="alert alert-info">
+                    <i class="bi bi-bank me-2"></i>
+                    <strong>Bank Payment #${paymentId}</strong>
+                </div>
+                <p>Detailed bank payment information would be loaded here via AJAX.</p>
+            `;
+        }
+        document.getElementById('paymentDetails').innerHTML = detailsHTML;
+    }, 1000);
+}
+
+// Initialize tooltips
+document.addEventListener('DOMContentLoaded', function() {
+    var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+    var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+        return new bootstrap.Tooltip(tooltipTriggerEl);
+    });
+});
+</script>
 {% endblock %}

@@ -1,4 +1,7 @@
 import re
+import os
+from cryptography.fernet import Fernet
+from flask import current_app
 
 def validate_crypto_address(address, crypto_type):
     """
@@ -101,3 +104,49 @@ def validate_crypto_address(address, crypto_type):
             return True
     
     return False
+
+# Get encryption key from environment or generate one
+def _get_encryption_key():
+    """Get or generate encryption key"""
+    key = current_app.config.get('ENCRYPTION_KEY')
+    if not key:
+        # Generate a new key if not set
+        key = Fernet.generate_key()
+        current_app.config['ENCRYPTION_KEY'] = key
+    return key
+
+def encrypt_data(data):
+    """
+    Encrypt sensitive data using Fernet encryption
+    
+    Args:
+        data (str): Data to encrypt
+        
+    Returns:
+        str: Encrypted data as base64 string
+    """
+    if not data:
+        return data
+    
+    key = _get_encryption_key()
+    f = Fernet(key)
+    encrypted = f.encrypt(data.encode())
+    return encrypted.decode()
+
+def decrypt_data(encrypted_data):
+    """
+    Decrypt data encrypted with encrypt_data
+    
+    Args:
+        encrypted_data (str): Encrypted data to decrypt
+        
+    Returns:
+        str: Decrypted data
+    """
+    if not encrypted_data:
+        return encrypted_data
+    
+    key = _get_encryption_key()
+    f = Fernet(key)
+    decrypted = f.decrypt(encrypted_data.encode())
+    return decrypted.decode()

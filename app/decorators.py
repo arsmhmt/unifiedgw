@@ -52,6 +52,85 @@ def commission_client_required(f):
         return f(*args, **kwargs)
     return decorated_function
 
+def owner_required(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        is_owner = False
+        try:
+            is_owner = current_user.is_authenticated and (
+                (hasattr(current_user, 'role') and current_user.role and 
+                 current_user.role.name.lower() == 'owner')
+            )
+        except Exception:
+            is_owner = False
+        if not is_owner:
+            flash("Owner access only.", "danger")
+            return redirect(url_for('auth.login'))
+        return f(*args, **kwargs)
+    return decorated_function
+
+def superadmin_required(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        is_superadmin = False
+        try:
+            is_superadmin = current_user.is_authenticated and (
+                (hasattr(current_user, 'is_superuser') and current_user.is_superuser) or
+                (hasattr(current_user, 'role') and current_user.role and 
+                 current_user.role.name.lower() == 'superadmin')
+            )
+        except Exception:
+            is_superadmin = False
+        if not is_superadmin:
+            flash("Superadmin access only.", "danger")
+            return redirect(url_for('auth.admin_login'))
+        return f(*args, **kwargs)
+    return decorated_function
+
+def branch_superadmin_required(f):
+    """Decorator for branch superadmins - can only access their own branch's data"""
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if not current_user.is_authenticated:
+            flash("Please log in.", "danger")
+            return redirect(url_for('auth.admin_login'))
+        
+        # Check if user is a superadmin with a managed branch
+        is_branch_superadmin = (
+            hasattr(current_user, 'role') and current_user.role and 
+            current_user.role.name.lower() == 'superadmin' and
+            hasattr(current_user, 'managed_branch') and current_user.managed_branch
+        )
+        
+        if not is_branch_superadmin:
+            flash("Branch superadmin access only.", "danger")
+            return redirect(url_for('auth.admin_login'))
+        
+        return f(*args, **kwargs)
+    return decorated_function
+
+def branch_admin_required(f):
+    """Decorator for branch admins - can access branch data with permissions"""
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if not current_user.is_authenticated:
+            flash("Please log in.", "danger")
+            return redirect(url_for('auth.admin_login'))
+        
+        # Check if user is admin under a branch
+        is_branch_admin = (
+            hasattr(current_user, 'role') and current_user.role and 
+            current_user.role.name.lower() == 'admin' and
+            hasattr(current_user, 'branch') and current_user.branch
+        )
+        
+        if not is_branch_admin:
+            flash("Branch admin access only.", "danger")
+            return redirect(url_for('auth.admin_login'))
+        
+        return f(*args, **kwargs)
+    return decorated_function
+
 def flat_rate_client_required(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):

@@ -1,3 +1,4 @@
+from ..utils.timezone import now_eest
 from ..extensions import db
 from datetime import datetime, timedelta
 from enum import Enum
@@ -213,7 +214,7 @@ class Report(db.Model):
     def _generate_overdue_payments(self):
         from .payment import Payment
         """Generate overdue payments report"""
-        current_time = datetime.utcnow()
+        current_time = now_eest()
         
         overdue_payments = Payment.query.filter(
             Payment.status == 'pending',

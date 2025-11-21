@@ -1,0 +1,238 @@
+{% extends "base.html" %}
+
+{% block title %}PHP USDT Deposit API Guide for Betting Platforms | PayCrypt{% endblock %}
+
+{% block meta_tags %}
+<meta name="description" content="PHP integration guide for PayCrypt's USDT deposit API, with cURL and webhook examples for betting platforms and casinos.">
+<link rel="canonical" href="{{ request.url }}">
+
+<!-- Open Graph -->
+<meta property="og:title" content="PHP USDT Deposit API Guide for Betting Platforms | PayCrypt">
+<meta property="og:description" content="Step-by-step PHP examples for creating USDT deposits and handling PayCrypt webhooks in betting platforms.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="{{ request.url }}">
+
+<!-- JSON-LD Schema -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "TechArticle",
+  "headline": "PHP USDT Deposit API Integration Guide for Betting Platforms",
+  "description": "PHP examples for integrating PayCrypt's USDT deposit API, including deposit creation with cURL and webhook handling.",
+  "publisher": {
+    "@type": "Organization",
+    "name": "PayCrypt",
+    "url": "{{ request.url_root }}"
+  }
+}
+</script>
+{% endblock %}
+
+{% block content %}
+<section class="py-5 bg-dark text-white">
+  <div class="container py-md-5">
+    <div class="row g-4 align-items-center">
+      <div class="col-lg-7">
+        <span class="badge bg-warning text-dark mb-3 px-3 py-2">PHP integration guide</span>
+        <h1 class="display-5 fw-bold mb-3">PHP USDT Deposit API Guide</h1>
+        <p class="lead mb-3">
+          This guide shows how to call the PayCrypt USDT deposit API from <strong>PHP</strong> and receive webhooks
+          when deposits are confirmed for your betting or casino platform.
+        </p>
+        <ul class="list-unstyled small mb-4">
+          <li class="d-flex gap-2 mb-2"><i class="fas fa-check-circle text-success mt-1"></i><span>Use <code>curl</code> in PHP to create USDT deposits.</span></li>
+          <li class="d-flex gap-2 mb-2"><i class="fas fa-check-circle text-success mt-1"></i><span>Implement a simple webhook endpoint in your application.</span></li>
+          <li class="d-flex gap-2 mb-2"><i class="fas fa-check-circle text-success mt-1"></i><span>Update balances only when status is <code>confirmed</code>.</span></li>
+        </ul>
+        <a href="https://t.me/paycryptonline" class="btn btn-warning fw-semibold px-4" target="_blank" rel="noopener">
+          <i class="fab fa-telegram me-2"></i> Get API Keys on Telegram
+        </a>
+      </div>
+      <div class="col-lg-5">
+        <div class="bg-secondary bg-opacity-25 rounded-4 p-3 p-md-4 small">
+          <div class="d-flex justify-content-between align-items-center mb-2">
+            <span class="text-uppercase text-muted fw-semibold">Endpoint</span>
+            <span class="badge bg-success">POST</span>
+          </div>
+<pre class="mb-0 small text-white"><code>POST /api/v1/crypto/deposits
+Authorization: Bearer &lt;YOUR_API_KEY&gt;
+Content-Type: application/json
+
+{
+  "fiat_amount": 100,
+  "fiat_currency": "USD",
+  "crypto_currency": "USDT",
+  "crypto_network": "TRC20"
+}</code></pre>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="py-5">
+  <div class="container">
+    <div class="row g-4">
+      <div class="col-lg-6">
+        <h2 class="h3 fw-bold mb-3">1. Create a USDT deposit from PHP</h2>
+        <p class="text-muted small mb-3">
+          The example below uses <code>curl</code> via <code>curl_setopt_array</code>. Replace <code>&lt;API_KEY&gt;</code>
+          with your PayCrypt API key.
+        </p>
+<pre class="bg-dark text-light rounded-3 p-3 small"><code class="language-php">&lt;?php
+
+$apiBase = 'https://paycrypt.online';
+$apiKey  = getenv('PAYCRYPT_API_KEY') ?: '&lt;API_KEY&gt;';
+
+$payload = [
+    'fiat_amount'    =&gt; 250,
+    'fiat_currency'  =&gt; 'USD',
+    'crypto_currency' =&gt; 'USDT',
+    'crypto_network' =&gt; 'TRC20',
+];
+
+$ch = curl_init("{$apiBase}/api/v1/crypto/deposits");
+curl_setopt_array($ch, [
+    CURLOPT_POST           =&gt; true,
+    CURLOPT_HTTPHEADER     =&gt; [
+        "Authorization: Bearer {$apiKey}",
+        'Content-Type: application/json',
+    ],
+    CURLOPT_POSTFIELDS     =&gt; json_encode($payload),
+    CURLOPT_RETURNTRANSFER =&gt; true,
+    CURLOPT_TIMEOUT        =&gt; 10,
+]);
+
+$responseBody = curl_exec($ch);
+$httpCode     = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+curl_close($ch);
+
+echo $httpCode . PHP_EOL;
+print_r($responseBody);</code></pre>
+        <p class="text-muted small mt-3 mb-0">
+          Decode the JSON in <code>$responseBody</code> and store the <code>payment_id</code>,
+          <code>crypto_amount</code>, and <code>deposit_address</code> in your own database.
+        </p>
+      </div>
+      <div class="col-lg-6">
+        <h2 class="h3 fw-bold mb-3">2. Show the deposit details in your cashier</h2>
+        <p class="text-muted small mb-3">
+          Typically you store the response together with your internal ticket and then show the deposit details to the
+          player in your cashier UI.
+        </p>
+        <ul class="list-unstyled small mb-3">
+          <li class="mb-2"><i class="fas fa-arrow-right text-secondary me-2"></i>Persist the PayCrypt response (or relevant fields) with your bet or session.</li>
+          <li class="mb-2"><i class="fas fa-arrow-right text-secondary me-2"></i>Render the address and QR code image in your PHP templates or frontend.</li>
+          <li class="mb-2"><i class="fas fa-arrow-right text-secondary me-2"></i>Wait for the webhook before crediting the balance.</li>
+        </ul>
+        <p class="text-muted small mb-0">
+          The exact structure of your cashier is up to you; the key is to keep a clear link between your internal ticket
+          and the PayCrypt <code>payment_id</code>.
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="py-5 bg-light">
+  <div class="container">
+    <div class="row g-4">
+      <div class="col-lg-6">
+        <h2 class="h3 fw-bold mb-3">3. Handle the webhook in PHP</h2>
+        <p class="text-muted small mb-3">
+          Configure your webhook URL in the PayCrypt dashboard, for example
+          <code>https://your-domain.com/webhooks/paycrypt/deposit</code>. When a deposit is confirmed on-chain,
+          PayCrypt will POST a JSON payload to that URL.
+        </p>
+<pre class="bg-dark text-light rounded-3 p-3 small"><code class="language-php">&lt;?php
+
+// Example in a generic PHP endpoint file (adjust to your framework).
+
+$body = file_get_contents('php://input');
+$data = json_decode($body, true) ?: [];
+
+$paymentId = $data['payment_id'] ?? null;
+$status    = $data['status'] ?? null;
+$amount    = $data['amount'] ?? null;
+$currency  = $data['currency'] ?? null;
+
+if ($status === 'confirmed' &amp;&amp; $paymentId !== null) {
+    // TODO: look up the pending deposit by $paymentId in your database
+    // and credit the player's balance.
+}
+
+http_response_code(200);
+echo json_encode(['received' =&gt; true]);</code></pre>
+        <p class="text-muted small mt-3 mb-0">
+          In production, you should add logging, basic authentication, and idempotency checks so repeated webhook calls
+          do not double-credit a deposit.
+        </p>
+      </div>
+      <div class="col-lg-6">
+        <h2 class="h3 fw-bold mb-3">4. Operational notes</h2>
+        <p class="text-muted small mb-3">
+          Every operator has different reporting and regulatory requirements, but there are some common practices:
+        </p>
+        <ul class="list-unstyled small mb-3">
+          <li class="mb-2"><i class="fas fa-clipboard-check text-secondary me-2"></i>Keep logs for deposit creation and webhook calls (without exposing secrets).</li>
+          <li class="mb-2"><i class="fas fa-clipboard-check text-secondary me-2"></i>Store enough metadata to match disputes to on-chain evidence.</li>
+          <li class="mb-2"><i class="fas fa-clipboard-check text-secondary me-2"></i>Work with your own legal advisors to align reporting with your license.</li>
+        </ul>
+        <p class="text-muted small mb-0">
+          Treat this guide as technical context, not legal advice. Exact configurations should be reviewed with your
+          compliance team.
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="py-5">
+  <div class="container">
+    <div class="row g-3">
+      <div class="col-md-3">
+        <a href="{{ url_for('main.usdt_deposit_api') }}" class="card border-0 shadow-sm text-decoration-none h-100">
+          <div class="card-body">
+            <h5 class="fw-bold text-dark">USDT Deposit API Overview</h5>
+            <p class="text-muted small mb-0">Main endpoint, JSON examples, and webhook format.</p>
+          </div>
+        </a>
+      </div>
+      <div class="col-md-3">
+        <a href="{{ url_for('main.betting_crypto_gateway') }}" class="card border-0 shadow-sm text-decoration-none h-100">
+          <div class="card-body">
+            <h5 class="fw-bold text-dark">Betting Crypto Gateway</h5>
+            <p class="text-muted small mb-0">How PayCrypt fits into your sportsbook or casino flows.</p>
+          </div>
+        </a>
+      </div>
+      <div class="col-md-3">
+        <a href="{{ url_for('main.crypto_gateway_for_casinos') }}" class="card border-0 shadow-sm text-decoration-none h-100">
+          <div class="card-body">
+            <h5 class="fw-bold text-dark">Crypto Gateway for Casinos</h5>
+            <p class="text-muted small mb-0">Multi-brand and multi-jurisdiction casino setups.</p>
+          </div>
+        </a>
+      </div>
+      <div class="col-md-3">
+        <a href="{{ url_for('tools.index') }}" class="card border-0 shadow-sm text-decoration-none h-100">
+          <div class="card-body">
+            <h5 class="fw-bold text-dark">Free Crypto Tools</h5>
+            <p class="text-muted small mb-0">RugCheck, Wallet Profiler, and other due diligence tools.</p>
+          </div>
+        </a>
+      </div>
+    </div>
+    <div class="row g-3 mt-3">
+      <div class="col-md-3">
+        <a href="{{ url_for('main.pricing') }}" class="card border-0 shadow-sm text-decoration-none h-100">
+          <div class="card-body">
+            <h5 class="fw-bold text-dark">Pricing</h5>
+            <p class="text-muted small mb-0">Understand setup fees for PHP-based betting platforms.</p>
+          </div>
+        </a>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}

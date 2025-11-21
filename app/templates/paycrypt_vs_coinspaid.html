@@ -1,0 +1,203 @@
+{% extends "base.html" %}
+
+{% block title %}PayCrypt vs CoinsPaid – Crypto Gateway for Betting Platforms{% endblock %}
+
+{% block meta_tags %}
+<meta name="description" content="Compare PayCrypt and CoinsPaid as crypto payment gateways, with a focus on betting platforms and casinos that need fast USDT deposits and flexible integrations.">
+<link rel="canonical" href="{{ request.url }}">
+
+<!-- Open Graph -->
+<meta property="og:title" content="PayCrypt vs CoinsPaid – Crypto Gateway Comparison">
+<meta property="og:description" content="Side-by-side look at PayCrypt and CoinsPaid for operators that care about USDT deposits, TRC20 fees, and custom betting platform flows.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="{{ request.url }}">
+
+<!-- JSON-LD Schema -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebPage",
+  "name": "PayCrypt vs CoinsPaid",
+  "description": "Vendor-neutral comparison between PayCrypt and CoinsPaid for crypto payment processing, with emphasis on betting and casino use cases.",
+  "url": "{{ request.url }}"
+}
+</script>
+{% endblock %}
+
+{% block content %}
+<section class="py-5 bg-dark text-white">
+  <div class="container py-md-5">
+    <div class="row g-4 align-items-center">
+      <div class="col-lg-7">
+        <span class="badge bg-warning text-dark mb-3 px-3 py-2">Vendor-neutral overview</span>
+        <h1 class="display-5 fw-bold mb-3">PayCrypt vs CoinsPaid</h1>
+        <p class="lead mb-3">
+          Both PayCrypt and CoinsPaid help you accept crypto payments. The right choice depends on whether you run a
+          <strong>betting / casino operation</strong> or a broader merchant business.
+        </p>
+        <ul class="list-unstyled mb-4 small">
+          <li class="d-flex gap-2 mb-2"><i class="fas fa-check-circle text-success mt-1"></i><span>PayCrypt is designed around high-frequency deposits for betting platforms and casinos.</span></li>
+          <li class="d-flex gap-2 mb-2"><i class="fas fa-check-circle text-success mt-1"></i><span>CoinsPaid is a large crypto payments provider serving many verticals (exchanges, merchants, and more).</span></li>
+          <li class="d-flex gap-2 mb-2"><i class="fas fa-check-circle text-success mt-1"></i><span>This page focuses on <strong>fit</strong>: when a specialised betting gateway is useful vs when a general provider is enough.</span></li>
+        </ul>
+        <div class="d-flex flex-wrap gap-3">
+          <a href="{{ url_for('main.betting_crypto_gateway') }}" class="btn btn-warning fw-semibold px-4">
+            Learn about the Betting Gateway
+          </a>
+          <a href="https://t.me/paycryptonline" target="_blank" rel="noopener" class="btn btn-outline-light fw-semibold px-4">
+            Talk about your use case
+          </a>
+        </div>
+      </div>
+      <div class="col-lg-5">
+        <div class="card border-0 shadow-lg bg-secondary bg-opacity-25">
+          <div class="card-body p-4">
+            <h5 class="fw-bold mb-3">Summary (fast version)</h5>
+            <ul class="list-unstyled small mb-0">
+              <li class="mb-2"><strong>Best for betting brands:</strong> PayCrypt, if you need USDT/TRC20 deposits, webhook balance updates, and Curacao-friendly reporting.</li>
+              <li class="mb-2"><strong>Best for broad merchant coverage:</strong> A multi-vertical provider like CoinsPaid, if you mainly charge e‑commerce or SaaS customers.</li>
+              <li class="mb-0"><strong>Not a replacement for legal advice:</strong> always confirm license and compliance requirements with your own counsel.</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="py-5 bg-light">
+  <div class="container">
+    <h2 class="h2 fw-bold mb-4">High-level comparison</h2>
+    <div class="table-responsive">
+      <table class="table table-bordered align-middle bg-white">
+        <thead class="table-light">
+          <tr>
+            <th scope="col">Criteria</th>
+            <th scope="col">PayCrypt</th>
+            <th scope="col">CoinsPaid (general notes)</th>
+          </tr>
+        </thead>
+        <tbody class="small">
+          <tr>
+            <td><strong>Primary focus</strong></td>
+            <td>Crypto deposits and payouts for betting platforms, casinos, and high-risk operators.</td>
+            <td>Broader crypto payments across different industries and merchant types.</td>
+          </tr>
+          <tr>
+            <td><strong>Typical use cases</strong></td>
+            <td>Sportsbooks, casinos, iGaming brands that need fast USDT/TRC20 deposits and clear audit logs.</td>
+            <td>Exchanges, wallets, and online merchants that need general crypto processing.</td>
+          </tr>
+          <tr>
+            <td><strong>Integration style</strong></td>
+            <td>Simple REST API, deposit webhooks, and admin dashboards tailored to betting flows.</td>
+            <td>Full‑featured payment infrastructure aimed at many different business models.</td>
+          </tr>
+          <tr>
+            <td><strong>Pricing approach</strong></td>
+            <td>One‑time setup fees for the gateway and API, then usage‑based costs depending on your provider mix.</td>
+            <td>Public information suggests volume‑based or revenue‑share style pricing; exact commercial terms are agreed directly with them.</td>
+          </tr>
+          <tr>
+            <td><strong>When PayCrypt is a good fit</strong></td>
+            <td>
+              You mostly care about <strong>USDT deposits, TRC20 fees, and betting workflows</strong>. You want a focused gateway you can combine with your own KYC and risk stack.
+            </td>
+            <td>
+              You may still work with a larger processor in parallel for non-betting brands, card payments, or general merchant flows.
+            </td>
+          </tr>
+          <tr>
+            <td><strong>When a larger provider may be enough</strong></td>
+            <td>
+              If crypto is a small add‑on to an otherwise fiat‑heavy business, or your regulator prefers a single large PSP, a general provider might be sufficient.
+            </td>
+            <td>
+              You accept many kinds of payments (cards, bank, crypto) across multiple non‑betting verticals and prefer everything under one umbrella.
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<section class="py-5">
+  <div class="container">
+    <div class="row g-4">
+      <div class="col-lg-6">
+        <h2 class="h4 fw-bold mb-3">If you run a betting platform or casino</h2>
+        <p class="text-muted small mb-3">
+          The main question is not "Which brand is bigger?" but "Which setup gives my players fast, predictable deposits with clean reporting?".
+        </p>
+        <ul class="list-unstyled small mb-3">
+          <li class="mb-2"><i class="fas fa-arrow-right text-secondary me-2"></i>You likely settle mostly in USDT on TRC20 or similar low-fee networks.</li>
+          <li class="mb-2"><i class="fas fa-arrow-right text-secondary me-2"></i>You care about reconciling every ticket and dispute with on‑chain evidence.</li>
+          <li class="mb-2"><i class="fas fa-arrow-right text-secondary me-2"></i>You may have multiple brands/skins under the same license.</li>
+        </ul>
+        <p class="text-muted small mb-3">
+          PayCrypt is intentionally narrow: fast deposits, webhooks into your own platform, and admin tools that mirror how betting operators actually work.
+        </p>
+        <a href="{{ url_for('main.crypto_gateway_for_casinos') }}" class="btn btn-outline-primary btn-sm fw-semibold">
+          View Casino Gateway Overview
+        </a>
+      </div>
+      <div class="col-lg-6">
+        <h2 class="h4 fw-bold mb-3">Using PayCrypt alongside a larger PSP</h2>
+        <p class="text-muted small mb-3">
+          Many operators combine a specialist gateway with a larger payments provider:
+        </p>
+        <ul class="list-unstyled small mb-3">
+          <li class="mb-2"><i class="fas fa-link text-secondary me-2"></i>Use PayCrypt for high‑volume USDT deposits and betting‑specific flows.</li>
+          <li class="mb-2"><i class="fas fa-link text-secondary me-2"></i>Use other processors for card payments or general merchant businesses.</li>
+          <li class="mb-2"><i class="fas fa-link text-secondary me-2"></i>Keep settlement and risk decisions in your own back‑office instead of delegating everything.</li>
+        </ul>
+        <p class="text-muted small mb-0">
+          This page is not endorsed by CoinsPaid and is based on public, high‑level positioning only. For exact pricing and features, you should always speak directly with each provider.
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="py-5 bg-light">
+  <div class="container">
+    <div class="row g-3">
+      <div class="col-md-4">
+        <a href="{{ url_for('main.betting_crypto_gateway') }}" class="card border-0 shadow-sm text-decoration-none h-100">
+          <div class="card-body">
+            <h5 class="fw-bold text-dark">Betting Crypto Gateway</h5>
+            <p class="text-muted small mb-0">Deep dive into how PayCrypt handles deposits for sportsbooks and casinos.</p>
+          </div>
+        </a>
+      </div>
+      <div class="col-md-4">
+        <a href="{{ url_for('main.usdt_deposit_api') }}" class="card border-0 shadow-sm text-decoration-none h-100">
+          <div class="card-body">
+            <h5 class="fw-bold text-dark">USDT Deposit API</h5>
+            <p class="text-muted small mb-0">See the technical endpoint and webhook examples.</p>
+          </div>
+        </a>
+      </div>
+      <div class="col-md-4">
+        <a href="{{ url_for('tools.index') }}" class="card border-0 shadow-sm text-decoration-none h-100">
+          <div class="card-body">
+            <h5 class="fw-bold text-dark">Free Crypto Risk Tools</h5>
+            <p class="text-muted small mb-0">RugCheck, Wallet Profiler, and other tools that inform PayCrypt's risk engine.</p>
+          </div>
+        </a>
+      </div>
+    </div>
+    <div class="row g-3 mt-3">
+      <div class="col-md-4">
+        <a href="{{ url_for('main.pricing') }}" class="card border-0 shadow-sm text-decoration-none h-100">
+          <div class="card-body">
+            <h5 class="fw-bold text-dark">Pricing</h5>
+            <p class="text-muted small mb-0">See how PayCrypt's setup fees compare to larger processors.</p>
+          </div>
+        </a>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}

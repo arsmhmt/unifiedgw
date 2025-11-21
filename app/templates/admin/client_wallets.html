@@ -1,0 +1,546 @@
+{% extends "admin/base.html" %}
+
+{% block title %}Client Wallet Management - Admin Dashboard{% endblock %}
+
+{% block styles %}
+{{ super() }}
+<style>
+    .wallet-card {
+        border-left: 4px solid #007bff;
+        transition: all 0.3s ease;
+    }
+
+    .wallet-card:hover {
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        transform: translateY(-2px);
+    }
+
+    .wallet-card.status-active {
+        border-left-color: #28a745;
+    }
+
+    .wallet-card.status-pending {
+        border-left-color: #ffc107;
+    }
+
+    .wallet-card.status-error {
+        border-left-color: #dc3545;
+    }
+
+    .wallet-card.status-inactive {
+        border-left-color: #6c757d;
+    }
+
+    .wallet-type-badge {
+        padding: 0.35rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.75rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .type-custom-api {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+    }
+
+    .type-custom-manual {
+        background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        color: white;
+    }
+
+    .type-platform-binance {
+        background: linear-gradient(135deg, #ffd89b 0%, #19547b 100%);
+        color: white;
+    }
+
+    .stat-card {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border-radius: 10px;
+        padding: 1.5rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .stat-card h3 {
+        font-size: 2.5rem;
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+    }
+
+    .crypto-badge {
+        background: rgba(255, 152, 0, 0.1);
+        color: #ff9800;
+        padding: 0.25rem 0.5rem;
+        border-radius: 4px;
+        font-size: 0.7rem;
+        font-weight: 600;
+        margin: 0.2rem;
+        display: inline-block;
+    }
+
+    .address-preview {
+        font-family: 'Courier New', monospace;
+        background: #f8f9fa;
+        padding: 0.5rem;
+        border-radius: 4px;
+        font-size: 0.85rem;
+        word-break: break-all;
+    }
+
+    .filter-section {
+        background: white;
+        padding: 1.5rem;
+        border-radius: 10px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+        margin-bottom: 2rem;
+    }
+
+    .action-buttons .btn {
+        margin: 0.2rem;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Page Header -->
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <h1 class="h3 mb-0 text-gray-800">
+            <i class="fas fa-wallet me-2"></i>Client Wallet Management
+        </h1>
+        <div>
+            <a href="{{ url_for('admin.dashboard') }}" class="btn btn-sm btn-outline-secondary">
+                <i class="fas fa-arrow-left me-1"></i>Back to Dashboard
+            </a>
+        </div>
+    </div>
+
+    <!-- Statistics Cards -->
+    <div class="row mb-4">
+        <div class="col-xl-4 col-md-6 mb-3">
+            <div class="stat-card" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                <div class="d-flex align-items-center">
+                    <div class="flex-grow-1">
+                        <h3 class="mb-0">{{ stats.total or 0 }}</h3>
+                        <p class="mb-0 opacity-75">Total Wallets</p>
+                    </div>
+                    <i class="fas fa-wallet fa-3x opacity-50"></i>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-4 col-md-6 mb-3">
+            <div class="stat-card" style="background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);">
+                <div class="d-flex align-items-center">
+                    <div class="flex-grow-1">
+                        <h3 class="mb-0">{{ stats.active or 0 }}</h3>
+                        <p class="mb-0 opacity-75">Active Wallets</p>
+                    </div>
+                    <i class="fas fa-check-circle fa-3x opacity-50"></i>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-4 col-md-6 mb-3">
+            <div class="stat-card" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">
+                <div class="d-flex align-items-center">
+                    <div class="flex-grow-1">
+                        <h3 class="mb-0">{{ stats.pending or 0 }}</h3>
+                        <p class="mb-0 opacity-75">Pending Approval</p>
+                    </div>
+                    <i class="fas fa-clock fa-3x opacity-50"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filter Section -->
+    <div class="filter-section">
+        <form method="GET" action="{{ url_for('admin.client_wallets') }}">
+            <div class="row">
+                <div class="col-md-3">
+                    <label for="client_id" class="form-label">
+                        <i class="fas fa-building me-1"></i>Client
+                    </label>
+                    <select name="client_id" id="client_id" class="form-select">
+                        <option value="">All Clients</option>
+                        {% for client in clients %}
+                        <option value="{{ client.id }}" {% if request.args.get('client_id')|int == client.id %}selected{% endif %}>
+                            {{ client.company_name }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label for="wallet_type" class="form-label">
+                        <i class="fas fa-layer-group me-1"></i>Wallet Type
+                    </label>
+                    <select name="wallet_type" id="wallet_type" class="form-select">
+                        <option value="">All Types</option>
+                        <option value="custom_api" {% if request.args.get('wallet_type') == 'custom_api' %}selected{% endif %}>Custom API</option>
+                        <option value="custom_manual" {% if request.args.get('wallet_type') == 'custom_manual' %}selected{% endif %}>Custom Manual</option>
+                        <option value="platform_binance" {% if request.args.get('wallet_type') == 'platform_binance' %}selected{% endif %}>Platform Binance</option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label for="status" class="form-label">
+                        <i class="fas fa-info-circle me-1"></i>Status
+                    </label>
+                    <select name="status" id="status" class="form-select">
+                        <option value="">All Statuses</option>
+                        <option value="active" {% if request.args.get('status') == 'active' %}selected{% endif %}>Active</option>
+                        <option value="pending_verification" {% if request.args.get('status') == 'pending_verification' %}selected{% endif %}>Pending</option>
+                        <option value="inactive" {% if request.args.get('status') == 'inactive' %}selected{% endif %}>Inactive</option>
+                        <option value="error" {% if request.args.get('status') == 'error' %}selected{% endif %}>Error</option>
+                    </select>
+                </div>
+                <div class="col-md-3 d-flex align-items-end">
+                    <button type="submit" class="btn btn-primary me-2">
+                        <i class="fas fa-filter me-1"></i>Filter
+                    </button>
+                    <a href="{{ url_for('admin.client_wallets') }}" class="btn btn-outline-secondary">
+                        <i class="fas fa-times me-1"></i>Clear
+                    </a>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <!-- Wallets List -->
+    <div class="row">
+        {% if wallets %}
+            {% for wallet, client_name, client_email in wallets %}
+            <div class="col-lg-6 mb-4">
+                <div class="card wallet-card status-{{ wallet.status.value }}">
+                    <div class="card-body">
+                        <!-- Wallet Header -->
+                        <div class="d-flex justify-content-between align-items-start mb-3">
+                            <div>
+                                <h5 class="card-title mb-1">
+                                    <i class="fas fa-wallet me-2 text-primary"></i>{{ wallet.wallet_name }}
+                                </h5>
+                                <p class="text-muted mb-0">
+                                    <small>
+                                        <i class="fas fa-building me-1"></i>{{ client_name }}
+                                    </small>
+                                </p>
+                            </div>
+                            <span class="wallet-type-badge type-{{ wallet.wallet_type.value.replace('_', '-') }}">
+                                {{ wallet.wallet_type.value.replace('_', ' ') }}
+                            </span>
+                        </div>
+
+                        <!-- Status Badge -->
+                        <div class="mb-3">
+                            {% if wallet.status.value == 'active' %}
+                            <span class="badge bg-success">
+                                <i class="fas fa-check-circle me-1"></i>Active
+                            </span>
+                            {% elif wallet.status.value == 'pending_verification' %}
+                            <span class="badge bg-warning">
+                                <i class="fas fa-clock me-1"></i>Pending Approval
+                            </span>
+                            {% elif wallet.status.value == 'error' %}
+                            <span class="badge bg-danger">
+                                <i class="fas fa-exclamation-triangle me-1"></i>Error
+                            </span>
+                            {% else %}
+                            <span class="badge bg-secondary">
+                                <i class="fas fa-ban me-1"></i>{{ wallet.status.value }}
+                            </span>
+                            {% endif %}
+                        </div>
+
+                        <!-- Wallet Info -->
+                        <div class="mb-3">
+                            <div class="d-flex justify-content-between mb-2">
+                                <span class="text-muted">
+                                    <i class="fas fa-coins me-1"></i>Supported Currencies:
+                                </span>
+                                <span class="badge bg-info">{{ wallet.supported_currencies|length if wallet.supported_currencies else 0 }}</span>
+                            </div>
+                            <div class="crypto-support">
+                                {% if wallet.supported_currencies %}
+                                    {% for currency in wallet.supported_currencies %}
+                                    <span class="crypto-badge">{{ currency }}</span>
+                                    {% endfor %}
+                                {% else %}
+                                    <span class="text-muted"><small>No currencies configured</small></span>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <!-- Addresses Preview (for manual wallets) -->
+                        {% if wallet.wallet_type.value == 'custom_manual' and wallet.wallet_addresses %}
+                        <div class="mb-3">
+                            <p class="text-muted mb-2">
+                                <i class="fas fa-address-card me-1"></i>Configured Addresses: {{ wallet.wallet_addresses|length }}
+                            </p>
+                            {% for currency, address in (wallet.wallet_addresses.items() if wallet.wallet_addresses else []) %}
+                            {% if loop.index <= 2 %}
+                            <div class="address-preview mb-1">
+                                <strong>{{ currency }}:</strong> {{ address[:15] }}...{{ address[-10:] if address|length > 25 else address[15:] }}
+                            </div>
+                            {% endif %}
+                            {% endfor %}
+                            {% if wallet.wallet_addresses|length > 2 %}
+                            <small class="text-muted">+ {{ wallet.wallet_addresses|length - 2 }} more addresses</small>
+                            {% endif %}
+                        </div>
+                        {% endif %}
+
+                        <!-- API Configuration (for API wallets) -->
+                        {% if wallet.wallet_type.value == 'custom_api' %}
+                        <div class="mb-3">
+                            <p class="text-muted mb-1">
+                                <i class="fas fa-plug me-1"></i>API Endpoint:
+                            </p>
+                            <div class="address-preview">
+                                {{ wallet.api_endpoint or 'Not configured' }}
+                            </div>
+                        </div>
+                        {% endif %}
+
+                        <!-- Error Message -->
+                        {% if wallet.error_message %}
+                        <div class="alert alert-danger mb-3">
+                            <i class="fas fa-exclamation-triangle me-1"></i>
+                            {{ wallet.error_message }}
+                        </div>
+                        {% endif %}
+
+                        <!-- Action Buttons -->
+                        <div class="action-buttons d-flex flex-wrap">
+                            <button class="btn btn-sm btn-outline-primary" onclick="viewWallet({{ wallet.id }})">
+                                <i class="fas fa-eye me-1"></i>View Details
+                            </button>
+                            
+                            {% if wallet.status.value == 'pending_verification' %}
+                            <button class="btn btn-sm btn-success" onclick="approveWallet({{ wallet.id }})">
+                                <i class="fas fa-check me-1"></i>Approve
+                            </button>
+                            <button class="btn btn-sm btn-danger" onclick="rejectWallet({{ wallet.id }})">
+                                <i class="fas fa-times me-1"></i>Reject
+                            </button>
+                            {% endif %}
+                            
+                            <a href="mailto:{{ client_email }}" class="btn btn-sm btn-outline-secondary">
+                                <i class="fas fa-envelope me-1"></i>Contact Client
+                            </a>
+                        </div>
+
+                        <!-- Timestamp -->
+                        <div class="mt-3 text-end">
+                            <small class="text-muted">
+                                <i class="far fa-clock me-1"></i>
+                                Created: {{ wallet.created_at.strftime('%Y-%m-%d %H:%M') if wallet.created_at else 'N/A' }}
+                            </small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        {% else %}
+            <div class="col-12">
+                <div class="alert alert-info">
+                    <i class="fas fa-info-circle me-2"></i>No wallets found matching your criteria.
+                </div>
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Wallet Details Modal -->
+<div class="modal fade" id="walletDetailsModal" tabindex="-1" aria-labelledby="walletDetailsModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="walletDetailsModalLabel">
+                    <i class="fas fa-wallet me-2"></i>Wallet Details
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body" id="walletDetailsContent">
+                <div class="text-center py-4">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Reject Wallet Modal -->
+<div class="modal fade" id="rejectWalletModal" tabindex="-1" aria-labelledby="rejectWalletModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="rejectWalletModalLabel">
+                    <i class="fas fa-times-circle me-2"></i>Reject Wallet Configuration
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <label for="rejectReason" class="form-label">Reason for Rejection:</label>
+                    <textarea class="form-control" id="rejectReason" rows="3" placeholder="Provide a reason..."></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-danger" onclick="confirmReject()">
+                    <i class="fas fa-times me-1"></i>Reject Wallet
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+{{ super() }}
+<script>
+let currentWalletId = null;
+
+function viewWallet(walletId) {
+    const modal = new bootstrap.Modal(document.getElementById('walletDetailsModal'));
+    modal.show();
+    
+    fetch(`{{ url_for('admin.view_client_wallet', wallet_id=0) }}`.replace('0', walletId), {
+        headers: {
+            'X-Requested-With': 'XMLHttpRequest'
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            displayWalletDetails(data.wallet);
+        } else {
+            showError('Failed to load wallet details');
+        }
+    })
+    .catch(error => {
+        showError('Error loading wallet details: ' + error.message);
+    });
+}
+
+function displayWalletDetails(wallet) {
+    let html = `
+        <div class="wallet-details">
+            <div class="row mb-3">
+                <div class="col-md-6">
+                    <strong>Wallet Name:</strong><br>${wallet.wallet_name}
+                </div>
+                <div class="col-md-6">
+                    <strong>Client:</strong><br>${wallet.client_name}
+                </div>
+            </div>
+            <div class="row mb-3">
+                <div class="col-md-6">
+                    <strong>Type:</strong><br>${wallet.wallet_type}
+                </div>
+                <div class="col-md-6">
+                    <strong>Status:</strong><br>
+                    <span class="badge bg-${wallet.status === 'active' ? 'success' : 'warning'}">${wallet.status}</span>
+                </div>
+            </div>
+    `;
+    
+    if (wallet.wallet_addresses && Object.keys(wallet.wallet_addresses).length > 0) {
+        html += `
+            <div class="mb-3">
+                <strong>Wallet Addresses:</strong>
+                <div class="mt-2">
+        `;
+        for (const [currency, address] of Object.entries(wallet.wallet_addresses)) {
+            html += `
+                <div class="mb-2">
+                    <strong>${currency}:</strong>
+                    <div class="address-preview">${address}</div>
+                </div>
+            `;
+        }
+        html += `</div></div>`;
+    }
+    
+    html += `</div>`;
+    document.getElementById('walletDetailsContent').innerHTML = html;
+}
+
+function approveWallet(walletId) {
+    if (!confirm('Are you sure you want to approve this wallet configuration?')) {
+        return;
+    }
+    
+    fetch(`{{ url_for('admin.approve_client_wallet', wallet_id=0) }}`.replace('0', walletId), {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-Requested-With': 'XMLHttpRequest'
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            showSuccess(data.message);
+            setTimeout(() => location.reload(), 1500);
+        } else {
+            showError(data.error);
+        }
+    })
+    .catch(error => {
+        showError('Error approving wallet: ' + error.message);
+    });
+}
+
+function rejectWallet(walletId) {
+    currentWalletId = walletId;
+    const modal = new bootstrap.Modal(document.getElementById('rejectWalletModal'));
+    modal.show();
+}
+
+function confirmReject() {
+    const reason = document.getElementById('rejectReason').value.trim();
+    if (!reason) {
+        alert('Please provide a reason for rejection');
+        return;
+    }
+    
+    fetch(`{{ url_for('admin.reject_client_wallet', wallet_id=0) }}`.replace('0', currentWalletId), {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-Requested-With': 'XMLHttpRequest'
+        },
+        body: JSON.stringify({ reason: reason })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            showSuccess(data.message);
+            bootstrap.Modal.getInstance(document.getElementById('rejectWalletModal')).hide();
+            setTimeout(() => location.reload(), 1500);
+        } else {
+            showError(data.error);
+        }
+    })
+    .catch(error => {
+        showError('Error rejecting wallet: ' + error.message);
+    });
+}
+
+function showSuccess(message) {
+    // You can use your preferred notification library
+    alert(message);
+}
+
+function showError(message) {
+    alert('Error: ' + message);
+}
+</script>
+{% endblock %}

@@ -1,17 +1,18 @@
 from datetime import datetime
 # Import db directly from the app's main __init__.py where it is now globally exposed
 # after being initialized with the Flask app.
-from ..extensions import db 
+from ..extensions import db
+from ..utils.timezone import now_eest
 
 __all__ = ['BaseModel']
 
 class BaseModel(db.Model):
     """Base model class that other models inherit from"""
     __abstract__ = True
-    
+
     id = db.Column(db.Integer, primary_key=True)
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
-    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    created_at = db.Column(db.DateTime, default=now_eest)
+    updated_at = db.Column(db.DateTime, default=now_eest, onupdate=now_eest)
     
     # Removed custom __init__ method. SQLAlchemy's declarative base handles this.
     # The __init__ method you had was overriding SQLAlchemy's default constructor

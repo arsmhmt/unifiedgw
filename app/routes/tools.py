@@ -1,17 +1,20 @@
-from flask import Blueprint, render_template, request, jsonify, flash
+from flask import Blueprint, render_template, request, jsonify, flash, url_for
+import os
 import requests
 import time
 from datetime import datetime
 
 tools_bp = Blueprint('tools', __name__, url_prefix='/tools')
 
+AI_SUMMARY_MODEL = os.getenv('OPENAI_SUMMARY_MODEL', 'gpt-3.5-turbo')
+
 @tools_bp.route('/')
 def index():
     """Tools landing page with all available tools"""
     tools_list = [
         {
-            'name': 'Token Security Analyzer',
-            'description': 'Quick security analysis for cryptocurrency tokens using GoPlus Security API - Basic version.',
+            'name': 'RugCheck AI',
+            'description': 'AI-enhanced token security analysis powered by PayCrypt intelligence and GoPlus API.',
             'icon': 'fas fa-shield-alt',
             'url': 'tools.rugcheck',
             'status': 'active',
@@ -127,8 +130,8 @@ def index():
             ]
         },
         {
-            'name': 'Wallet Profiler',
-            'description': 'Analyze wallet behavior, holdings, profit/loss, and trading patterns.',
+            'name': 'Wallet Intelligence',
+            'description': 'AI-driven wallet behavior insights, portfolio breakdowns, and trading pattern detection.',
             'icon': 'fas fa-wallet',
             'url': 'tools.wallet_profiler',
             'status': 'active',
@@ -192,8 +195,21 @@ def index():
             ]
         }
     ]
-    
-    return render_template('tools/index.html', tools=tools_list)
+
+    featured_tool = {
+        'name': 'RugCheck AI',
+        'badge': 'Featured Tool of the Week',
+        'summary': 'Identify scams faster with AI-generated risk summaries and live token security analytics.',
+        'cta_label': 'Launch RugCheck AI',
+        'cta_url': url_for('tools.rugcheck', ref='featured'),
+        'highlights': [
+            'Real-time honeypot and liquidity checks',
+            'GPT-powered risk briefings',
+            'Multi-chain support across 20+ networks'
+        ]
+    }
+
+    return render_template('tools/index.html', tools=tools_list, featured_tool=featured_tool)
 
 # GoPlus API supported chains
 SUPPORTED_CHAINS = {
@@ -211,18 +227,13 @@ SUPPORTED_CHAINS = {
     '1285': 'Moonriver',
     '42220': 'Celo',
     '1284': 'Moonbeam',
-    '288': 'Boba',
-    '199': 'BitTorrent',
-    '336': 'Shiden',
-    '2000': 'Dogechain',
-    '61': 'Ethereum Classic',
-    '8217': 'Klaytn'
 }
 
 def analyze_token_security(result):
     """Analyze GoPlus API result and provide human-readable assessment"""
     if not result or 'error' in result:
         return {'status': 'error', 'message': 'Unable to analyze token'}
+
     
     risks = []
     warnings = []
@@ -306,6 +317,7 @@ def analyze_token_security(result):
 def rugcheck():
     result = None
     analysis = None
+    ai_summary = None
     
     if request.method == 'POST':
         chain = request.form.get('chain')
@@ -316,7 +328,8 @@ def rugcheck():
             return render_template('tools/rugcheck.html', 
                                  chains=SUPPORTED_CHAINS, 
                                  result=result, 
-                                 analysis=analysis)
+                                 analysis=analysis,
+                                 ai_summary=ai_summary)
         
         # Validate address format (basic check)
         if not address.startswith('0x') or len(address) != 42:
@@ -324,7 +337,8 @@ def rugcheck():
             return render_template('tools/rugcheck.html', 
                                  chains=SUPPORTED_CHAINS, 
                                  result=result, 
-                                 analysis=analysis)
+                                 analysis=analysis,
+                                 ai_summary=ai_summary)
 
         api_url = f"https://api.gopluslabs.io/api/v1/token_security/{chain}?contract_addresses={address}"
         
@@ -348,6 +362,14 @@ def rugcheck():
                     result['_chain_id'] = chain
                     result['_address'] = address
                     result['_timestamp'] = datetime.now().strftime('%Y-%m-%d %H:%M:%S UTC')
+
+                    if analysis and analysis.get('status') == 'success':
+                        prompt, fallback = _build_rugcheck_summary_inputs(result, analysis)
+                        summary_text, generated = _generate_ai_summary(prompt, fallback)
+                        ai_summary = {
+                            'text': summary_text,
+                            'generated': generated
+                        }
                     
         except requests.exceptions.Timeout:
             flash('Request timed out. Please try again.', 'error')
@@ -359,7 +381,8 @@ def rugcheck():
     return render_template('tools/rugcheck.html', 
                          chains=SUPPORTED_CHAINS, 
                          result=result, 
-                         analysis=analysis)
+                         analysis=analysis,
+                         ai_summary=ai_summary)
 
 @tools_bp.route('/token-explorer', methods=['GET', 'POST'])
 def token_explorer():
@@ -1037,25 +1060,34 @@ def liquidity_lock():
 @tools_bp.route('/wallet-profiler', methods=['GET', 'POST'])
 def wallet_profiler():
     """Wallet behavior and portfolio analysis"""
+    ai_summary = None
     if request.method == 'POST':
         chain = request.form.get('chain')
         address = request.form.get('address')
         
         if not chain or not address:
             flash('Please provide both blockchain and wallet address.', 'error')
-            return render_template('tools/wallet_profiler.html', chains=SUPPORTED_CHAINS)
+            return render_template('tools/wallet_profiler.html', chains=SUPPORTED_CHAINS, ai_summary=ai_summary)
         
         try:
             result = analyze_wallet_profile(chain, address)
+            if result and result.get('success'):
+                prompt, fallback = _build_wallet_summary_inputs(result)
+                summary_text, generated = _generate_ai_summary(prompt, fallback)
+                ai_summary = {
+                    'text': summary_text,
+                    'generated': generated
+                }
             return render_template('tools/wallet_profiler.html', 
                                  chains=SUPPORTED_CHAINS,
                                  result=result,
                                  address=address,
-                                 chain=chain)
+                                 chain=chain,
+                                 ai_summary=ai_summary)
         except Exception as e:
             flash(f'Error analyzing wallet: {str(e)}', 'error')
     
-    return render_template('tools/wallet_profiler.html', chains=SUPPORTED_CHAINS)
+    return render_template('tools/wallet_profiler.html', chains=SUPPORTED_CHAINS, ai_summary=ai_summary)
 
 # Enhanced Analysis Functions
 

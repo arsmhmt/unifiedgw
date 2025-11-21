@@ -1,0 +1,200 @@
+{% extends "branch/base.html" %}
+
+{% block title %}Withdrawal Requests - Bank Gateway - {{ branch.name }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <!-- Page Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="mb-1">
+                <i class="bi bi-arrow-up-circle me-2"></i>Withdrawal Requests
+            </h2>
+            <p class="text-muted mb-0">Branch: <strong>{{ branch.name }}</strong> (Read Only)</p>
+        </div>
+        <a href="{{ url_for('branch.bank_gateway_dashboard') }}" class="btn btn-outline-secondary">
+            <i class="bi bi-arrow-left me-2"></i>Back to Bank Gateway
+        </a>
+    </div>
+
+    <!-- Statistics Cards -->
+    <div class="row g-3 mb-4">
+        <div class="col-md-4">
+            <div class="card bg-gradient-warning text-dark border-0">
+                <div class="card-body">
+                    <h6 class="mb-1">Pending Requests</h6>
+                    <h4 class="mb-0">{{ pending_count }}</h4>
+                    <small class="d-block">{{ "%.2f"|format(pending_amount) }} TRY</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card bg-gradient-success text-white border-0">
+                <div class="card-body">
+                    <h6 class="text-white-50 mb-1">Approved</h6>
+                    <h4 class="mb-0">{{ approved_count }}</h4>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card bg-gradient-info text-white border-0">
+                <div class="card-body">
+                    <h6 class="text-white-50 mb-1">Total Requests</h6>
+                    <h4 class="mb-0">{{ withdrawals.total }}</h4>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filters -->
+    <div class="card border-0 shadow-sm mb-4">
+        <div class="card-body">
+            <form method="GET" class="row g-3">
+                <div class="col-md-3">
+                    <label class="form-label small text-muted">Status</label>
+                    <select name="status" class="form-select">
+                        <option value="pending" {% if status_filter == 'pending' %}selected{% endif %}>Pending</option>
+                        <option value="all" {% if status_filter == 'all' %}selected{% endif %}>All Status</option>
+                        <option value="approved" {% if status_filter == 'approved' %}selected{% endif %}>Approved</option>
+                        <option value="rejected" {% if status_filter == 'rejected' %}selected{% endif %}>Rejected</option>
+                        <option value="completed" {% if status_filter == 'completed' %}selected{% endif %}>Completed</option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label small text-muted">Client</label>
+                    <select name="client_id" class="form-select">
+                        <option value="">All Clients</option>
+                        {% for client in clients %}
+                        <option value="{{ client.id }}" {% if client_filter == client.id %}selected{% endif %}>
+                            {{ client.company_name }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label small text-muted">Search</label>
+                    <input type="text" name="search" class="form-control" placeholder="Name, IBAN, Reference" value="{{ search }}">
+                </div>
+                <div class="col-md-2 d-flex align-items-end">
+                    <button type="submit" class="btn btn-primary w-100">
+                        <i class="bi bi-funnel me-2"></i>Filter
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Withdrawals Table -->
+    <div class="card border-0 shadow-sm">
+        <div class="card-header bg-white border-bottom">
+            <h5 class="mb-0">
+                <i class="bi bi-table me-2"></i>Withdrawal Requests
+                <span class="badge bg-secondary">{{ withdrawals.total }} total</span>
+            </h5>
+        </div>
+        <div class="card-body p-0">
+            {% if withdrawals.items %}
+            <div class="table-responsive">
+                <table class="table table-hover mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th width="8%">ID</th>
+                            <th width="12%">Reference</th>
+                            <th width="15%">User</th>
+                            <th width="12%">Amount</th>
+                            <th width="15%">Bank Details</th>
+                            <th width="10%">Status</th>
+                            <th width="13%">Created</th>
+                            <th width="15%">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for withdrawal in withdrawals.items %}
+                        <tr>
+                            <td class="text-muted small">{{ withdrawal.id }}</td>
+                            <td><code class="small">{{ withdrawal.reference_code }}</code></td>
+                            <td>
+                                <strong>{{ withdrawal.user_name }} {{ withdrawal.user_surname or '' }}</strong>
+                                {% if withdrawal.client_site %}
+                                <br><small class="text-muted">{{ withdrawal.client_site.client.company_name }}</small>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <strong class="text-primary">{{ "%.2f"|format(withdrawal.amount) }}</strong> {{ withdrawal.currency }}
+                            </td>
+                            <td>
+                                <small>{{ withdrawal.bank_name }}</small><br>
+                                <code class="small">{{ withdrawal.iban[:15] }}...</code>
+                            </td>
+                            <td>
+                                {% if withdrawal.status == 'pending' %}
+                                <span class="badge bg-warning text-dark">Pending</span>
+                                {% elif withdrawal.status == 'approved' %}
+                                <span class="badge bg-success">Approved</span>
+                                {% elif withdrawal.status == 'rejected' %}
+                                <span class="badge bg-danger">Rejected</span>
+                                {% elif withdrawal.status == 'completed' %}
+                                <span class="badge bg-dark">Completed</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <small>{{ withdrawal.created_at.strftime('%Y-%m-%d %H:%M') }}</small>
+                            </td>
+                            <td>
+                                <a href="{{ url_for('branch.bank_gateway_withdrawal_detail', request_id=withdrawal.id) }}" 
+                                   class="btn btn-sm btn-outline-primary">
+                                    <i class="bi bi-eye me-1"></i>View
+                                </a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            
+            <!-- Pagination -->
+            {% if withdrawals.pages > 1 %}
+            <div class="card-footer bg-light">
+                <nav>
+                    <ul class="pagination pagination-sm mb-0 justify-content-center">
+                        <li class="page-item {% if not withdrawals.has_prev %}disabled{% endif %}">
+                            <a class="page-link" href="{{ url_for('branch.bank_gateway_withdrawals', page=withdrawals.prev_num, status=status_filter, client_id=client_filter, search=search) }}">Previous</a>
+                        </li>
+                        {% for page_num in withdrawals.iter_pages() %}
+                            {% if page_num %}
+                            <li class="page-item {% if page_num == withdrawals.page %}active{% endif %}">
+                                <a class="page-link" href="{{ url_for('branch.bank_gateway_withdrawals', page=page_num, status=status_filter, client_id=client_filter, search=search) }}">{{ page_num }}</a>
+                            </li>
+                            {% else %}
+                            <li class="page-item disabled"><span class="page-link">...</span></li>
+                            {% endif %}
+                        {% endfor %}
+                        <li class="page-item {% if not withdrawals.has_next %}disabled{% endif %}">
+                            <a class="page-link" href="{{ url_for('branch.bank_gateway_withdrawals', page=withdrawals.next_num, status=status_filter, client_id=client_filter, search=search) }}">Next</a>
+                        </li>
+                    </ul>
+                </nav>
+            </div>
+            {% endif %}
+            {% else %}
+            <div class="text-center py-5">
+                <i class="bi bi-inbox fs-1 text-muted"></i>
+                <p class="text-muted mt-3">No withdrawal requests found</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<style>
+.bg-gradient-warning {
+    background: linear-gradient(135deg, #ffc107 0%, #e0a800 100%);
+}
+.bg-gradient-success {
+    background: linear-gradient(135deg, #0f9b0f 0%, #0d7c0d 100%);
+}
+.bg-gradient-info {
+    background: linear-gradient(135deg, #17a2b8 0%, #138496 100%);
+}
+</style>
+{% endblock %}

@@ -3,6 +3,7 @@ API Key Management Models for Client API Access
 Enhanced for Commission-Based vs Flat-Rate Client Models
 """
 from datetime import datetime, timedelta
+from ..utils.timezone import now_eest
 from app.extensions import db
 from .base import BaseModel
 import secrets
@@ -137,7 +138,7 @@ class ClientApiKey(BaseModel):
         
         expires_at = None
         if expires_days:
-            expires_at = datetime.utcnow() + timedelta(days=expires_days)
+            expires_at = now_eest() + timedelta(days=expires_days)
         
         api_key = cls(
             client_id=client_id,
@@ -165,9 +166,13 @@ class ClientApiKey(BaseModel):
         key_prefix = key[:8] + '...'
         key_hash = cls.hash_key(key)
         
+        # Generate secret key and webhook secret
+        secret_key = secrets.token_hex(32)
+        webhook_secret = secrets.token_hex(24)
+        
         expires_at = None
         if expires_days:
-            expires_at = datetime.utcnow() + timedelta(days=expires_days)
+            expires_at = now_eest() + timedelta(days=expires_days)
         
         api_key = cls(
             client_id=client_id,
@@ -175,6 +180,8 @@ class ClientApiKey(BaseModel):
             key=key,  # We store the key temporarily for returning to admin
             key_prefix=key_prefix,
             key_hash=key_hash,
+            secret_key=secret_key,
+            webhook_secret=webhook_secret,
             permissions=permissions or [],
             rate_limit=rate_limit,
             expires_at=expires_at,
@@ -184,8 +191,8 @@ class ClientApiKey(BaseModel):
         db.session.add(api_key)
         db.session.commit()
         
-        # Return the key one time only
-        return api_key, key
+        # Return the API key object (contains key, secret_key, webhook_secret)
+        return api_key
     
     @classmethod
     def create_for_client(cls, client, name, permissions=None, rate_limit=60, expires_at=None):

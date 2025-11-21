@@ -1,0 +1,135 @@
+{% extends 'owner/base.html' %}
+
+{% block title %}Security Center - Owner Panel{% endblock %}
+
+{% block content %}
+<div class="d-flex flex-column flex-md-row align-items-center justify-content-between mb-4">
+    <div>
+        <h1 class="h3 mb-1 cyber-title">Security Operations</h1>
+        <p class="text-muted mb-0 cyber-subtitle">Investigate suspicious activity across owners, admins, and client portals.</p>
+    </div>
+</div>
+
+<div class="row g-4 mb-4">
+    <div class="col-xl-4 col-md-6">
+        <div class="card stats-card primary h-100">
+            <div class="card-body d-flex align-items-center">
+                <div class="flex-grow-1">
+                    <h6 class="text-uppercase fw-bold mb-1">Recent Events</h6>
+                    <h3 class="mb-0">{{ stats.recent_events }}</h3>
+                </div>
+                <div class="icon-bg">
+                    <i class="bi bi-clock-history"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-xl-4 col-md-6">
+        <div class="card stats-card success h-100">
+            <div class="card-body d-flex align-items-center">
+                <div class="flex-grow-1">
+                    <h6 class="text-uppercase fw-bold mb-1">Active Users</h6>
+                    <h3 class="mb-0">{{ stats.active_users }}</h3>
+                </div>
+                <div class="icon-bg">
+                    <i class="bi bi-person-check"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-xl-4 col-md-6">
+        <div class="card stats-card danger h-100">
+            <div class="card-body d-flex align-items-center">
+                <div class="flex-grow-1">
+                    <h6 class="text-uppercase fw-bold mb-1">Failed Events</h6>
+                    <h3 class="mb-0">{{ stats.failed_events }}</h3>
+                </div>
+                <div class="icon-bg">
+                    <i class="bi bi-exclamation-triangle"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-4">
+    <div class="col-lg-7">
+        <div class="card shadow-sm h-100">
+            <div class="card-header bg-transparent border-bottom d-flex align-items-center justify-content-between">
+                <h5 class="mb-0"><i class="bi bi-shield-lock me-2 text-primary"></i>Recent Security Events</h5>
+                <span class="text-muted small">Last {{ recent_events|length }} entries</span>
+            </div>
+            <div class="card-body p-0">
+                {% if recent_events %}
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0 align-middle">
+                            <thead class="table-dark">
+                                <tr>
+                                    <th>User</th>
+                                    <th>Type</th>
+                                    <th>Result</th>
+                                    <th>IP</th>
+                                    <th class="text-end">Timestamp</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for event in recent_events %}
+                                <tr>
+                                    <td>{{ event.username }}</td>
+                                    <td class="text-muted small text-uppercase">{{ event.user_type }}</td>
+                                    <td>
+                                        {% if event.success %}
+                                            <span class="badge bg-success">Success</span>
+                                        {% else %}
+                                            <span class="badge bg-danger">Failed</span>
+                                        {% endif %}
+                                    </td>
+                                    <td class="text-muted small">{{ event.ip_address }}</td>
+                                    <td class="text-end text-muted small">
+                                        {{ event.login_at.strftime('%Y-%m-%d %H:%M') if event.login_at else '—' }}
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <div class="text-center py-5">
+                        <i class="bi bi-shield-lock fa-3x text-muted mb-3"></i>
+                        <h6 class="text-muted">No security events yet</h6>
+                        <p class="text-muted small mb-0">Authentication history will surface here for visibility.</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-5">
+        <div class="card shadow-sm h-100">
+            <div class="card-header bg-transparent border-bottom d-flex align-items-center justify-content-between">
+                <h5 class="mb-0"><i class="bi bi-eye-slash me-2 text-warning"></i>Suspicious Activity</h5>
+                <span class="text-muted small">Last hour anomalies</span>
+            </div>
+            <div class="card-body">
+                {% if suspicious_activity %}
+                    <ul class="list-group list-group-flush">
+                        {% for item in suspicious_activity %}
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            <div>
+                                <div class="fw-semibold">IP: {{ item.ip_address }}</div>
+                                <div class="text-muted small">Attempts: {{ item.attempts }}</div>
+                            </div>
+                            <span class="badge bg-danger">{{ item.last_attempt.strftime('%H:%M') if item.last_attempt else '—' }}</span>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                {% else %}
+                    <div class="text-center py-4">
+                        <i class="bi bi-eye-slash fa-2x text-muted mb-2"></i>
+                        <p class="text-muted small mb-0">No suspicious login bursts detected.</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

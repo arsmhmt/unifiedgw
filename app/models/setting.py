@@ -1,4 +1,5 @@
 from datetime import datetime
+from ..utils.timezone import now_eest
 from enum import Enum
 from app.extensions import db
 
@@ -83,7 +84,7 @@ class Setting(db.Model):
         setting = cls.get_setting(key)
         if setting:
             setting.value = value
-            setting.updated_at = datetime.utcnow()
+            setting.updated_at = now_eest()
             db.session.commit()
             return setting
         return None

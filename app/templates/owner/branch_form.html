@@ -1,0 +1,166 @@
+{% extends 'owner/base.html' %}
+
+{% block title %}{{ action }} Branch - Owner Panel{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Page Heading -->
+    <div class="d-flex flex-column flex-md-row align-items-center justify-content-between mb-4">
+        <div class="mb-3 mb-md-0">
+            <h1 class="h3 mb-1 text-gray-800">{{ action }} Branch & Superadmin Account</h1>
+            <p class="text-muted mb-0">Create a new branch with its own superadmin account for accessing the superadmin panel.</p>
+        </div>
+    </div>
+
+    <!-- Information Notice -->
+    <div class="alert alert-info" role="alert">
+        <i class="fas fa-user-shield me-2"></i>
+        <strong>Create Superadmin:</strong> Each branch gets its own superadmin account with full access to the superadmin panel. The branch will use these credentials to manage the system.
+    </div>
+
+    <!-- Form -->
+    <div class="row">
+        <div class="col-lg-8">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Branch Information</h6>
+                </div>
+                <div class="card-body">
+                    <form method="post">
+                        {{ form.hidden_tag() }}
+
+                        <div class="form-group">
+                            <label class="text-cyber-primary font-weight-bold">
+                                <i class="fas fa-robot me-2"></i>SuperAdmin Node Name
+                            </label>
+                            {{ form.name(class="form-control", placeholder="e.g., Quantum Node Alpha") }}
+                            {% if form.name.errors %}
+                                {% for error in form.name.errors %}
+                                    <small class="text-danger">{{ error }}</small>
+                                {% endfor %}
+                            {% endif %}
+                        </div>
+
+                        <!-- Superadmin Account Section -->
+                        <div class="form-group">
+                            <h6 class="font-weight-bold text-cyber-primary mt-4 mb-3">
+                                <i class="fas fa-user-ninja me-2"></i>SuperAdmin Neural Network Credentials
+                            </h6>
+                        </div>
+
+                        <div class="form-group">
+                            {{ form.superadmin_username.label }}
+                            {{ form.superadmin_username(class="form-control") }}
+                            {% if form.superadmin_username.errors %}
+                                {% for error in form.superadmin_username.errors %}
+                                    <small class="text-danger">{{ error }}</small>
+                                {% endfor %}
+                            {% endif %}
+                        </div>
+
+                        <div class="form-group">
+                            {{ form.superadmin_email.label }}
+                            {{ form.superadmin_email(class="form-control") }}
+                            {% if form.superadmin_email.errors %}
+                                {% for error in form.superadmin_email.errors %}
+                                    <small class="text-danger">{{ error }}</small>
+                                {% endfor %}
+                            {% endif %}
+                        </div>
+
+                        <div class="form-group">
+                            {{ form.superadmin_password.label }}
+                            {{ form.superadmin_password(class="form-control", placeholder="Leave blank to keep current password (edit only)") }}
+                            {% if form.superadmin_password.errors %}
+                                {% for error in form.superadmin_password.errors %}
+                                    <small class="text-danger">{{ error }}</small>
+                                {% endfor %}
+                            {% endif %}
+                        </div>
+
+                        <div class="form-row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    {{ form.superadmin_first_name.label }}
+                                    {{ form.superadmin_first_name(class="form-control") }}
+                                    {% if form.superadmin_first_name.errors %}
+                                        {% for error in form.superadmin_first_name.errors %}
+                                            <small class="text-danger">{{ error }}</small>
+                                        {% endfor %}
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    {{ form.superadmin_last_name.label }}
+                                    {{ form.superadmin_last_name(class="form-control") }}
+                                    {% if form.superadmin_last_name.errors %}
+                                        {% for error in form.superadmin_last_name.errors %}
+                                            <small class="text-danger">{{ error }}</small>
+                                        {% endfor %}
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            {{ form.address.label }}
+                            {{ form.address(class="form-control", rows=3) }}
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    {{ form.city.label }}
+                                    {{ form.city(class="form-control") }}
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    {{ form.country.label }}
+                                    {{ form.country(class="form-control") }}
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    {{ form.postal_code.label }}
+                                    {{ form.postal_code(class="form-control") }}
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    {{ form.phone.label }}
+                                    {{ form.phone(class="form-control") }}
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            {{ form.email.label }}
+                            {{ form.email(class="form-control") }}
+                        </div>
+
+                        <div class="form-group">
+                            {{ form.webhook_url.label }}
+                            {{ form.webhook_url(class="form-control") }}
+                        </div>
+
+                        <div class="form-check">
+                            {{ form.is_active() }}
+                            {{ form.is_active.label }}
+                        </div>
+
+                        <div class="form-group mt-3">
+                            {{ form.submit(class="btn btn-cyber me-2") }}
+                            <a href="{{ url_for('owner.list_branches') }}" class="btn btn-cyber-outline">Cancel</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

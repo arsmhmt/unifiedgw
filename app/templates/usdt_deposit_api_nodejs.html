@@ -1,0 +1,234 @@
+{% extends "base.html" %}
+
+{% block title %}Node.js USDT Deposit API Guide for Betting Platforms | PayCrypt{% endblock %}
+
+{% block meta_tags %}
+<meta name="description" content="Node.js integration guide for PayCrypt's USDT deposit API, with fetch/Express and webhook examples for betting platforms and casinos.">
+<link rel="canonical" href="{{ request.url }}">
+
+<!-- Open Graph -->
+<meta property="og:title" content="Node.js USDT Deposit API Guide for Betting Platforms | PayCrypt">
+<meta property="og:description" content="Step-by-step Node.js examples for creating USDT deposits and handling PayCrypt webhooks in betting platforms.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="{{ request.url }}">
+
+<!-- JSON-LD Schema -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "TechArticle",
+  "headline": "Node.js USDT Deposit API Integration Guide for Betting Platforms",
+  "description": "Node.js examples for integrating PayCrypt's USDT deposit API, including deposit creation and webhook handling with Express.",
+  "publisher": {
+    "@type": "Organization",
+    "name": "PayCrypt",
+    "url": "{{ request.url_root }}"
+  }
+}
+</script>
+{% endblock %}
+
+{% block content %}
+<section class="py-5 bg-dark text-white">
+  <div class="container py-md-5">
+    <div class="row g-4 align-items-center">
+      <div class="col-lg-7">
+        <span class="badge bg-warning text-dark mb-3 px-3 py-2">Node.js integration guide</span>
+        <h1 class="display-5 fw-bold mb-3">Node.js USDT Deposit API Guide</h1>
+        <p class="lead mb-3">
+          This guide shows how to call the PayCrypt USDT deposit API from <strong>Node.js</strong> and receive webhooks
+          when deposits are confirmed for your betting or casino application.
+        </p>
+        <ul class="list-unstyled small mb-4">
+          <li class="d-flex gap-2 mb-2"><i class="fas fa-check-circle text-success mt-1"></i><span>Create USDT deposits using <code>fetch</code> or <code>axios</code>.</span></li>
+          <li class="d-flex gap-2 mb-2"><i class="fas fa-check-circle text-success mt-1"></i><span>Handle webhooks in an Express route.</span></li>
+          <li class="d-flex gap-2 mb-2"><i class="fas fa-check-circle text-success mt-1"></i><span>Update balances only when status is <code>confirmed</code>.</span></li>
+        </ul>
+        <a href="https://t.me/paycryptonline" class="btn btn-warning fw-semibold px-4" target="_blank" rel="noopener">
+          <i class="fab fa-telegram me-2"></i> Get API Keys on Telegram
+        </a>
+      </div>
+      <div class="col-lg-5">
+        <div class="bg-secondary bg-opacity-25 rounded-4 p-3 p-md-4 small">
+          <div class="d-flex justify-content-between align-items-center mb-2">
+            <span class="text-uppercase text-muted fw-semibold">Endpoint</span>
+            <span class="badge bg-success">POST</span>
+          </div>
+<pre class="mb-0 small text-white"><code>POST /api/v1/crypto/deposits
+Authorization: Bearer &lt;YOUR_API_KEY&gt;
+Content-Type: application/json
+
+{
+  "fiat_amount": 100,
+  "fiat_currency": "USD",
+  "crypto_currency": "USDT",
+  "crypto_network": "TRC20"
+}</code></pre>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="py-5">
+  <div class="container">
+    <div class="row g-4">
+      <div class="col-lg-6">
+        <h2 class="h3 fw-bold mb-3">1. Create a USDT deposit from Node.js</h2>
+        <p class="text-muted small mb-3">
+          The example below uses the built-in <code>fetch</code> API available in recent Node.js versions.
+          Replace <code>&lt;API_KEY&gt;</code> with your PayCrypt API key.
+        </p>
+<pre class="bg-dark text-light rounded-3 p-3 small"><code class="language-javascript">const API_BASE = 'https://paycrypt.online';
+const API_KEY = process.env.PAYCRYPT_API_KEY || '&lt;API_KEY&gt;';
+
+async function createDeposit() {
+  const res = await fetch(`${API_BASE}/api/v1/crypto/deposits`, {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${API_KEY}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      fiat_amount: 250,
+      fiat_currency: 'USD',
+      crypto_currency: 'USDT',
+      crypto_network: 'TRC20',
+    }),
+  });
+
+  console.log(res.status);
+  const data = await res.json();
+  console.log(data);
+}
+
+createDeposit().catch(console.error);</code></pre>
+        <p class="text-muted small mt-3 mb-0">
+          Store the response (especially <code>payment_id</code>, <code>crypto_amount</code>, and
+          <code>deposit_address</code>) alongside your internal ticket or session.
+        </p>
+      </div>
+      <div class="col-lg-6">
+        <h2 class="h3 fw-bold mb-3">2. Show deposit details in your app</h2>
+        <p class="text-muted small mb-3">
+          In your cashier UI (React, Vue, server-rendered templates, etc.), render the returned address and QR code.
+        </p>
+        <ul class="list-unstyled small mb-3">
+          <li class="mb-2"><i class="fas fa-arrow-right text-secondary me-2"></i>Persist the response JSON with your own player or bet ID.</li>
+          <li class="mb-2"><i class="fas fa-arrow-right text-secondary me-2"></i>Show the address and QR so players can send USDT.</li>
+          <li class="mb-2"><i class="fas fa-arrow-right text-secondary me-2"></i>Only credit the balance after receiving the webhook.</li>
+        </ul>
+        <p class="text-muted small mb-0">
+          The exact stack is up to you; PayCrypt focuses on the deposit and confirmation layer.
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="py-5 bg-light">
+  <div class="container">
+    <div class="row g-4">
+      <div class="col-lg-6">
+        <h2 class="h3 fw-bold mb-3">3. Handle the webhook in Express</h2>
+        <p class="text-muted small mb-3">
+          Configure your webhook URL in the PayCrypt dashboard, for example
+          <code>https://your-domain.com/webhooks/paycrypt/deposit</code>. When a deposit is confirmed, PayCrypt
+          sends a POST request with JSON to that URL.
+        </p>
+<pre class="bg-dark text-light rounded-3 p-3 small"><code class="language-javascript">import express from 'express';
+
+const app = express();
+app.use(express.json());
+
+app.post('/webhooks/paycrypt/deposit', (req, res) =&gt; {
+  const data = req.body || {};
+
+  const paymentId = data.payment_id;
+  const status = data.status;
+  const amount = data.amount;
+  const currency = data.currency;
+
+  if (status === 'confirmed' &amp;&amp; paymentId) {
+    // TODO: look up the pending deposit by paymentId
+    // and credit the player's balance in your system.
+  }
+
+  // Respond quickly so PayCrypt treats the webhook as delivered.
+  res.json({ received: true });
+});
+
+app.listen(3000, () =&gt; {
+  console.log('Listening for PayCrypt webhooks on port 3000');
+});</code></pre>
+        <p class="text-muted small mt-3 mb-0">
+          In production you may want to add authentication, logging, and idempotency protection around this route.
+        </p>
+      </div>
+      <div class="col-lg-6">
+        <h2 class="h3 fw-bold mb-3">4. Operational considerations</h2>
+        <p class="text-muted small mb-3">
+          For betting and casino use cases, consider how deposits fit into your wider monitoring and compliance stack.
+        </p>
+        <ul class="list-unstyled small mb-3">
+          <li class="mb-2"><i class="fas fa-clipboard-check text-secondary me-2"></i>Log deposit creation and webhook events with internal IDs.</li>
+          <li class="mb-2"><i class="fas fa-clipboard-check text-secondary me-2"></i>Align reporting with your license and auditor expectations.</li>
+          <li class="mb-2"><i class="fas fa-clipboard-check text-secondary me-2"></i>Combine PayCrypt with your own KYC/AML and risk scoring systems.</li>
+        </ul>
+        <p class="text-muted small mb-0">
+          This page is technical guidance only. Work with your own legal team for licensing and compliance decisions.
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="py-5">
+  <div class="container">
+    <div class="row g-3">
+      <div class="col-md-3">
+        <a href="{{ url_for('main.usdt_deposit_api') }}" class="card border-0 shadow-sm text-decoration-none h-100">
+          <div class="card-body">
+            <h5 class="fw-bold text-dark">USDT Deposit API Overview</h5>
+            <p class="text-muted small mb-0">Main endpoint, JSON examples, and webhook format.</p>
+          </div>
+        </a>
+      </div>
+      <div class="col-md-3">
+        <a href="{{ url_for('main.betting_crypto_gateway') }}" class="card border-0 shadow-sm text-decoration-none h-100">
+          <div class="card-body">
+            <h5 class="fw-bold text-dark">Betting Crypto Gateway</h5>
+            <p class="text-muted small mb-0">How PayCrypt connects to your betting flows.</p>
+          </div>
+        </a>
+      </div>
+      <div class="col-md-3">
+        <a href="{{ url_for('main.crypto_gateway_for_casinos') }}" class="card border-0 shadow-sm text-decoration-none h-100">
+          <div class="card-body">
+            <h5 class="fw-bold text-dark">Crypto Gateway for Casinos</h5>
+            <p class="text-muted small mb-0">Multi-brand casino setups and reporting.</p>
+          </div>
+        </a>
+      </div>
+      <div class="col-md-3">
+        <a href="{{ url_for('tools.index') }}" class="card border-0 shadow-sm text-decoration-none h-100">
+          <div class="card-body">
+            <h5 class="fw-bold text-dark">Free Crypto Tools</h5>
+            <p class="text-muted small mb-0">RugCheck, Wallet Profiler, and other due diligence tools.</p>
+          </div>
+        </a>
+      </div>
+    </div>
+    <div class="row g-3 mt-3">
+      <div class="col-md-3">
+        <a href="{{ url_for('main.pricing') }}" class="card border-0 shadow-sm text-decoration-none h-100">
+          <div class="card-body">
+            <h5 class="fw-bold text-dark">Pricing</h5>
+            <p class="text-muted small mb-0">See setup tiers for Node.js-based betting and casino stacks.</p>
+          </div>
+        </a>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}

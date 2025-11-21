@@ -9,6 +9,7 @@ import time
 import json
 import logging
 from datetime import datetime, timedelta
+from ..utils.timezone import now_eest
 from typing import Dict, Optional, Tuple, Any
 from flask import Blueprint, request, jsonify, current_app
 from functools import wraps
@@ -288,7 +289,7 @@ def test_client_webhook(client_id):
         test_payload = {
             'event_type': 'test',
             'data': {
-                'timestamp': datetime.utcnow().isoformat(),
+                'timestamp': now_eest().isoformat(),
                 'message': 'This is a test webhook'
             }
         }
@@ -346,7 +347,7 @@ def setup_webhook_security(client: Client, webhook_url: str, events: list) -> Di
             'webhook_secret': webhook_secret,
             'webhook_events': events,
             'webhook_enabled': True,
-            'webhook_created_at': datetime.utcnow().isoformat()
+            'webhook_created_at': now_eest().isoformat()
         })
         
         client.settings = settings
@@ -402,7 +403,7 @@ def send_webhook(client: Client, event_type: str, data: Dict) -> bool:
         payload = {
             'event_type': event_type,
             'data': data,
-            'timestamp': datetime.utcnow().isoformat(),
+            'timestamp': now_eest().isoformat(),
             'client_id': client.id
         }
         

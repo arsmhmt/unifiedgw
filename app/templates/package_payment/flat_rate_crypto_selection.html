@@ -24,7 +24,7 @@
                             </h5>
                             <p class="mb-1"><strong>Amount:</strong> ${{ "%.2f"|format(billing_amount) }} USD</p>
                             <p class="mb-1"><strong>Billing Cycle:</strong> Every 30 days</p>
-                            <p class="mb-0"><strong>Service Period:</strong> {{ period_start.strftime('%Y-%m-%d') }} to {{ period_end.strftime('%Y-%m-%d') }}</p>
+                            <p class="mb-0"><strong>Service Period:</strong> {{ period_start|datetime_eest('%Y-%m-%d') }} to {{ period_end|datetime_eest('%Y-%m-%d') }}</p>
                             {% else %}
                             <h5 class="text-warning mb-2">
                                 <i class="fas fa-star me-2"></i>
@@ -35,7 +35,7 @@
                             <p class="mb-1 text-success"><strong>You Save:</strong> ${{ "%.2f"|format(package.annual_savings) }} per year!</p>
                             {% endif %}
                             <p class="mb-1"><strong>Billing Cycle:</strong> Every 365 days</p>
-                            <p class="mb-0"><strong>Service Period:</strong> {{ period_start.strftime('%Y-%m-%d') }} to {{ period_end.strftime('%Y-%m-%d') }}</p>
+                            <p class="mb-0"><strong>Service Period:</strong> {{ period_start|datetime_eest('%Y-%m-%d') }} to {{ period_end|datetime_eest('%Y-%m-%d') }}</p>
                             {% endif %}
                         </div>
                     </div>

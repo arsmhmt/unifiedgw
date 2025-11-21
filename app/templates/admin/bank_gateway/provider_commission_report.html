@@ -1,0 +1,339 @@
+{% extends "admin/admin_base.html" %}
+
+{% block title %}Provider Commission Report - {{ provider.display_name }} - Bank Gateway Admin{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <!-- Page Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="mb-1">
+                <i class="bi bi-file-text me-2"></i>Provider Commission Report
+            </h2>
+            <p class="text-muted mb-0">
+                <strong>{{ provider.display_name }}</strong> ({{ provider.username }})
+            </p>
+        </div>
+        <div>
+            <a href="{{ url_for('admin.provider_commissions') }}" class="btn btn-outline-secondary me-2">
+                <i class="bi bi-arrow-left me-2"></i>Back to Commissions
+            </a>
+            <button onclick="window.print()" class="btn btn-outline-primary">
+                <i class="bi bi-printer me-2"></i>Print Report
+            </button>
+        </div>
+    </div>
+
+    <!-- Date Range Filter -->
+    <div class="card border-0 shadow-sm mb-4">
+        <div class="card-body">
+            <form method="GET" action="{{ url_for('admin.provider_commission_report', provider_id=provider.id) }}" class="row g-3 align-items-end">
+                <div class="col-md-4">
+                    <label class="form-label small text-muted">Date From</label>
+                    <input type="date" name="date_from" class="form-control" value="{{ date_from }}" required>
+                </div>
+                
+                <div class="col-md-4">
+                    <label class="form-label small text-muted">Date To</label>
+                    <input type="date" name="date_to" class="form-control" value="{{ date_to }}" required>
+                </div>
+                
+                <div class="col-md-4">
+                    <button type="submit" class="btn btn-primary w-100">
+                        <i class="bi bi-calendar-range me-2"></i>Generate Report
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Statistics Overview -->
+    <div class="row g-3 mb-4">
+        <div class="col-md-3">
+            <div class="card bg-gradient-primary text-white border-0">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="flex-shrink-0">
+                            <i class="bi bi-currency-dollar fs-2"></i>
+                        </div>
+                        <div class="flex-grow-1 ms-3">
+                            <h6 class="text-white-50 mb-1">Total Earned</h6>
+                            <h4 class="mb-0">{{ "%.2f"|format(stats.total_earned) }} TRY</h4>
+                            <small class="d-block">{{ stats.commission_count }} commissions</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-3">
+            <div class="card bg-gradient-success text-white border-0">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="flex-shrink-0">
+                            <i class="bi bi-check-circle fs-2"></i>
+                        </div>
+                        <div class="flex-grow-1 ms-3">
+                            <h6 class="text-white-50 mb-1">Total Paid</h6>
+                            <h4 class="mb-0">{{ "%.2f"|format(stats.total_paid) }} TRY</h4>
+                            <small class="d-block">{{ stats.paid_count }} payments</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-3">
+            <div class="card bg-gradient-danger text-white border-0">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="flex-shrink-0">
+                            <i class="bi bi-exclamation-circle fs-2"></i>
+                        </div>
+                        <div class="flex-grow-1 ms-3">
+                            <h6 class="text-white-50 mb-1">Total Unpaid</h6>
+                            <h4 class="mb-0">{{ "%.2f"|format(stats.total_unpaid) }} TRY</h4>
+                            <small class="d-block">{{ stats.unpaid_count }} pending</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-3">
+            <div class="card bg-gradient-info text-white border-0">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="flex-shrink-0">
+                            <i class="bi bi-percent fs-2"></i>
+                        </div>
+                        <div class="flex-grow-1 ms-3">
+                            <h6 class="text-white-50 mb-1">Payment Rate</h6>
+                            <h4 class="mb-0">
+                                {% if stats.total_earned > 0 %}
+                                {{ "%.1f"|format((stats.total_paid / stats.total_earned) * 100) }}%
+                                {% else %}
+                                0%
+                                {% endif %}
+                            </h4>
+                            <small class="d-block">of total earned</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Commission Breakdown -->
+    <div class="row g-3 mb-4">
+        <div class="col-md-6">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white border-bottom">
+                    <h6 class="mb-0">
+                        <i class="bi bi-pie-chart me-2"></i>By Transaction Type
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-6 text-center">
+                            <div class="mb-2">
+                                <i class="bi bi-arrow-down-circle text-success fs-3"></i>
+                            </div>
+                            <h5 class="text-success mb-1">{{ "%.2f"|format(stats.deposit_commissions) }} TRY</h5>
+                            <small class="text-muted">Deposit Commissions</small>
+                        </div>
+                        <div class="col-6 text-center">
+                            <div class="mb-2">
+                                <i class="bi bi-arrow-up-circle text-warning fs-3"></i>
+                            </div>
+                            <h5 class="text-warning mb-1">{{ "%.2f"|format(stats.withdraw_commissions) }} TRY</h5>
+                            <small class="text-muted">Withdrawal Commissions</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-6">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white border-bottom">
+                    <h6 class="mb-0">
+                        <i class="bi bi-graph-up me-2"></i>Provider Information
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <table class="table table-sm table-borderless mb-0">
+                        <tr>
+                            <td class="text-muted" width="50%">Username:</td>
+                            <td><strong>{{ provider.username }}</strong></td>
+                        </tr>
+                        <tr>
+                            <td class="text-muted">Display Name:</td>
+                            <td><strong>{{ provider.display_name }}</strong></td>
+                        </tr>
+                        <tr>
+                            <td class="text-muted">Status:</td>
+                            <td>
+                                {% if provider.is_blocked %}
+                                <span class="badge bg-danger">Blocked</span>
+                                {% else %}
+                                <span class="badge bg-success">Active</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="text-muted">Report Period:</td>
+                            <td><strong>{{ date_from }} to {{ date_to }}</strong></td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Detailed Commission List -->
+    <div class="card border-0 shadow-sm">
+        <div class="card-header bg-white border-bottom">
+            <h5 class="mb-0">
+                <i class="bi bi-table me-2"></i>Commission Details
+                <span class="badge bg-secondary">{{ commissions|length }} records</span>
+            </h5>
+        </div>
+        <div class="card-body p-0">
+            {% if commissions %}
+            <div class="table-responsive">
+                <table class="table table-hover mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th width="5%">#</th>
+                            <th width="15%">Date</th>
+                            <th width="15%">Type</th>
+                            <th width="15%">Amount</th>
+                            <th width="20%">Transaction Ref</th>
+                            <th width="15%">Status</th>
+                            <th width="15%">Payment Ref</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for commission in commissions %}
+                        <tr>
+                            <td class="text-muted small">{{ commission.id }}</td>
+                            <td>
+                                <small>{{ commission.created_at.strftime('%Y-%m-%d') }}</small><br>
+                                <small class="text-muted">{{ commission.created_at.strftime('%H:%M:%S') }}</small>
+                            </td>
+                            <td>
+                                {% if commission.transaction_type == 'deposit' %}
+                                <span class="badge bg-success">
+                                    <i class="bi bi-arrow-down-circle me-1"></i>Deposit
+                                </span>
+                                {% else %}
+                                <span class="badge bg-warning text-dark">
+                                    <i class="bi bi-arrow-up-circle me-1"></i>Withdraw
+                                </span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <strong class="text-primary">{{ "%.2f"|format(commission.amount) }}</strong>
+                                <span class="text-muted">{{ commission.currency }}</span>
+                            </td>
+                            <td>
+                                <code class="small">{{ commission.related_transaction_ref or 'N/A' }}</code>
+                            </td>
+                            <td>
+                                {% if commission.is_paid %}
+                                <span class="badge bg-success">
+                                    <i class="bi bi-check-circle me-1"></i>Paid
+                                </span>
+                                <br><small class="text-muted">{{ commission.paid_at.strftime('%Y-%m-%d') if commission.paid_at else '' }}</small>
+                                {% else %}
+                                <span class="badge bg-danger">
+                                    <i class="bi bi-clock-history me-1"></i>Unpaid
+                                </span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if commission.is_paid and commission.payment_reference %}
+                                <code class="small">{{ commission.payment_reference }}</code>
+                                {% else %}
+                                <span class="text-muted">-</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                    <tfoot class="table-light">
+                        <tr>
+                            <th colspan="3" class="text-end">Totals:</th>
+                            <th>
+                                <strong class="text-primary">{{ "%.2f"|format(stats.total_earned) }} TRY</strong>
+                            </th>
+                            <th colspan="3">
+                                <span class="text-success me-3">Paid: {{ "%.2f"|format(stats.total_paid) }} TRY</span>
+                                <span class="text-danger">Unpaid: {{ "%.2f"|format(stats.total_unpaid) }} TRY</span>
+                            </th>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+            {% else %}
+            <div class="text-center py-5">
+                <i class="bi bi-inbox fs-1 text-muted"></i>
+                <p class="text-muted mt-3">No commission records found for the selected period</p>
+                <small class="text-muted">Try adjusting the date range</small>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Print Footer -->
+    <div class="d-none d-print-block mt-5 text-center text-muted">
+        <hr>
+        <small>
+            Generated on {{ now().strftime('%Y-%m-%d %H:%M:%S') }} | PayCrypt Bank Gateway System<br>
+            This is an automated report. No signature required.
+        </small>
+    </div>
+</div>
+
+<style>
+/* Print styles */
+@media print {
+    .btn, nav, .modal {
+        display: none !important;
+    }
+    
+    .card {
+        page-break-inside: avoid;
+        border: 1px solid #dee2e6 !important;
+        box-shadow: none !important;
+    }
+    
+    .card-header {
+        background-color: #f8f9fa !important;
+        print-color-adjust: exact;
+    }
+}
+
+/* Gradient backgrounds */
+.bg-gradient-primary {
+    background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+}
+
+.bg-gradient-success {
+    background: linear-gradient(135deg, #0f9b0f 0%, #0d7c0d 100%);
+}
+
+.bg-gradient-danger {
+    background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+}
+
+.bg-gradient-info {
+    background: linear-gradient(135deg, #17a2b8 0%, #138496 100%);
+}
+
+.table-hover tbody tr:hover {
+    background-color: rgba(255, 165, 0, 0.05);
+}
+</style>
+{% endblock %}

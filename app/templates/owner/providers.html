@@ -1,0 +1,129 @@
+{% extends 'owner/base.html' %}
+
+{% block title %}Provider Network - Owner Panel{% endblock %}
+
+{% block content %}
+<div class="d-flex flex-column flex-md-row align-items-center justify-content-between mb-4">
+    <div>
+        <h1 class="h3 mb-1 cyber-title">Provider Network</h1>
+        <p class="text-muted mb-0 cyber-subtitle">Manage Teminci bank partners and connected payout accounts.</p>
+    </div>
+</div>
+
+<div class="row g-4 mb-4">
+    <div class="col-xl-3 col-md-6">
+        <div class="card stats-card primary h-100">
+            <div class="card-body d-flex align-items-center">
+                <div class="flex-grow-1">
+                    <h6 class="text-uppercase fw-bold mb-1">Providers</h6>
+                    <h3 class="mb-0">{{ stats.total_providers }}</h3>
+                </div>
+                <div class="icon-bg">
+                    <i class="bi bi-handshake"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-xl-3 col-md-6">
+        <div class="card stats-card success h-100">
+            <div class="card-body d-flex align-items-center">
+                <div class="flex-grow-1">
+                    <h6 class="text-uppercase fw-bold mb-1">Active</h6>
+                    <h3 class="mb-0">{{ stats.active_providers }}</h3>
+                </div>
+                <div class="icon-bg">
+                    <i class="bi bi-shield-check"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-xl-3 col-md-6">
+        <div class="card stats-card info h-100">
+            <div class="card-body d-flex align-items-center">
+                <div class="flex-grow-1">
+                    <h6 class="text-uppercase fw-bold mb-1">Bank Accounts</h6>
+                    <h3 class="mb-0">{{ stats.total_accounts }}</h3>
+                </div>
+                <div class="icon-bg">
+                    <i class="bi bi-bank"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-xl-3 col-md-6">
+        <div class="card stats-card warning h-100">
+            <div class="card-body d-flex align-items-center">
+                <div class="flex-grow-1">
+                    <h6 class="text-uppercase fw-bold mb-1">Pending Tx</h6>
+                    <h3 class="mb-0">{{ stats.pending_transactions }}</h3>
+                </div>
+                <div class="icon-bg">
+                    <i class="bi bi-arrow-repeat"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="card shadow-sm">
+    <div class="card-header bg-transparent border-bottom d-flex align-items-center justify-content-between">
+        <h5 class="mb-0"><i class="bi bi-handshake me-2 text-primary"></i>Teminci Providers</h5>
+        <span class="text-muted small">{{ providers|length }} result{{ providers|length != 1 and 's' or '' }}</span>
+    </div>
+    <div class="card-body p-0">
+        {% if providers %}
+        <div class="table-responsive">
+            <table class="table table-hover mb-0 align-middle">
+                <thead class="table-dark">
+                    <tr>
+                        <th>Provider</th>
+                        <th>Contact</th>
+                        <th>Status</th>
+                        <th class="text-center">Accounts</th>
+                        <th>Commission</th>
+                        <th class="text-end">Created</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for provider in providers %}
+                    <tr>
+                        <td>
+                            <div class="fw-semibold">{{ provider.name }}</div>
+                            <div class="text-muted small">User ID: {{ provider.user_id }}</div>
+                        </td>
+                        <td>
+                            <div>{{ provider.phone or '—' }}</div>
+                            <div class="text-muted small">{{ provider.user.email if provider.user else '—' }}</div>
+                        </td>
+                        <td>
+                            {% if provider.is_blocked %}
+                                <span class="badge bg-danger">Blocked</span>
+                            {% else %}
+                                <span class="badge bg-success">Active</span>
+                            {% endif %}
+                        </td>
+                        <td class="text-center">
+                            {{ account_map.get(provider.id, 0) }}
+                        </td>
+                        <td>
+                            <div class="small">Deposit: {{ provider.deposit_commission or 0 }}%</div>
+                            <div class="small">Withdraw: {{ provider.withdraw_commission or 0 }}%</div>
+                        </td>
+                        <td class="text-end text-muted small">
+                            {{ provider.created_at.strftime('%Y-%m-%d') if provider.created_at else '—' }}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="text-center py-5">
+            <i class="bi bi-handshake fa-3x text-muted mb-3"></i>
+            <h6 class="text-muted">No providers found</h6>
+            <p class="text-muted small mb-0">Connect Teminci partners through the administration console.</p>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

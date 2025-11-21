@@ -11,9 +11,10 @@ from app.models.enums import PaymentStatus, AuditActionType, CommissionSnapshott
 # Import models that don't have foreign key dependencies first
 from app.models.api_usage import ApiUsage
 from app.models.document import Document
-from app.models.notification import NotificationPreference, NotificationType, NotificationEvent
+from app.models.notification import NotificationPreference, NotificationType, NotificationEvent, AdminNotification, AdminNotificationType
 from app.models.report import Report, ReportType, ReportStatus
 from app.models.audit import AuditTrail
+from app.models.login_history import LoginHistory, LoginAttemptLimiter
 
 # For backward compatibility
 AuditLog = AuditTrail
@@ -26,14 +27,19 @@ __all__ = [
     'PlanType', 'BillingCycle', 'SubscriptionStatus',
     'WalletProvider', 'WalletProviderCurrency', 'WalletProviderTransaction', 'WalletBalance', 'WalletProviderType',
     'WithdrawalMethod', 'ClientApiKey', 'ApiKeyUsageLog',
+    'LoginHistory', 'LoginAttemptLimiter',
+    'ClientWallet', 'ClientPricingPlan', 'WalletType', 'WalletStatus', 'PricingPlan',
     # Add other models as needed
 ]
 
 # Import base models first (no foreign key dependencies)
 from app.models.client import Client, Invoice, ClientDocument, ClientNotificationPreference
 
+# Import Branch after Client
+from app.models.branch import Branch
+
 # Then import models that depend on Client but don't have other complex dependencies
-from app.models.client_wallet import ClientWallet, ClientPricingPlan
+from app.models.client_wallet import ClientWallet, ClientPricingPlan, WalletType, WalletStatus, PricingPlan
 
 # Then import models that have foreign key dependencies
 from app.models.transaction import Transaction
@@ -44,6 +50,9 @@ from app.models.currency import Currency, ClientBalance, ClientCommission, Curre
 
 # Import api_key after Client is defined to avoid circular imports
 from app.models.api_key import ClientApiKey, ApiKeyUsageLog
+
+# Backward compatibility alias for legacy imports
+ApiKey = ClientApiKey
 
 # Then import RecurringPayment before Payment since Payment references it
 from app.models.recurring_payment import RecurringPayment
@@ -78,6 +87,19 @@ from app.models.setting import Setting
 # Import wallet provider models
 from app.models.wallet_provider import WalletProvider, WalletProviderCurrency, WalletBalance, WalletProviderTransaction
 
+# Import bank gateway models (at the end to avoid circular imports)
+try:
+    # Bank Gateway Models
+    from app.models.bank_gateway import (
+        BankGatewayProvider, BankGatewayAccount, BankGatewayClientSite, 
+        BankGatewayAPIKey, BankGatewayTransaction, BankGatewayCommission, 
+        BankGatewayDepositRequest, BankGatewayWithdrawalRequest, 
+        BankGatewayProviderCommission
+    )
+except ImportError:
+    # Bank gateway models may not be available during initial setup
+    pass
+
 # Export enums directly
 PaymentStatus = PaymentStatus
 AuditActionType = AuditActionType
@@ -93,7 +115,7 @@ __all__ = [
     
     # Main models
     'User', 'AdminUser', 'Role',
-    'Client', 'ClientWallet', 'ClientPricingPlan', 'ClientSetting', 'ClientDocument', 'ClientNotificationPreference', 'Invoice',
+    'Client', 'Branch', 'ClientWallet', 'ClientPricingPlan', 'ClientSetting', 'ClientDocument', 'ClientNotificationPreference', 'Invoice',
     'Platform', 'PlatformType', 'PlatformSetting', 'PlatformIntegration', 'PlatformWebhook',
     'Payment', 'PaymentSession', 'RecurringPayment', 
     'Withdrawal', 'WithdrawalRequest', 'WithdrawalStatus',
@@ -122,5 +144,17 @@ __all__ = [
     'ClientPackage', 'Feature', 'PackageFeature', 'ClientSubscription', 'PackageActivationPayment', 'FlatRateSubscriptionPayment', 'SubscriptionBillingCycle', 'SubscriptionStatus',
     
     # Wallet Provider
-    'WalletProvider', 'WalletProviderCurrency', 'WalletBalance', 'WalletProviderTransaction'
+    'WalletProvider', 'WalletProviderCurrency', 'WalletBalance', 'WalletProviderTransaction',
+    
+    # Client Wallet
+    'ClientWallet', 'ClientPricingPlan', 'WalletType', 'WalletStatus', 'PricingPlan',
+    
+    # Bank Gateway
+    'BankGatewayProvider', 'BankGatewayAccount', 'BankGatewayClientSite', 
+    'BankGatewayAPIKey', 'BankGatewayTransaction', 'BankGatewayCommission', 
+    'BankGatewayDepositRequest', 'BankGatewayWithdrawalRequest', 
+    'BankGatewayProviderCommission',
+
+    # Legacy aliases
+    'ApiKey'
 ]

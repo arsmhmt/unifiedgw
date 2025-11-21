@@ -4,6 +4,7 @@ Handles different wallet/exchange providers for the payment gateway
 """
 
 from datetime import datetime
+from ..utils.timezone import now_eest
 from enum import Enum
 from app.extensions import db
 from sqlalchemy import func, event
@@ -108,7 +109,7 @@ class WalletProvider(db.Model):
     def update_health_status(self, status, error_message=None):
         """Update health check status"""
         self.health_status = status
-        self.last_health_check = datetime.utcnow()
+        self.last_health_check = now_eest()
         if error_message:
             self.last_error_message = error_message
         db.session.commit()
@@ -205,13 +206,13 @@ class WalletBalance(db.Model):
     """Current wallet balances across all providers"""
     __tablename__ = 'wallet_balances'
     __table_args__ = (
-        db.UniqueConstraint('provider_id', 'currency_code', name='unique_provider_balance'),
+        db.UniqueConstraint('provider_id', 'currency', name='unique_provider_balance'),
         {'extend_existing': True}
     )
     
     id = db.Column(db.Integer, primary_key=True)
     provider_id = db.Column(db.Integer, db.ForeignKey('wallet_providers.id'), nullable=False)
-    currency_code = db.Column(db.String(10), nullable=False)
+    currency = db.Column(db.String(10), nullable=False)
     
     # Balance Information
     available_balance = db.Column(db.Numeric(20, 8), default=0)
@@ -225,18 +226,14 @@ class WalletBalance(db.Model):
     # Relationships
     provider = db.relationship('WalletProvider', back_populates='balances')
     
-    __table_args__ = (
-        db.UniqueConstraint('provider_id', 'currency_code', name='unique_provider_balance'),
-    )
-    
     def __repr__(self):
-        return f'<WalletBalance {self.provider.name}-{self.currency_code}: {self.available_balance}>'
+        return f'<WalletBalance {self.provider.name}-{self.currency}: {self.available_balance}>'
     
     @classmethod
-    def get_total_balance(cls, currency_code):
+    def get_total_balance(cls, currency):
         """Get total balance across all active providers for a currency"""
         from app.models.wallet_provider import WalletProvider as WP
         return db.session.query(func.sum(cls.available_balance)).join(WP).filter(
-            cls.currency_code == currency_code,
+            cls.currency == currency,
             WP.is_active == True
         ).scalar() or 0

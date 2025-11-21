@@ -5,6 +5,7 @@ Audit logging utilities for the CPGateway application.
 from flask import request
 from flask_login import current_user
 from app.models.audit import AuditTrail
+from ..utils.timezone import now_eest
 from app.extensions import db
 from app.models.user import User
 from app.models.admin import AdminUser
@@ -87,7 +88,7 @@ def log_security_event(event_type: str, details: Dict[str, Any], user_id: Option
         enhanced_details = {
             'event_type': event_type,
             'severity': severity,
-            'timestamp': datetime.utcnow().isoformat(),
+            'timestamp': now_eest().isoformat(),
             'ip_address': ip_address,
             'user_agent': request.headers.get('User-Agent') if request else None,
             'endpoint': request.endpoint if request else None,
@@ -149,7 +150,7 @@ def log_admin_action(action: str, target_type: str, target_id: int, description:
             'target_type': target_type,
             'target_id': target_id,
             'description': description,
-            'timestamp': datetime.utcnow().isoformat(),
+            'timestamp': now_eest().isoformat(),
             'ip_address': request.remote_addr if request else None,
             'user_agent': request.headers.get('User-Agent') if request else None
         }
@@ -204,7 +205,7 @@ def log_api_usage(api_key: str, endpoint: str, method: str, response_code: int,
             'method': method,
             'response_code': response_code,
             'response_time_ms': response_time,
-            'timestamp': datetime.utcnow().isoformat(),
+            'timestamp': now_eest().isoformat(),
             'ip_address': request.remote_addr if request else None,
             'user_agent': request.headers.get('User-Agent') if request else None
         }
@@ -296,7 +297,7 @@ def get_security_events(hours: int = 24, severity: Optional[str] = None,
     try:
         from datetime import timedelta
         
-        since = datetime.utcnow() - timedelta(hours=hours)
+        since = now_eest() - timedelta(hours=hours)
         
         query = AuditTrail.query.filter(
             AuditTrail.action_type.like('security_%'),
@@ -331,7 +332,7 @@ def get_admin_activity(admin_id: Optional[int] = None, hours: int = 24) -> List[
     try:
         from datetime import timedelta
         
-        since = datetime.utcnow() - timedelta(hours=hours)
+        since = now_eest() - timedelta(hours=hours)
         
         query = AuditTrail.query.filter(
             AuditTrail.action_type.like('admin_%'),

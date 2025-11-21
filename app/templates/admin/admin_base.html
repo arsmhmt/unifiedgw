@@ -1,0 +1,21 @@
+{% extends 'admin/base.html' %}
+
+{#
+  Shared admin base template that wraps the primary admin layout and
+  exposes convenient hook blocks for child templates that previously
+  expected `admin_base.html`.
+#}
+
+{% block page_title %}
+    {% set _parent_page_title = super() %}
+    {% block page_title_content %}
+        {{ _parent_page_title }}
+    {% endblock %}
+{% endblock %}
+
+{% block content %}
+    {% set _parent_content = super() %}
+    {% block admin_content %}
+        {{ _parent_content }}
+    {% endblock %}
+{% endblock %}

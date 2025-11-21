@@ -4,6 +4,7 @@ from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from flask import current_app, url_for, render_template
 from datetime import datetime, timedelta
+from ..utils.timezone import now_eest
 import secrets
 
 def send_email(subject, recipient, template, **kwargs):
@@ -67,7 +68,7 @@ def send_password_reset_email(user):
     """Send password reset link to user"""
     token = secrets.token_urlsafe(32)
     user.password_reset_token = token
-    user.password_reset_expires = datetime.utcnow() + timedelta(hours=1)
+    user.password_reset_expires = now_eest() + timedelta(hours=1)
     
     from app import db
     db.session.commit()

@@ -1,0 +1,159 @@
+{% extends 'owner/base.html' %}
+
+{% block title %}Finance AI - CyberFinance{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Page Heading -->
+    <div class="d-flex flex-column flex-md-row align-items-center justify-content-between mb-4">
+        <div class="mb-3 mb-md-0 page-header">
+            <h1 class="h3 mb-1">Finance AI Analytics</h1>
+            <p class="text-muted mb-0">Neural network-powered financial intelligence and quantum performance metrics.</p>
+        </div>
+        <div class="d-flex">
+            <button class="btn btn-cyber-outline me-2">
+                <i class="fas fa-brain me-2"></i>AI Predictions
+            </button>
+            <button class="btn btn-cyber">
+                <i class="fas fa-download me-2"></i>Export Data
+            </button>
+        </div>
+    </div>
+
+    <!-- Neural Network Stats -->
+    <div class="row">
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="stats-card primary">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-cyber-primary text-uppercase mb-1">
+                                Neural Nodes
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-cyber-text">{{ stats.total_branches }}</div>
+                            <div class="text-xs text-cyber-text-muted mt-1">
+                                <i class="fas fa-network-wired me-1"></i>Connected Systems
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-brain fa-2x text-cyber-primary" style="filter: drop-shadow(0 0 10px var(--cyber-primary));"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="stats-card success">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-cyber-success text-uppercase mb-1">
+                                Active Synapses
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-cyber-text">{{ stats.active_branches }}</div>
+                            <div class="text-xs text-cyber-text-muted mt-1">
+                                <i class="fas fa-bolt me-1"></i>Neural Activity: High
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-atom fa-2x text-cyber-success" style="filter: drop-shadow(0 0 10px var(--cyber-success));"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="stats-card warning">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-cyber-warning text-uppercase mb-1">
+                                Quantum Transactions
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-cyber-text">{{ "{:,}".format(stats.total_transactions) }}</div>
+                            <div class="text-xs text-cyber-text-muted mt-1">
+                                <i class="fas fa-microchip me-1"></i>AI Processed
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-exchange-alt fa-2x text-cyber-warning" style="filter: drop-shadow(0 0 10px var(--cyber-warning));"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="stats-card danger">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-cyber-danger text-uppercase mb-1">
+                                Crypto Volume
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-cyber-text">${{ "{:,.2f}".format(stats.total_volume) }}</div>
+                            <div class="text-xs text-cyber-text-muted mt-1">
+                                <i class="fas fa-coins me-1"></i>Digital Assets
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-chart-line fa-2x text-cyber-danger" style="filter: drop-shadow(0 0 10px var(--cyber-danger));"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Branch Performance Table -->
+    <div class="card shadow mb-4">
+        <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-primary">Branch Performance</h6>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
+                    <thead>
+                        <tr>
+                            <th>Branch Name</th>
+                            <th>Status</th>
+                            <th>Transactions</th>
+                            <th>Volume</th>
+                            <th>Performance</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for branch_stat in branch_stats %}
+                        <tr>
+                            <td>{{ branch_stat.name }}</td>
+                            <td>
+                                {% if branch_stat.is_active %}
+                                <span class="badge badge-success">Active</span>
+                                {% else %}
+                                <span class="badge badge-secondary">Inactive</span>
+                                {% endif %}
+                            </td>
+                            <td>{{ branch_stat.transactions }}</td>
+                            <td>${{ "%.2f"|format(branch_stat.volume) }}</td>
+                            <td>
+                                {% if branch_stat.transactions > 0 %}
+                                <div class="progress">
+                                    <div class="progress-bar bg-success" role="progressbar" 
+                                         style="width: {{ (branch_stat.transactions / stats.total_transactions * 100) if stats.total_transactions > 0 else 0 }}%" 
+                                         aria-valuenow="{{ branch_stat.transactions }}" aria-valuemin="0" aria-valuemax="{{ stats.total_transactions }}"></div>
+                                </div>
+                                {% else %}
+                                <small class="text-muted">No activity</small>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

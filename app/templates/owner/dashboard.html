@@ -1,0 +1,672 @@
+{% extends 'owner/base.html' %}
+
+{% block title %}Dashboard - Owner Panel{% endblock %}
+
+{% block content %}
+<!-- Page Heading -->
+<div class="d-flex flex-column flex-md-row align-items-center justify-content-between mb-4">
+        <div class="mb-3 mb-md-0">
+            <h1 class="h3 mb-1 cyber-title">Owner Dashboard</h1>
+            <p class="text-muted mb-0 cyber-subtitle">Welcome back, {{ current_user.username if current_user.is_authenticated else 'Guest' }}! Manage your network.</p>
+        </div>
+        <div class="btn-toolbar">
+            <div class="btn-group me-2">
+                <div class="dropdown">
+                    <button class="btn btn-outline-primary dropdown-toggle" type="button" id="timeFilter"
+                        data-bs-toggle="dropdown" aria-expanded="false">
+                        <i class="bi bi-calendar me-1"></i>
+                        <span id="selectedTime">Last 30 Days</span>
+                    </button>
+                    <ul class="dropdown-menu" aria-labelledby="timeFilter">
+                        <li><a class="dropdown-item" href="#" data-time="7">Last 7 Days</a></li>
+                        <li><a class="dropdown-item" href="#" data-time="30">Last 30 Days</a></li>
+                        <li><a class="dropdown-item" href="#" data-time="90">Last 90 Days</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="btn-group">
+                <button type="button" class="btn btn-outline-secondary dropdown-toggle" data-bs-toggle="dropdown"
+                    aria-expanded="false">
+                    <i class="bi bi-download me-1"></i> Export
+                </button>
+                <ul class="dropdown-menu dropdown-menu-end">
+                    <li><a class="dropdown-item" href="#"><i class="bi bi-file-earmark-pdf me-2"></i>PDF</a></li>
+                    <li><a class="dropdown-item" href="#"><i class="bi bi-file-earmark-excel me-2"></i>Excel</a></li>
+                    <li><a class="dropdown-item" href="#"><i class="bi bi-file-earmark-text me-2"></i>CSV</a></li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- Stats Cards -->
+    <div class="row g-4 mb-4">
+        <!-- Total SuperAdmins -->
+        <div class="col-xl-3 col-md-6">
+            <div class="card stats-card primary h-100">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="flex-grow-1">
+                            <h6 class="text-uppercase fw-bold mb-1">SuperAdmins</h6>
+                            <h3 class="mb-0">{{ stats.total_branches }}</h3>
+                            <p class="text-success small mb-0 mt-2">
+                                <i class="bi bi-building me-1"></i> <span>Total branches</span>
+                            </p>
+                        </div>
+                        <div class="icon-bg">
+                            <i class="bi bi-building"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Active SuperAdmins -->
+        <div class="col-xl-3 col-md-6">
+            <div class="card stats-card success h-100">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="flex-grow-1">
+                            <h6 class="text-uppercase fw-bold mb-1">Active Nodes</h6>
+                            <h3 class="mb-0">{{ stats.active_branches }}</h3>
+                            <p class="text-success small mb-0 mt-2">
+                                <i class="bi bi-shield-check me-1"></i> <span>Online branches</span>
+                            </p>
+                        </div>
+                        <div class="icon-bg">
+                            <i class="bi bi-shield-check"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Total Transactions -->
+        <div class="col-xl-3 col-md-6">
+            <div class="card stats-card warning h-100">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="flex-grow-1">
+                            <h6 class="text-uppercase fw-bold mb-1">Transactions</h6>
+                            <h3 class="mb-0">{{ "{:,}".format(stats.total_transactions) }}</h3>
+                            <p class="small mb-0 mt-2" style="color: var(--cyber-warning);">
+                                <i class="bi bi-arrow-left-right me-1"></i> <span>Network total</span>
+                            </p>
+                        </div>
+                        <div class="icon-bg">
+                            <i class="bi bi-arrow-left-right"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Total Volume -->
+        <div class="col-xl-3 col-md-6">
+            <div class="card stats-card danger h-100">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="flex-grow-1">
+                            <h6 class="text-uppercase fw-bold mb-1">Volume</h6>
+                            <h3 class="mb-0">${{ "{:,.2f}".format(stats.total_volume) }}</h3>
+                            <p class="small mb-0 mt-2" style="color: var(--cyber-danger);">
+                                <i class="bi bi-cash-stack me-1"></i> <span>Total processed</span>
+                            </p>
+                        </div>
+                        <div class="icon-bg">
+                            <i class="bi bi-cash-stack"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Actions Row -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header bg-transparent border-bottom">
+                    <h5 class="mb-0"><i class="bi bi-lightning-charge me-2 text-warning"></i>Network Control Center</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row g-3">
+                        <!-- Branch Management -->
+                        <div class="col-md-3 col-sm-6">
+                            <a href="{{ url_for('owner.list_branches') }}" class="btn btn-outline-primary w-100 h-100 d-flex flex-column align-items-center justify-content-center p-4 text-decoration-none" style="min-height: 120px;">
+                                <i class="bi bi-diagram-3 fs-2 mb-2"></i>
+                                <span class="fw-bold">Branch Network</span>
+                                <small class="text-muted mt-1">Manage all branches</small>
+                            </a>
+                        </div>
+                        <!-- Create Branch -->
+                        <div class="col-md-3 col-sm-6">
+                            <a href="{{ url_for('owner.add_branch') }}" class="btn btn-outline-success w-100 h-100 d-flex flex-column align-items-center justify-content-center p-4 text-decoration-none" style="min-height: 120px;">
+                                <i class="bi bi-plus-circle fs-2 mb-2"></i>
+                                <span class="fw-bold">New Branch</span>
+                                <small class="text-muted mt-1">Add SuperAdmin</small>
+                            </a>
+                        </div>
+                        <!-- Global Analytics -->
+                        <div class="col-md-3 col-sm-6">
+                            <a href="{{ url_for('owner.analytics') }}" class="btn btn-outline-warning w-100 h-100 d-flex flex-column align-items-center justify-content-center p-4 text-decoration-none" style="min-height: 120px;">
+                                <i class="bi bi-graph-up fs-2 mb-2"></i>
+                                <span class="fw-bold">Global Analytics</span>
+                                <small class="text-muted mt-1">Network-wide reports</small>
+                            </a>
+                        </div>
+                        <!-- System Health -->
+                        <div class="col-md-3 col-sm-6">
+                            <a href="{{ url_for('owner.system_health') }}" class="btn btn-outline-info w-100 h-100 d-flex flex-column align-items-center justify-content-center p-4 text-decoration-none" style="min-height: 120px;">
+                                <i class="bi bi-activity fs-2 mb-2"></i>
+                                <span class="fw-bold">System Health</span>
+                                <small class="text-muted mt-1">Monitor network status</small>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content Grid -->
+    <div class="row g-4">
+        <!-- Recent Branches -->
+        <div class="col-lg-8">
+            <div class="card">
+                <div class="card-header bg-transparent border-bottom d-flex align-items-center justify-content-between">
+                    <h5 class="mb-0">
+                        <i class="bi bi-building me-2 text-primary"></i>Recent Branches
+                    </h5>
+                    <a href="{{ url_for('owner.list_branches') }}" class="btn btn-link text-primary p-0">
+                        View All <i class="bi bi-arrow-right ms-1"></i>
+                    </a>
+                </div>
+                <div class="card-body p-0">
+                    {% if branches %}
+                        <div class="table-responsive">
+                            <table class="table table-hover mb-0">
+                                <thead class="table-dark">
+                                    <tr>
+                                        <th class="border-0 fw-semibold">Branch</th>
+                                        <th class="border-0 fw-semibold">Superadmin</th>
+                                        <th class="border-0 fw-semibold text-center">Clients</th>
+                                        <th class="border-0 fw-semibold">Status</th>
+                                        <th class="border-0 fw-semibold text-end">Financials</th>
+                                        <th class="border-0 fw-semibold text-end">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for branch in branches[:8] %}
+                                    <tr>
+                                        <td class="fw-medium">
+                                            {{ branch.name }}
+                                            <div class="text-muted small">{{ branch.city or '—' }}, {{ branch.country or '—' }}</div>
+                                        </td>
+                                        <td class="text-muted small">{{ branch.superadmin.username if branch.superadmin else '—' }}</td>
+                                        <td class="text-center">{{ branch.total_clients or branch.clients.filter_by(is_active=True).count() }}</td>
+                                        <td>
+                                            {% if branch.is_active %}
+                                                <span class="badge bg-success">Active</span>
+                                            {% else %}
+                                                <span class="badge bg-secondary">Inactive</span>
+                                            {% endif %}
+                                        </td>
+                                        <td class="text-end text-muted small">
+                                            <div>Tx: {{ branch.total_transactions or 0 }}</div>
+                                            <div>Vol: ${{ "{:,.2f}".format(branch.total_volume or 0) }}</div>
+                                        </td>
+                                        <td class="text-end">
+                                            <div class="btn-group btn-group-sm">
+                                                <a href="{{ url_for('owner.branch_api', branch_id=branch.id) }}" class="btn btn-outline-primary" title="API Access">
+                                                    <i class="bi bi-code"></i>
+                                                </a>
+                                                <a href="{{ url_for('owner.edit_branch', branch_id=branch.id) }}" class="btn btn-outline-secondary" title="Edit Branch">
+                                                    <i class="bi bi-pencil"></i>
+                                                </a>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <div class="text-center py-5">
+                            <i class="bi bi-building fa-3x text-muted mb-3"></i>
+                            <h6 class="text-muted">No branches found</h6>
+                            <p class="text-muted small mb-3">Get started by adding your first SuperAdmin branch</p>
+                            <a href="{{ url_for('owner.add_branch') }}" class="btn btn-primary">
+                                <i class="bi bi-plus-circle me-2"></i>Add First Branch
+                            </a>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Actions & System Status -->
+        <div class="col-lg-4">
+            <!-- Quick Actions -->
+            <div class="card mb-4">
+                <div class="card-header bg-transparent border-bottom">
+                    <h6 class="mb-0">
+                        <i class="bi bi-lightning-charge me-2 text-warning"></i>Quick Actions
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="d-grid gap-2">
+                        <a href="{{ url_for('owner.add_branch') }}" class="btn btn-outline-primary">
+                            <i class="bi bi-plus-circle me-2"></i>Add New Branch
+                        </a>
+                        <a href="{{ url_for('owner.list_branches') }}" class="btn btn-outline-secondary">
+                            <i class="bi bi-building me-2"></i>Manage Branches
+                        </a>
+                        <a href="{{ url_for('owner.analytics') }}" class="btn btn-outline-warning">
+                            <i class="bi bi-bar-chart me-2"></i>View Analytics
+                        </a>
+                        <a href="{{ url_for('auth.logout') }}" class="btn btn-outline-danger">
+                            <i class="bi bi-box-arrow-right me-2"></i>Logout
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- System Status -->
+            <div class="card">
+                <div class="card-header bg-transparent border-bottom">
+                    <h6 class="mb-0">
+                        <i class="bi bi-hdd-network me-2 text-success"></i>System Status
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="d-flex align-items-center mb-3">
+                        <div class="status-indicator bg-success me-3"></div>
+                        <div>
+                            <div class="small fw-medium">Database</div>
+                            <div class="text-muted x-small">Operational</div>
+                        </div>
+                    </div>
+                    <div class="d-flex align-items-center mb-3">
+                        <div class="status-indicator bg-success me-3"></div>
+                        <div>
+                            <div class="small fw-medium">API Services</div>
+                            <div class="text-muted x-small">All systems online</div>
+                        </div>
+                    </div>
+                    <div class="d-flex align-items-center">
+                        <div class="status-indicator bg-warning me-3"></div>
+                        <div>
+                            <div class="small fw-medium">Background Jobs</div>
+                            <div class="text-muted x-small">Processing (2 active)</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Admin & Client Insights -->
+    <div class="row g-4 mb-4">
+        <div class="col-xl-6">
+            <div class="card shadow-sm h-100">
+                <div class="card-header bg-transparent border-bottom">
+                    <h5 class="mb-0"><i class="bi bi-people-fill me-2 text-primary"></i>Admin Network</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row g-3 mb-4">
+                        <div class="col-4">
+                            <div class="mini-stat primary">
+                                <div class="label text-uppercase small fw-semibold">Total</div>
+                                <div class="value h4 mb-0">{{ admin_stats.total }}</div>
+                            </div>
+                        </div>
+                        <div class="col-4">
+                            <div class="mini-stat success">
+                                <div class="label text-uppercase small fw-semibold">Active</div>
+                                <div class="value h4 mb-0">{{ admin_stats.active }}</div>
+                            </div>
+                        </div>
+                        <div class="col-4">
+                            <div class="mini-stat info">
+                                <div class="label text-uppercase small fw-semibold">Superusers</div>
+                                <div class="value h4 mb-0">{{ admin_stats.superusers or 0 }}</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <h6 class="fw-semibold text-uppercase text-muted small">Recently Added</h6>
+                    {% if admin_stats.recent %}
+                    <div class="table-responsive">
+                        <table class="table table-sm align-middle mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Name</th>
+                                    <th>Email</th>
+                                    <th>Status</th>
+                                    <th class="text-end">Created</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for admin in admin_stats.recent %}
+                                <tr>
+                                    <td class="fw-medium">{{ admin.get_full_name() }}</td>
+                                    <td class="text-muted small">{{ admin.email }}</td>
+                                    <td>
+                                        <span class="badge bg-{{ 'success' if admin.is_active else 'secondary' }}">{{ 'Active' if admin.is_active else 'Inactive' }}</span>
+                                    </td>
+                                    <td class="text-end text-muted small">{{ admin.created_at.strftime('%Y-%m-%d') if admin.created_at else '—' }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <p class="text-muted small mb-0">No administrative users captured yet.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-6">
+            <div class="card shadow-sm h-100">
+                <div class="card-header bg-transparent border-bottom">
+                    <h5 class="mb-0"><i class="bi bi-building me-2 text-success"></i>Client Portfolio</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row g-3 mb-4">
+                        <div class="col-3">
+                            <div class="mini-stat primary">
+                                <div class="label text-uppercase small fw-semibold">Total</div>
+                                <div class="value h4 mb-0">{{ client_stats.total }}</div>
+                            </div>
+                        </div>
+                        <div class="col-3">
+                            <div class="mini-stat success">
+                                <div class="label text-uppercase small fw-semibold">Active</div>
+                                <div class="value h4 mb-0">{{ client_stats.active }}</div>
+                            </div>
+                        </div>
+                        <div class="col-3">
+                            <div class="mini-stat info">
+                                <div class="label text-uppercase small fw-semibold">Verified</div>
+                                <div class="value h4 mb-0">{{ client_stats.verified }}</div>
+                            </div>
+                        </div>
+                        <div class="col-3">
+                            <div class="mini-stat warning">
+                                <div class="label text-uppercase small fw-semibold">API Enabled</div>
+                                <div class="value h4 mb-0">{{ stats.with_api_keys if stats.with_api_keys is defined else client_stats.with_api_keys }}</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <h6 class="fw-semibold text-uppercase text-muted small">Recent Onboarding</h6>
+                    {% if client_stats.recent %}
+                    <div class="table-responsive">
+                        <table class="table table-sm align-middle mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Client</th>
+                                    <th>Email</th>
+                                    <th>Status</th>
+                                    <th class="text-end">Created</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for client in client_stats.recent %}
+                                <tr>
+                                    <td class="fw-medium">{{ client.company_name }}</td>
+                                    <td class="text-muted small">{{ client.email }}</td>
+                                    <td>
+                                        <span class="badge bg-{{ 'success' if client.is_active else 'secondary' }}">{{ 'Active' if client.is_active else 'Inactive' }}</span>
+                                    </td>
+                                    <td class="text-end text-muted small">{{ client.created_at.strftime('%Y-%m-%d') if client.created_at else '—' }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <p class="text-muted small mb-0">No clients onboarded yet.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Provider & Audit Overview -->
+    <div class="row g-4 mb-4">
+        <div class="col-xl-6">
+            <div class="card shadow-sm h-100">
+                <div class="card-header bg-transparent border-bottom">
+                    <h5 class="mb-0"><i class="bi bi-handshake me-2 text-warning"></i>Provider Coverage</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row g-3">
+                        <div class="col-6">
+                            <div class="mini-stat primary">
+                                <div class="label text-uppercase small fw-semibold">Providers</div>
+                                <div class="value h4 mb-0">{{ provider_stats.providers }}</div>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="mini-stat success">
+                                <div class="label text-uppercase small fw-semibold">Active</div>
+                                <div class="value h4 mb-0">{{ provider_stats.active_providers }}</div>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="mini-stat info">
+                                <div class="label text-uppercase small fw-semibold">Accounts</div>
+                                <div class="value h4 mb-0">{{ provider_stats.accounts }}</div>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="mini-stat danger">
+                                <div class="label text-uppercase small fw-semibold">Pending Tx</div>
+                                <div class="value h4 mb-0">{{ provider_stats.pending_transactions }}</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-6">
+            <div class="card shadow-sm h-100">
+                <div class="card-header bg-transparent border-bottom d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0"><i class="bi bi-clock-history me-2 text-info"></i>Audit Highlights</h5>
+                    <a href="{{ url_for('owner.owner_audit_logs') }}" class="btn btn-sm btn-outline-primary">View logs</a>
+                </div>
+                <div class="card-body">
+                    <div class="row g-3 text-center mb-3">
+                        <div class="col-6">
+                            <div class="mini-stat primary">
+                                <div class="label text-uppercase small fw-semibold">Trail Entries</div>
+                                <div class="value h4 mb-0">{{ audit_stats.total_audit_trail }}</div>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="mini-stat success">
+                                <div class="label text-uppercase small fw-semibold">Branch Logs</div>
+                                <div class="value h4 mb-0">{{ audit_stats.total_branch_audit }}</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <h6 class="fw-semibold text-uppercase text-muted small">Recent Activity</h6>
+                    {% if audit_stats.recent_audit_trail %}
+                    <ul class="list-group list-group-flush small mb-2">
+                        {% for log in audit_stats.recent_audit_trail[:3] %}
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            <div>
+                                <div class="fw-semibold">{{ log.action_type|replace('_', ' ')|title }}</div>
+                                <div class="text-muted">{{ log.entity_type|replace('_', ' ')|title }} #{{ log.entity_id }}</div>
+                            </div>
+                            <span class="badge bg-light text-muted">{{ log.created_at.strftime('%m-%d %H:%M') if log.created_at else '—' }}</span>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                    {% else %}
+                    <p class="text-muted small mb-0">No platform audit entries yet.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- API & Security Overview -->
+    <div class="row g-4 mb-4">
+        <div class="col-xl-6">
+            <div class="card shadow-sm h-100">
+                <div class="card-header bg-transparent border-bottom d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0"><i class="bi bi-code-square me-2 text-primary"></i>API Operations</h5>
+                    <a href="{{ url_for('owner.api_management') }}" class="btn btn-sm btn-outline-primary">Manage</a>
+                </div>
+                <div class="card-body">
+                    <div class="row g-3 mb-3 text-center">
+                        <div class="col-4">
+                            <div class="mini-stat primary">
+                                <div class="label text-uppercase small fw-semibold">Keys</div>
+                                <div class="value h4 mb-0">{{ api_stats.total_api_keys }}</div>
+                            </div>
+                        </div>
+                        <div class="col-4">
+                            <div class="mini-stat success">
+                                <div class="label text-uppercase small fw-semibold">Active</div>
+                                <div class="value h4 mb-0">{{ api_stats.recent_keys|selectattr('is_active')|list|length }}</div>
+                            </div>
+                        </div>
+                        <div class="col-4">
+                            <div class="mini-stat warning">
+                                <div class="label text-uppercase small fw-semibold">Usage Logs</div>
+                                <div class="value h4 mb-0">{{ api_stats.recent_usage|length }}</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <h6 class="fw-semibold text-uppercase text-muted small">New Keys</h6>
+                    {% if api_stats.recent_keys %}
+                    <ul class="list-group list-group-flush small mb-3">
+                        {% for key in api_stats.recent_keys[:4] %}
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            <div>
+                                <div class="fw-semibold">{{ key.name }}</div>
+                                <div class="text-muted">Client #{{ key.client_id }} · {{ key.key_prefix }}</div>
+                            </div>
+                            <span class="badge bg-{{ 'success' if key.is_active else 'secondary' }}">{{ 'Active' if key.is_active else 'Disabled' }}</span>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                    {% else %}
+                    <p class="text-muted small mb-0">No API keys issued recently.</p>
+                    {% endif %}
+
+                    <h6 class="fw-semibold text-uppercase text-muted small">Latest Calls</h6>
+                    {% if api_stats.recent_usage %}
+                    <div class="table-responsive">
+                        <table class="table table-sm align-middle mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Endpoint</th>
+                                    <th>Method</th>
+                                    <th>Status</th>
+                                    <th class="text-end">Latency</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for log in api_stats.recent_usage[:5] %}
+                                <tr>
+                                    <td class="text-truncate" style="max-width: 150px;" title="{{ log.endpoint }}">{{ log.endpoint }}</td>
+                                    <td class="text-muted small text-uppercase">{{ log.method }}</td>
+                                    <td>
+                                        <span class="badge bg-{{ 'success' if log.status_code and log.status_code < 400 else 'danger' }}">{{ log.status_code or '—' }}</span>
+                                    </td>
+                                    <td class="text-end text-muted small">{{ log.response_time_ms or '—' }} ms</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <p class="text-muted small mb-0">No API usage recorded.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-6">
+            <div class="card shadow-sm h-100">
+                <div class="card-header bg-transparent border-bottom d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0"><i class="bi bi-shield-lock me-2 text-danger"></i>Security Center</h5>
+                    <a href="{{ url_for('owner.security_center') }}" class="btn btn-sm btn-outline-danger">Investigate</a>
+                </div>
+                <div class="card-body">
+                    <div class="row g-3 mb-3 text-center">
+                        <div class="col-4">
+                            <div class="mini-stat primary">
+                                <div class="label text-uppercase small fw-semibold">Events (24h)</div>
+                                <div class="value h4 mb-0">{{ security_stats.recent_events|length }}</div>
+                            </div>
+                        </div>
+                        <div class="col-4">
+                            <div class="mini-stat success">
+                                <div class="label text-uppercase small fw-semibold">Active Users</div>
+                                <div class="value h4 mb-0">{{ security_stats.active_users }}</div>
+                            </div>
+                        </div>
+                        <div class="col-4">
+                            <div class="mini-stat danger">
+                                <div class="label text-uppercase small fw-semibold">Failed</div>
+                                <div class="value h4 mb-0">{{ security_stats.failed_last_24h }}</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <h6 class="fw-semibold text-uppercase text-muted small">Recent Logins</h6>
+                    {% if security_stats.recent_events %}
+                    <ul class="list-group list-group-flush small mb-3">
+                        {% for event in security_stats.recent_events[:5] %}
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            <div>
+                                <div class="fw-semibold">{{ event.username }}</div>
+                                <div class="text-muted">{{ event.user_type|title }} · {{ event.ip_address }}</div>
+                            </div>
+                            <span class="badge bg-{{ 'success' if event.success else 'danger' }}">{{ 'OK' if event.success else 'Fail' }}</span>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                    {% else %}
+                    <p class="text-muted small mb-3">No authentication activity recorded.</p>
+                    {% endif %}
+
+                    <h6 class="fw-semibold text-uppercase text-muted small">Suspicious Sources</h6>
+                    {% if security_stats.suspicious %}
+                    <ul class="list-group list-group-flush small">
+                        {% for item in security_stats.suspicious %}
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            <div>
+                                <div class="fw-semibold">IP {{ item.ip_address }}</div>
+                                <div class="text-muted">Attempts: {{ item.attempts }}</div>
+                            </div>
+                            <span class="badge bg-warning text-dark">{{ item.last_attempt.strftime('%H:%M') if item.last_attempt else '—' }}</span>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                    {% else %}
+                    <p class="text-muted small mb-0">No abnormal patterns detected.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <style>
+        .status-indicator {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+    </style>
+    {% endblock %}

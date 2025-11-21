@@ -1,4 +1,5 @@
 from datetime import datetime
+from ..utils.timezone import now_eest
 from sqlalchemy.orm import relationship, validates
 from sqlalchemy import ForeignKey, func, CheckConstraint
 from ..extensions import db
@@ -188,21 +189,21 @@ class Withdrawal(BaseModel):
         # This would typically use a crypto wallet API (e.g., Binance)
         
         self.status = WithdrawalStatus.PROCESSING
-        self.processed_at = datetime.utcnow()
+        self.processed_at = now_eest()
         db.session.commit()
     
     def complete(self, tx_hash):
         """Mark withdrawal as completed"""
         self.status = WithdrawalStatus.COMPLETED
         self.tx_hash = tx_hash
-        self.processed_at = datetime.utcnow()
+        self.processed_at = now_eest()
         db.session.commit()
     
     def reject(self, reason):
         """Reject withdrawal request"""
         self.status = WithdrawalStatus.REJECTED
         self.rejection_reason = reason
-        self.processed_at = datetime.utcnow()
+        self.processed_at = now_eest()
         db.session.commit()
 
 def get_client_balance(client_id):

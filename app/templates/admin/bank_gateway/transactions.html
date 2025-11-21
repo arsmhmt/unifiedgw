@@ -1,0 +1,126 @@
+{% extends "admin/base.html" %}
+
+{% block title %}Bank Transactions - Admin Panel{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h1 class="h3 mb-0">Bank Transactions</h1>
+                    <p class="text-muted">Monitor and manage bank payment transactions</p>
+                </div>
+                <div>
+                    <a href="{{ url_for('admin.bank_transactions') }}" class="btn btn-outline-primary me-2">All</a>
+                    <a href="{{ url_for('admin.bank_transactions', status='pending') }}" class="btn btn-outline-warning me-2">Pending</a>
+                    <a href="{{ url_for('admin.bank_transactions', status='confirmed') }}" class="btn btn-outline-success me-2">Confirmed</a>
+                    <a href="{{ url_for('admin.bank_transactions', status='failed') }}" class="btn btn-outline-danger">Failed</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-12">
+            <div class="card shadow">
+                <div class="card-body">
+                    {% if transactions.items %}
+                    <div class="table-responsive">
+                        <table class="table table-bordered table-hover">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Amount</th>
+                                    <th>Status</th>
+                                    <th>Provider</th>
+                                    <th>Account</th>
+                                    <th>Commission</th>
+                                    <th>Date</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for transaction in transactions.items %}
+                                <tr>
+                                    <td>
+                                        <a href="{{ url_for('admin.bank_transaction_detail', transaction_id=transaction.id) }}" class="text-decoration-none">
+                                            #{{ transaction.id }}
+                                        </a>
+                                    </td>
+                                    <td>${{ "%.2f"|format(transaction.amount) }}</td>
+                                    <td>
+                                        {% if transaction.status == 'confirmed' %}
+                                            <span class="badge bg-success">{{ transaction.status.title() }}</span>
+                                        {% elif transaction.status == 'pending' %}
+                                            <span class="badge bg-warning">{{ transaction.status.title() }}</span>
+                                        {% elif transaction.status == 'failed' %}
+                                            <span class="badge bg-danger">{{ transaction.status.title() }}</span>
+                                        {% else %}
+                                            <span class="badge bg-secondary">{{ transaction.status.title() }}</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>{{ transaction.bank_account.provider.bank_name if transaction.bank_account and transaction.bank_account.provider else 'N/A' }}</td>
+                                    <td>{{ transaction.bank_account.account_number[-4:] if transaction.bank_account and transaction.bank_account.account_number else 'N/A' }}</td>
+                                    <td>${{ "%.2f"|format(transaction.commission_amount or 0) }}</td>
+                                    <td>{{ transaction.created_at.strftime('%Y-%m-%d %H:%M') if transaction.created_at else 'N/A' }}</td>
+                                    <td>
+                                        <a href="{{ url_for('admin.bank_transaction_detail', transaction_id=transaction.id) }}" class="btn btn-sm btn-outline-primary">
+                                            <i class="bi bi-eye"></i> View
+                                        </a>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Pagination -->
+                    {% if transactions.pages > 1 %}
+                    <nav aria-label="Transaction pagination" class="mt-4">
+                        <ul class="pagination justify-content-center">
+                            {% if transactions.has_prev %}
+                                <li class="page-item">
+                                    <a class="page-link" href="{{ url_for('admin.bank_transactions', page=transactions.prev_num, status=status) }}">Previous</a>
+                                </li>
+                            {% endif %}
+                            
+                            {% for page_num in transactions.iter_pages() %}
+                                {% if page_num %}
+                                    {% if page_num != transactions.page %}
+                                        <li class="page-item">
+                                            <a class="page-link" href="{{ url_for('admin.bank_transactions', page=page_num, status=status) }}">{{ page_num }}</a>
+                                        </li>
+                                    {% else %}
+                                        <li class="page-item active">
+                                            <span class="page-link">{{ page_num }}</span>
+                                        </li>
+                                    {% endif %}
+                                {% else %}
+                                    <li class="page-item disabled">
+                                        <span class="page-link">...</span>
+                                    </li>
+                                {% endif %}
+                            {% endfor %}
+                            
+                            {% if transactions.has_next %}
+                                <li class="page-item">
+                                    <a class="page-link" href="{{ url_for('admin.bank_transactions', page=transactions.next_num, status=status) }}">Next</a>
+                                </li>
+                            {% endif %}
+                        </ul>
+                    </nav>
+                    {% endif %}
+                    {% else %}
+                    <div class="text-center py-5">
+                        <i class="bi bi-arrow-left-right display-1 text-muted"></i>
+                        <h3 class="text-muted mt-3">No Transactions</h3>
+                        <p class="text-muted">No bank transactions found{% if status %} with status "{{ status }}"{% endif %}.</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

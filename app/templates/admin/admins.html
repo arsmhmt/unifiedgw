@@ -7,7 +7,7 @@
     <!-- Page Heading -->
     <div class="d-sm-flex align-items-center justify-content-between mb-4">
         <h1 class="h3 mb-0 text-gray-800">{{ _('Admin Users') }}</h1>
-        <a href="{{ url_for('admin.create_admin') }}" class="d-none d-sm-inline-block btn btn-primary shadow-sm">
+        <a href="{{ url_for('admin.add_admin') }}" class="d-none d-sm-inline-block btn btn-primary shadow-sm">
             <i class="bi bi-plus-circle me-1"></i> {{ _('Add Admin') }}
         </a>
     </div>
@@ -61,8 +61,11 @@
                             <div class="text-xs font-weight-bold text-info text-uppercase mb-1">
                                 {{ _('Last Login') }}</div>
                             <div class="h5 mb-0 font-weight-bold text-gray-800">
-                                {{ current_admin.last_login_at.strftime('%b %d, %Y %H:%M') if
-                                current_admin.last_login_at else _('Never') }}
+                                {% if current_user.is_authenticated and current_user.last_login_at %}
+                                {{ current_user.last_login_at.strftime('%b %d, %Y %H:%M') }}
+                                {% else %}
+                                {{ _('Never') }}
+                                {% endif %}
                             </div>
                         </div>
                         <div class="col-auto">
@@ -114,11 +117,11 @@
                                         style="width: 32px; height: 32px;">
                                         {{ admin.username[0]|upper }}
                                     </div>
-                                    <a href="{{ url_for('admin.edit_admin', admin_id=admin.id) }}"
+                                    <a href="#" onclick="showToast('Edit admin feature coming soon!', 'info')"
                                         class="font-weight-bold">
                                         {{ admin.username }}
                                     </a>
-                                    {% if admin.id == current_admin.id %}
+                                    {% if current_user.is_authenticated and admin.id == current_user.id %}
                                     <span class="badge bg-primary ms-2">{{ _('You') }}</span>
                                     {% endif %}
                                 </div>
@@ -139,14 +142,14 @@
                             <td>{{ admin.created_at.strftime('%b %d, %Y') }}</td>
                             <td>
                                 <div class="btn-group" role="group">
-                                    <a href="{{ url_for('admin.edit_admin', admin_id=admin.id) }}"
+                                    <a href="#" onclick="showToast('Edit admin feature coming soon!', 'info')"
                                         class="btn btn-sm btn-primary" data-bs-toggle="tooltip" title="{{ _('Edit') }}">
                                         <i class="bi bi-pencil"></i>
                                     </a>
-                                    {% if admin.id != current_admin.id %}
+                                    {% if not current_user.is_authenticated or admin.id != current_user.id %}
                                     <button type="button" class="btn btn-sm btn-danger" data-bs-toggle="modal"
-                                        data-bs-target="#deleteAdminModal{{ admin.id }}" {% if
-                                        admin.id==current_admin.id %}disabled{% endif %} data-bs-toggle="tooltip"
+                                        data-bs-target="#deleteAdminModal{{ admin.id }}" {% if current_user.is_authenticated and
+                                        admin.id==current_user.id %}disabled{% endif %} data-bs-toggle="tooltip"
                                         title="{{ _('Delete') }}">
                                         <i class="bi bi-trash"></i>
                                     </button>
@@ -156,7 +159,7 @@
                         </tr>
 
                         <!-- Delete Confirmation Modal -->
-                        {% if admin.id != current_admin.id %}
+                        {% if not current_user.is_authenticated or admin.id != current_user.id %}
                         <div class="modal fade" id="deleteAdminModal{{ admin.id }}" tabindex="-1"
                             aria-labelledby="deleteAdminModalLabel{{ admin.id }}" aria-hidden="true">
                             <div class="modal-dialog">
@@ -176,8 +179,7 @@
                                     <div class="modal-footer">
                                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{{
                                             _('Cancel') }}</button>
-                                        <form action="{{ url_for('admin.delete_admin', admin_id=admin.id) }}"
-                                            method="POST" class="d-inline">
+                                        <form action="#" method="POST" class="d-inline" onsubmit="showToast('Delete admin feature coming soon!', 'info'); return false;">
                                             <input type="hidden" name="_method" value="DELETE">
                                             <button type="submit" class="btn btn-danger">
                                                 <i class="bi bi-trash me-1"></i> {{ _('Delete') }}

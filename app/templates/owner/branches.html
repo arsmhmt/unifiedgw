@@ -1,0 +1,129 @@
+{% extends 'owner/base.html' %}
+
+{% block title %}SuperAdmins - CyberFinance{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Page Heading -->
+    <div class="d-flex flex-column flex-md-row align-items-center justify-content-between mb-4">
+        <div class="mb-3 mb-md-0 page-header">
+            <h1 class="h3 mb-1">SuperAdmin Network</h1>
+            <p class="text-muted mb-0">Manage your AI-powered superadmin nodes and their quantum access credentials.</p>
+        </div>
+        <a href="{{ url_for('owner.add_branch') }}" class="btn btn-cyber">
+            <i class="fas fa-plus me-2"></i>Add SuperAdmin Node
+        </a>
+    </div>
+
+    <!-- SuperAdmins Table -->
+    <div class="card">
+        <div class="card-header">
+            <h6 class="m-0 font-weight-bold text-cyber-primary">
+                <i class="fas fa-network-wired me-2"></i>Active SuperAdmin Nodes
+            </h6>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover" width="100%" cellspacing="0">
+                    <thead>
+                        <tr>
+                            <th><i class="fas fa-robot me-2"></i>Node Name</th>
+                            <th><i class="fas fa-user-secret me-2"></i>SuperAdmin</th>
+                            <th><i class="fas fa-map-marker-alt me-2"></i>Location</th>
+                            <th><i class="fas fa-cogs me-2"></i>Status</th>
+                            <th><i class="fas fa-key me-2"></i>API Access</th>
+                            <th><i class="fas fa-terminal me-2"></i>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for branch in branches %}
+                        <tr>
+                            <td>
+                                <div class="d-flex align-items-center">
+                                    <div class="me-3">
+                                        <i class="fas fa-server text-cyber-primary fa-lg"></i>
+                                    </div>
+                                    <div>
+                                        <strong>{{ branch.name }}</strong>
+                                        <br>
+                                        <small class="text-cyber-text-muted">{{ branch.email }}</small>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>
+                                {% if branch.adminuser %}
+                                <span class="badge bg-cyber-primary">{{ branch.adminuser.username }}</span>
+                                {% else %}
+                                <span class="badge bg-secondary">Unassigned</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <i class="fas fa-globe text-cyber-accent me-1"></i>
+                                {{ branch.city }}, {{ branch.country }}
+                            </td>
+                            <td>
+                                {% if branch.is_active %}
+                                <span class="badge bg-cyber-success">
+                                    <i class="fas fa-check-circle me-1"></i>Online
+                                </span>
+                                {% else %}
+                                <span class="badge bg-cyber-danger">
+                                    <i class="fas fa-times-circle me-1"></i>Offline
+                                </span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <div class="d-flex align-items-center">
+                                    <code class="text-cyber-primary me-2">{{ branch.api_key[:16] }}...</code>
+                                    <button class="btn btn-sm btn-cyber-outline" onclick="copyToClipboard('{{ branch.api_key }}')">
+                                        <i class="fas fa-copy"></i>
+                                    </button>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="btn-group" role="group">
+                                    <a href="{{ url_for('owner.branch_api', branch_id=branch.id) }}"
+                                       class="btn btn-sm btn-cyber-outline" title="API Management">
+                                        <i class="fas fa-key"></i>
+                                    </a>
+                                    <a href="{{ url_for('owner.edit_branch', branch_id=branch.id) }}"
+                                       class="btn btn-sm btn-cyber-outline" title="Edit Node">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                    <form method="post" action="{{ url_for('owner.delete_branch', branch_id=branch.id) }}"
+                                          style="display: inline;" onsubmit="return confirm('Delete this SuperAdmin node?')">
+                                        <button type="submit" class="btn btn-sm btn-cyber-outline text-danger" title="Delete Node">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function copyToClipboard(text) {
+    navigator.clipboard.writeText(text).then(function() {
+        // Show temporary success feedback
+        const notification = document.createElement('div');
+        notification.className = 'alert alert-success alert-dismissible fade show position-fixed';
+        notification.style.cssText = 'top: 20px; right: 20px; z-index: 9999; min-width: 300px;';
+        notification.innerHTML = `
+            <i class="fas fa-check-circle me-2"></i>API Key copied to clipboard!
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        `;
+        document.body.appendChild(notification);
+
+        setTimeout(() => {
+            notification.remove();
+        }, 3000);
+    });
+}
+</script>
+{% endblock %}

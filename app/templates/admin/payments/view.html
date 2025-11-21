@@ -4,11 +4,6 @@
 {% block content %}
 <div class="container-fluid px-4">
     <h1 class="mt-4">Payment Details</h1>
-    <ol class="breadcrumb mb-4">
-        <li class="breadcrumb-item"><a href="{{ url_for('admin.admin_dashboard') }}">Dashboard</a></li>
-        <li class="breadcrumb-item"><a href="{{ url_for('admin.payments_list') }}">Payments</a></li>
-        <li class="breadcrumb-item active">Payment #{{ payment.id }}</li>
-    </ol>
 
     <div class="card mb-4">
         <div class="card-header">
@@ -28,13 +23,13 @@
                     </div>
                     <div class="mb-3">
                         <label class="form-label">Amount</label>
-                        <p class="form-control-plaintext">{{ "%.2f"|format(payment.amount) }} {{ payment.currency }}</p>
+                        <p class="form-control-plaintext">{{ payment.display_amount }}</p>
                     </div>
                     <div class="mb-3">
                         <label class="form-label">Status</label>
                         <p class="form-control-plaintext">
-                            <span class="badge {% if payment.status == 'completed' %}bg-success{% elif payment.status == 'pending' %}bg-warning{% else %}bg-danger{% endif %}">
-                                {{ payment.status|capitalize }}
+                            <span class="badge {% if payment.status.value == 'completed' %}bg-success{% elif payment.status.value == 'pending' %}bg-warning{% else %}bg-danger{% endif %}">
+                                {{ payment.status.value|capitalize }}
                             </span>
                         </p>
                     </div>
@@ -64,28 +59,48 @@
                 <p>{{ payment.description if payment.description else 'No description provided' }}</p>
             </div>
 
+            <!-- Payment Metadata (Sender Info) -->
+            {% if payment.metadata %}
+            <div class="mt-4">
+                <h5>Payment Details</h5>
+                <div class="row">
+                    {% if payment.metadata.sender_name %}
+                    <div class="col-md-6">
+                        <label class="form-label">Sender Name</label>
+                        <p class="form-control-plaintext">{{ payment.metadata.sender_name }}</p>
+                    </div>
+                    {% endif %}
+                    {% if payment.metadata.sender_iban %}
+                    <div class="col-md-6">
+                        <label class="form-label">Sender IBAN</label>
+                        <p class="form-control-plaintext">{{ payment.metadata.sender_iban }}</p>
+                    </div>
+                    {% endif %}
+                    {% if payment.metadata.reference %}
+                    <div class="col-md-6">
+                        <label class="form-label">Reference</label>
+                        <p class="form-control-plaintext">{{ payment.metadata.reference }}</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+            {% endif %}
+
             <!-- Quick Actions -->
             <div class="mt-4">
                 <h5>Quick Actions</h5>
                 <div class="row">
-                    <div class="col-md-4">
+                    <div class="col-md-6">
                         <form action="{{ url_for('admin.mark_payment_status', payment_id=payment.id, status='completed') }}" method="POST">
-                            <button type="submit" class="btn btn-success w-100">
+                            <button type="submit" class="btn btn-success w-100" {% if payment.status.value == 'completed' %}disabled{% endif %}>
                                 <i class="fas fa-check me-2"></i>Mark as Completed
                             </button>
                         </form>
                     </div>
-                    <div class="col-md-4">
+                    <div class="col-md-6">
                         <form action="{{ url_for('admin.mark_payment_status', payment_id=payment.id, status='failed') }}" method="POST">
-                            <button type="submit" class="btn btn-danger w-100">
+                            <button type="submit" class="btn btn-danger w-100" {% if payment.status.value == 'failed' %}disabled{% endif %}>
                                 <i class="fas fa-times me-2"></i>Mark as Failed
-                            </button>
-                        </form>
-                    </div>
-                    <div class="col-md-4">
-                        <form action="{{ url_for('admin.generate_invoice', payment_id=payment.id) }}" method="POST">
-                            <button type="submit" class="btn btn-primary w-100">
-                                <i class="fas fa-file-invoice me-2"></i>Generate Invoice
                             </button>
                         </form>
                     </div>

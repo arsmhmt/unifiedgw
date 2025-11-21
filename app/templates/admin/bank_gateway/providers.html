@@ -1,0 +1,86 @@
+{% extends "admin/base.html" %}
+
+{% block title %}Bank Providers - Admin Panel{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h1 class="h3 mb-0">Bank Providers</h1>
+                    <p class="text-muted">Manage bank payment service providers</p>
+                </div>
+                <a href="{{ url_for('admin.add_bank_provider') }}" class="btn btn-primary">
+                    <i class="bi bi-plus-circle me-2"></i>Add Provider
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-12">
+            <div class="card shadow">
+                <div class="card-body">
+                    {% if providers %}
+                    <div class="table-responsive">
+                        <table class="table table-bordered table-hover">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Bank Name</th>
+                                    <th>User</th>
+                                    <th>Status</th>
+                                    <th>Created</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for provider in providers %}
+                                <tr>
+                                    <td>{{ provider.id }}</td>
+                                    <td>{{ provider.bank_name }}</td>
+                                    <td>{{ provider.user.username if provider.user else 'N/A' }}</td>
+                                    <td>
+                                        {% if provider.is_blocked %}
+                                            <span class="badge bg-danger">Blocked</span>
+                                        {% else %}
+                                            <span class="badge bg-success">Active</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>{{ provider.created_at.strftime('%Y-%m-%d') if provider.created_at else 'N/A' }}</td>
+                                    <td>
+                                        <form method="POST" action="{{ url_for('admin.toggle_bank_provider_block', provider_id=provider.id) }}" class="d-inline">
+                                            {{ csrf_token() }}
+                                            {% if provider.is_blocked %}
+                                                <button type="submit" class="btn btn-sm btn-success">
+                                                    <i class="bi bi-unlock"></i> Unblock
+                                                </button>
+                                            {% else %}
+                                                <button type="submit" class="btn btn-sm btn-danger">
+                                                    <i class="bi bi-lock"></i> Block
+                                                </button>
+                                            {% endif %}
+                                        </form>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <div class="text-center py-5">
+                        <i class="bi bi-building display-1 text-muted"></i>
+                        <h3 class="text-muted mt-3">No Bank Providers</h3>
+                        <p class="text-muted">No bank providers have been added yet.</p>
+                        <a href="{{ url_for('admin.add_bank_provider') }}" class="btn btn-primary">
+                            <i class="bi bi-plus-circle me-2"></i>Add First Provider
+                        </a>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

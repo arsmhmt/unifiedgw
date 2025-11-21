@@ -1,0 +1,113 @@
+{% extends "base.html" %}
+
+{% block title %}Blog — PayCrypt Crypto Gateway{% endblock %}
+
+{% block meta_tags %}
+<meta name="description" content="Articles and guides from PayCrypt on USDT deposits, crypto payment flows, and gateway design for betting platforms and online casinos.">
+<link rel="canonical" href="{{ request.url }}">
+
+<!-- Open Graph -->
+<meta property="og:title" content="Blog — PayCrypt Crypto Gateway">
+<meta property="og:description" content="Read practical guides on USDT deposits, TRC20 flows, and crypto cashier setups for betting brands.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="{{ request.url }}">
+
+<!-- JSON-LD Schema -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Blog",
+  "name": "PayCrypt Blog",
+  "description": "Guides and articles on crypto payments for betting platforms and online casinos.",
+  "url": "{{ request.url }}",
+  "publisher": {
+    "@type": "Organization",
+    "name": "PayCrypt",
+    "url": "{{ request.url_root }}"
+  }
+}
+</script>
+{% endblock %}
+
+{% block content %}
+<section class="py-5 bg-dark text-white">
+  <div class="container py-md-5">
+    <div class="row g-4 align-items-center">
+      <div class="col-lg-7">
+        <span class="badge bg-warning text-dark mb-3 px-3 py-2">Engine B — articles & guides</span>
+        <h1 class="display-5 fw-bold mb-3">PayCrypt Blog</h1>
+        <p class="lead mb-3">
+          Practical guides on <strong>USDT deposits</strong>, <strong>TRC20 flows</strong>, and
+          <strong>crypto gateway design</strong> for betting platforms and online casinos.
+        </p>
+        <p class="text-muted small mb-0">
+          Short, implementation-focused pieces aimed at product, tech, and operations teams.
+        </p>
+      </div>
+      <div class="col-lg-5">
+        <div class="card border-0 shadow-lg bg-secondary bg-opacity-25">
+          <div class="card-body p-4 small">
+            <h5 class="fw-bold mb-3">Featured article</h5>
+            <p class="mb-2">
+              How to structure USDT deposits for betting platforms so that players see fast confirmations,
+              finance teams get clean reporting, and compliance teams can audit flows.
+            </p>
+            <a href="{{ url_for('main.blog_usdt_deposits_for_betting_platforms') }}" class="btn btn-warning btn-sm fw-semibold mt-2">
+              Read: USDT Deposits for Betting Platforms
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="py-5 bg-light">
+  <div class="container">
+    <div class="row g-4">
+      <div class="col-md-8">
+        <h2 class="h4 fw-bold mb-3">Latest articles</h2>
+        <div class="card border-0 shadow-sm mb-3">
+          <div class="card-body">
+            <h3 class="h5 fw-bold mb-1">
+              <a href="{{ url_for('main.blog_usdt_deposits_for_betting_platforms') }}" class="text-decoration-none text-dark">
+                USDT Deposits for Betting Platforms: TRC20, Flows, and Webhooks
+              </a>
+            </h3>
+            <p class="text-muted small mb-2">How to think about USDT deposits if you run a betting or casino brand.</p>
+            <p class="text-muted small mb-0">
+              Covers basic USDT choices (TRC20 vs ERC20), how to structure deposit sessions,
+              and where webhooks fit into your cashier and reporting.
+            </p>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <h2 class="h5 fw-bold mb-3">Related pages</h2>
+        <ul class="list-unstyled small mb-0">
+          <li class="mb-2">
+            <a href="{{ url_for('main.betting_crypto_gateway') }}" class="text-decoration-none">
+              Betting Crypto Gateway
+            </a>
+          </li>
+          <li class="mb-2">
+            <a href="{{ url_for('main.usdt_deposit_api') }}" class="text-decoration-none">
+              USDT Deposit API
+            </a>
+          </li>
+          <li class="mb-2">
+            <a href="{{ url_for('main.crypto_gateway_for_casinos') }}" class="text-decoration-none">
+              Crypto Gateway for Casinos
+            </a>
+          </li>
+          <li class="mb-2">
+            <a href="{{ url_for('main.pricing') }}" class="text-decoration-none">
+              Pricing
+            </a>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}

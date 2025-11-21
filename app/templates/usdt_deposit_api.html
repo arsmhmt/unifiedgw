@@ -1,0 +1,267 @@
+{% extends "base.html" %}
+
+{% block title %}USDT Deposit API for Betting Platforms | PayCrypt{% endblock %}
+
+{% block meta_tags %}
+<meta name="description" content="USDT deposit API for betting platforms, casinos, and high-risk operators. TRC20, ERC20, webhooks, and callback examples for fast crypto confirmations.">
+<link rel="canonical" href="{{ request.url }}">
+
+<!-- Open Graph -->
+<meta property="og:title" content="USDT Deposit API for Betting Platforms | PayCrypt">
+<meta property="og:description" content="TRC20 & ERC20 USDT deposit API with webhooks and automatic balance updates.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="{{ request.url }}">
+
+<!-- JSON-LD Schema -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "TechArticle",
+  "headline": "USDT Deposit API for Betting Platforms",
+  "description": "API reference for integrating USDT deposits with PayCrypt, including TRC20, ERC20, and webhook callbacks.",
+  "author": {
+    "@type": "Organization",
+    "name": "PayCrypt"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "PayCrypt",
+    "url": "{{ request.url_root }}"
+  }
+}
+</script>
+{% endblock %}
+
+{% block content %}
+<section class="py-5 bg-dark text-white">
+  <div class="container">
+    <div class="row align-items-center g-4">
+      <div class="col-lg-7">
+        <h1 class="display-5 fw-bold mb-3">USDT Deposit API for Betting Platforms</h1>
+        <p class="lead mb-3">
+          Accept USDT (TRC20 & ERC20) deposits with automatic confirmations, webhooks, and full audit logs.
+        </p>
+        <ul class="list-unstyled mb-4">
+          <li class="d-flex gap-2 mb-2"><i class="fas fa-check-circle text-success mt-1"></i><span>TRC20 &amp; ERC20 support</span></li>
+          <li class="d-flex gap-2 mb-2"><i class="fas fa-check-circle text-success mt-1"></i><span>Webhook callbacks on confirmed deposits</span></li>
+          <li class="d-flex gap-2 mb-2"><i class="fas fa-check-circle text-success mt-1"></i><span>Designed for betting platforms, casinos, and high-risk operators</span></li>
+          <li class="d-flex gap-2 mb-2"><i class="fas fa-check-circle text-success mt-1"></i><span>Simple JSON-based REST API</span></li>
+        </ul>
+        <a href="https://t.me/paycryptonline" class="btn btn-warning fw-semibold px-4" target="_blank" rel="noopener">
+          <i class="fab fa-telegram me-2"></i> Get API Keys on Telegram
+        </a>
+      </div>
+      <div class="col-lg-5">
+        <div class="bg-secondary bg-opacity-25 rounded-4 p-3 p-md-4 small">
+          <div class="d-flex justify-content-between align-items-center mb-2">
+            <span class="text-uppercase text-muted fw-semibold">Endpoint Preview</span>
+            <span class="badge bg-success">POST</span>
+          </div>
+<pre class="mb-0 small text-white"><code>POST /api/v1/crypto/deposits
+Authorization: Bearer &lt;YOUR_API_KEY&gt;
+Content-Type: application/json
+
+{
+  "fiat_amount": 100,
+  "fiat_currency": "USD",
+  "crypto_currency": "USDT",
+  "crypto_network": "TRC20"
+}</code></pre>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="py-5">
+  <div class="container">
+    <div class="row g-4">
+      <div class="col-lg-6">
+        <h2 class="h3 fw-bold mb-3">1. Create a USDT Deposit</h2>
+        <p class="text-muted">Send a request to create a USDT deposit session for your user.</p>
+<pre class="bg-dark text-light rounded-3 p-3 small"><code class="language-json">POST /api/v1/crypto/deposits
+Authorization: Bearer &lt;YOUR_API_KEY&gt;
+Content-Type: application/json
+
+{
+  "fiat_amount": 250,
+  "fiat_currency": "USD",
+  "crypto_currency": "USDT",
+  "crypto_network": "TRC20"
+}</code></pre>
+        <p class="mt-3 text-muted">Response example:</p>
+<pre class="bg-dark text-light rounded-3 p-3 small"><code class="language-json">{
+  "success": true,
+  "payment_id": 1234,
+  "transaction_id": "b1f8e...",
+  "fiat_amount": 250.0,
+  "fiat_currency": "USD",
+  "crypto_amount": 249.1,
+  "crypto_currency": "USDT",
+  "network": "TRC20",
+  "deposit_address": "TYASr5...",
+  "qr_code": "data:image/png;base64,...",
+  "status": "pending"
+}</code></pre>
+      </div>
+      <div class="col-lg-6">
+        <h2 class="h3 fw-bold mb-3">2. Receive Webhook on Confirmation</h2>
+        <p class="text-muted">When the deposit is confirmed on-chain, PayCrypt will call your webhook URL.</p>
+<pre class="bg-dark text-light rounded-3 p-3 small"><code class="language-json">POST https://your-platform.com/webhooks/paycrypt/deposit
+
+{
+  "payment_id": 1234,
+  "transaction_id": "b1f8e...",
+  "amount": 249.1,
+  "currency": "USDT",
+  "network": "TRC20",
+  "status": "confirmed",
+  "txid": "blockchain_hash_abc123"
+}</code></pre>
+        <p class="mt-3 text-muted">You update the user balance when <code>status</code> is <code>confirmed</code>.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="py-5 bg-light">
+  <div class="container">
+    <div class="row g-4">
+      <div class="col-lg-4">
+        <h3 class="h5 fw-bold mb-2">Python Example</h3>
+<pre class="bg-dark text-light rounded-3 p-3 small"><code class="language-python">import requests
+
+resp = requests.post(
+  "https://paycrypt.online/api/v1/crypto/deposits",
+  headers={"Authorization": "Bearer &lt;API_KEY&gt;"},
+  json={
+    "fiat_amount": 100,
+    "fiat_currency": "USD",
+    "crypto_currency": "USDT",
+    "crypto_network": "TRC20"
+  }
+)
+print(resp.json())</code></pre>
+      </div>
+      <div class="col-lg-4">
+        <h3 class="h5 fw-bold mb-2">PHP Example</h3>
+<pre class="bg-dark text-light rounded-3 p-3 small"><code class="language-php">&lt;?php
+$ch = curl_init("https://paycrypt.online/api/v1/crypto/deposits");
+$data = [
+  "fiat_amount" =&gt; 100,
+  "fiat_currency" =&gt; "USD",
+  "crypto_currency" =&gt; "USDT",
+  "crypto_network" =&gt; "TRC20"
+];
+curl_setopt_array($ch, [
+  CURLOPT_POST => true,
+  CURLOPT_HTTPHEADER => [
+    "Authorization: Bearer &lt;API_KEY&gt;",
+    "Content-Type: application/json"
+  ],
+  CURLOPT_POSTFIELDS => json_encode($data),
+  CURLOPT_RETURNTRANSFER => true
+]);
+$response = curl_exec($ch);
+curl_close($ch);
+print($response);</code></pre>
+      </div>
+      <div class="col-lg-4">
+        <h3 class="h5 fw-bold mb-2">Node.js Example</h3>
+<pre class="bg-dark text-light rounded-3 p-3 small"><code class="language-javascript">import fetch from 'node-fetch';
+
+const res = await fetch('https://paycrypt.online/api/v1/crypto/deposits', {
+  method: 'POST',
+  headers: {
+    'Authorization': 'Bearer &lt;API_KEY&gt;',
+    'Content-Type': 'application/json'
+  },
+  body: JSON.stringify({
+    fiat_amount: 100,
+    fiat_currency: 'USD',
+    crypto_currency: 'USDT',
+    crypto_network: 'TRC20'
+  })
+});
+const data = await res.json();
+console.log(data);</code></pre>
+      </div>
+    </div>
+    <div class="row g-3 mt-3">
+      <div class="col-md-4">
+        <a href="{{ url_for('main.usdt_deposit_api_python') }}" class="card border-0 shadow-sm text-decoration-none h-100">
+          <div class="card-body">
+            <h5 class="fw-bold text-dark">Python integration guide</h5>
+            <p class="text-muted small mb-0">Step-by-step Python example for creating deposits and handling webhooks.</p>
+          </div>
+        </a>
+      </div>
+      <div class="col-md-4">
+        <a href="{{ url_for('main.usdt_deposit_api_php') }}" class="card border-0 shadow-sm text-decoration-none h-100">
+          <div class="card-body">
+            <h5 class="fw-bold text-dark">PHP integration guide</h5>
+            <p class="text-muted small mb-0">Full PHP cURL example and webhook handler for your betting platform.</p>
+          </div>
+        </a>
+      </div>
+      <div class="col-md-4">
+        <a href="{{ url_for('main.usdt_deposit_api_nodejs') }}" class="card border-0 shadow-sm text-decoration-none h-100">
+          <div class="card-body">
+            <h5 class="fw-bold text-dark">Node.js integration guide</h5>
+            <p class="text-muted small mb-0">Node.js fetch / Express example for deposits and callbacks.</p>
+          </div>
+        </a>
+      </div>
+    </div>
+    <div class="row g-3 mt-3">
+      <div class="col-md-4">
+        <a href="{{ url_for('main.pricing') }}" class="card border-0 shadow-sm text-decoration-none h-100">
+          <div class="card-body">
+            <h5 class="fw-bold text-dark">Pricing</h5>
+            <p class="text-muted small mb-0">Understand how USDT deposit volume maps to setup tiers.</p>
+          </div>
+        </a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="py-5">
+  <div class="container">
+    <div class="row g-3">
+      <div class="col-md-3">
+        <a href="{{ url_for('main.betting_crypto_gateway') }}" class="card border-0 shadow-sm text-decoration-none h-100">
+          <div class="card-body">
+            <h5 class="fw-bold text-dark">Betting Crypto Gateway</h5>
+            <p class="text-muted small mb-0">See the full gateway features for betting platforms</p>
+          </div>
+        </a>
+      </div>
+      <div class="col-md-3">
+        <a href="{{ url_for('tools.index') }}" class="card border-0 shadow-sm text-decoration-none h-100">
+          <div class="card-body">
+            <h5 class="fw-bold text-dark">Free Crypto Tools</h5>
+            <p class="text-muted small mb-0">RugCheck AI, Gas Tracker, Wallet Profiler & more</p>
+          </div>
+        </a>
+      </div>
+      <div class="col-md-3">
+        <a href="{{ url_for('main.crypto_gateway_for_casinos') }}" class="card border-0 shadow-sm text-decoration-none h-100">
+          <div class="card-body">
+            <h5 class="fw-bold text-dark">Crypto Gateway for Casinos</h5>
+            <p class="text-muted small mb-0">Global casino operators in Curacao, UAE, LATAM, India</p>
+          </div>
+        </a>
+      </div>
+      <div class="col-md-3">
+        <a href="{{ url_for('main.blog_usdt_deposits_for_betting_platforms') }}" class="card border-0 shadow-sm text-decoration-none h-100">
+          <div class="card-body">
+            <h5 class="fw-bold text-dark">USDT deposits article</h5>
+            <p class="text-muted small mb-0">From the blog: TRC20 flows, sessions, and webhooks for betting teams.</p>
+          </div>
+        </a>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}

@@ -1,0 +1,467 @@
+{% extends "admin/admin_base.html" %}
+
+{% block title %}Provider Commissions - Bank Gateway Admin{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <!-- Page Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="mb-1">
+                <i class="bi bi-cash-coin me-2"></i>Provider Commissions
+            </h2>
+            <p class="text-muted mb-0">Track and manage provider commission payments</p>
+        </div>
+        <a href="{{ url_for('admin.bank_gateway_dashboard') }}" class="btn btn-outline-secondary">
+            <i class="bi bi-arrow-left me-2"></i>Back to Dashboard
+        </a>
+    </div>
+
+    <!-- Statistics Cards -->
+    <div class="row g-3 mb-4">
+        <div class="col-md-3">
+            <div class="card bg-gradient-dark text-white border-0">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="flex-shrink-0">
+                            <i class="bi bi-currency-dollar fs-2 text-warning"></i>
+                        </div>
+                        <div class="flex-grow-1 ms-3">
+                            <h6 class="text-white-50 mb-1">Total Earned</h6>
+                            <h4 class="mb-0">{{ "%.2f"|format(stats.total_earned) }} TRY</h4>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-3">
+            <div class="card bg-gradient-success text-white border-0">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="flex-shrink-0">
+                            <i class="bi bi-check-circle fs-2"></i>
+                        </div>
+                        <div class="flex-grow-1 ms-3">
+                            <h6 class="text-white-50 mb-1">Total Paid</h6>
+                            <h4 class="mb-0">{{ "%.2f"|format(stats.total_paid) }} TRY</h4>
+                            <small class="d-block">{{ stats.paid_count }} payments</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-3">
+            <div class="card bg-gradient-danger text-white border-0">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="flex-shrink-0">
+                            <i class="bi bi-exclamation-circle fs-2"></i>
+                        </div>
+                        <div class="flex-grow-1 ms-3">
+                            <h6 class="text-white-50 mb-1">Total Unpaid</h6>
+                            <h4 class="mb-0">{{ "%.2f"|format(stats.total_unpaid) }} TRY</h4>
+                            <small class="d-block">{{ stats.unpaid_count }} pending</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-3">
+            <div class="card bg-gradient-info text-white border-0">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="flex-shrink-0">
+                            <i class="bi bi-receipt fs-2"></i>
+                        </div>
+                        <div class="flex-grow-1 ms-3">
+                            <h6 class="text-white-50 mb-1">Total Commissions</h6>
+                            <h4 class="mb-0">{{ stats.total_commissions }}</h4>
+                            <small class="d-block">All transactions</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filters -->
+    <div class="card border-0 shadow-sm mb-4">
+        <div class="card-body">
+            <form method="GET" action="{{ url_for('admin.provider_commissions') }}" class="row g-3">
+                <div class="col-md-2">
+                    <label class="form-label small text-muted">Status</label>
+                    <select name="status" class="form-select">
+                        <option value="all" {% if status_filter == 'all' %}selected{% endif %}>All Status</option>
+                        <option value="unpaid" {% if status_filter == 'unpaid' %}selected{% endif %}>Unpaid</option>
+                        <option value="paid" {% if status_filter == 'paid' %}selected{% endif %}>Paid</option>
+                    </select>
+                </div>
+                
+                <div class="col-md-2">
+                    <label class="form-label small text-muted">Provider</label>
+                    <select name="provider_id" class="form-select">
+                        <option value="">All Providers</option>
+                        {% for provider in providers %}
+                        <option value="{{ provider.id }}" {% if selected_provider_id == provider.id %}selected{% endif %}>
+                            {{ provider.display_name }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                
+                <div class="col-md-2">
+                    <label class="form-label small text-muted">Type</label>
+                    <select name="type" class="form-select">
+                        <option value="">All Types</option>
+                        <option value="deposit" {% if selected_type == 'deposit' %}selected{% endif %}>Deposit</option>
+                        <option value="withdraw" {% if selected_type == 'withdraw' %}selected{% endif %}>Withdraw</option>
+                    </select>
+                </div>
+                
+                <div class="col-md-2">
+                    <label class="form-label small text-muted">Date From</label>
+                    <input type="date" name="date_from" class="form-control" value="{{ date_from }}">
+                </div>
+                
+                <div class="col-md-2">
+                    <label class="form-label small text-muted">Date To</label>
+                    <input type="date" name="date_to" class="form-control" value="{{ date_to }}">
+                </div>
+                
+                <div class="col-md-2 d-flex align-items-end">
+                    <button type="submit" class="btn btn-primary w-100">
+                        <i class="bi bi-funnel me-2"></i>Filter
+                    </button>
+                </div>
+            </form>
+            
+            {% if status_filter != 'all' or selected_provider_id or selected_type or date_from or date_to %}
+            <div class="mt-3">
+                <a href="{{ url_for('admin.provider_commissions') }}" class="btn btn-sm btn-outline-secondary">
+                    <i class="bi bi-x-circle me-1"></i>Clear Filters
+                </a>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Commissions Table -->
+    <div class="card border-0 shadow-sm">
+        <div class="card-header bg-white border-bottom">
+            <h5 class="mb-0">
+                <i class="bi bi-table me-2"></i>Commission Records
+                <span class="badge bg-secondary">{{ commissions.total }} total</span>
+            </h5>
+        </div>
+        <div class="card-body p-0">
+            {% if commissions.items %}
+            <div class="table-responsive">
+                <table class="table table-hover mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th width="5%">#</th>
+                            <th width="15%">Provider</th>
+                            <th width="10%">Type</th>
+                            <th width="12%">Amount</th>
+                            <th width="15%">Transaction Ref</th>
+                            <th width="12%">Created</th>
+                            <th width="10%">Status</th>
+                            <th width="10%">Payment Ref</th>
+                            <th width="11%">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for commission in commissions.items %}
+                        <tr>
+                            <td class="text-muted small">{{ commission.id }}</td>
+                            <td>
+                                {% if commission.provider %}
+                                <strong>{{ commission.provider.display_name }}</strong>
+                                <br><small class="text-muted">{{ commission.provider.username }}</small>
+                                {% else %}
+                                <span class="text-muted">N/A</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if commission.transaction_type == 'deposit' %}
+                                <span class="badge bg-success">
+                                    <i class="bi bi-arrow-down-circle me-1"></i>Deposit
+                                </span>
+                                {% else %}
+                                <span class="badge bg-warning text-dark">
+                                    <i class="bi bi-arrow-up-circle me-1"></i>Withdraw
+                                </span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <strong class="text-primary">{{ "%.2f"|format(commission.amount) }}</strong>
+                                <span class="text-muted">{{ commission.currency }}</span>
+                            </td>
+                            <td>
+                                <code class="small">{{ commission.related_transaction_ref or 'N/A' }}</code>
+                            </td>
+                            <td>
+                                <small>{{ commission.created_at.strftime('%Y-%m-%d %H:%M') }}</small>
+                            </td>
+                            <td>
+                                {% if commission.is_paid %}
+                                <span class="badge bg-success">
+                                    <i class="bi bi-check-circle me-1"></i>Paid
+                                </span>
+                                <br><small class="text-muted">{{ commission.paid_at.strftime('%Y-%m-%d') if commission.paid_at else '' }}</small>
+                                {% else %}
+                                <span class="badge bg-danger">
+                                    <i class="bi bi-clock-history me-1"></i>Unpaid
+                                </span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if commission.is_paid and commission.payment_reference %}
+                                <code class="small">{{ commission.payment_reference }}</code>
+                                {% else %}
+                                <span class="text-muted">-</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if not commission.is_paid %}
+                                <button type="button" class="btn btn-sm btn-success" 
+                                        data-bs-toggle="modal" 
+                                        data-bs-target="#markPaidModal"
+                                        data-commission-id="{{ commission.id }}"
+                                        data-provider-name="{{ commission.provider.display_name if commission.provider else 'Unknown' }}"
+                                        data-amount="{{ commission.amount }}"
+                                        data-currency="{{ commission.currency }}">
+                                    <i class="bi bi-check-circle me-1"></i>Mark Paid
+                                </button>
+                                {% else %}
+                                <button type="button" class="btn btn-sm btn-outline-info" 
+                                        data-bs-toggle="modal" 
+                                        data-bs-target="#paymentDetailsModal"
+                                        data-commission-id="{{ commission.id }}"
+                                        data-provider-name="{{ commission.provider.display_name if commission.provider else 'Unknown' }}"
+                                        data-amount="{{ commission.amount }}"
+                                        data-currency="{{ commission.currency }}"
+                                        data-payment-ref="{{ commission.payment_reference or '' }}"
+                                        data-payment-method="{{ commission.payment_method or '' }}"
+                                        data-payment-notes="{{ commission.payment_notes or '' }}"
+                                        data-paid-at="{{ commission.paid_at.strftime('%Y-%m-%d %H:%M') if commission.paid_at else '' }}">
+                                    <i class="bi bi-info-circle me-1"></i>Details
+                                </button>
+                                {% endif %}
+                                
+                                {% if commission.provider %}
+                                <a href="{{ url_for('admin.provider_commission_report', provider_id=commission.provider.id) }}" 
+                                   class="btn btn-sm btn-outline-secondary mt-1" 
+                                   title="View provider report">
+                                    <i class="bi bi-file-text"></i>
+                                </a>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            
+            <!-- Pagination -->
+            {% if commissions.pages > 1 %}
+            <div class="card-footer bg-light">
+                <nav aria-label="Commission pagination">
+                    <ul class="pagination pagination-sm mb-0 justify-content-center">
+                        <li class="page-item {% if not commissions.has_prev %}disabled{% endif %}">
+                            <a class="page-link" href="{{ url_for('admin.provider_commissions', page=commissions.prev_num, status=status_filter, provider_id=selected_provider_id, type=selected_type, date_from=date_from, date_to=date_to) }}">
+                                Previous
+                            </a>
+                        </li>
+                        
+                        {% for page_num in commissions.iter_pages(left_edge=1, right_edge=1, left_current=2, right_current=2) %}
+                            {% if page_num %}
+                                <li class="page-item {% if page_num == commissions.page %}active{% endif %}">
+                                    <a class="page-link" href="{{ url_for('admin.provider_commissions', page=page_num, status=status_filter, provider_id=selected_provider_id, type=selected_type, date_from=date_from, date_to=date_to) }}">
+                                        {{ page_num }}
+                                    </a>
+                                </li>
+                            {% else %}
+                                <li class="page-item disabled"><span class="page-link">...</span></li>
+                            {% endif %}
+                        {% endfor %}
+                        
+                        <li class="page-item {% if not commissions.has_next %}disabled{% endif %}">
+                            <a class="page-link" href="{{ url_for('admin.provider_commissions', page=commissions.next_num, status=status_filter, provider_id=selected_provider_id, type=selected_type, date_from=date_from, date_to=date_to) }}">
+                                Next
+                            </a>
+                        </li>
+                    </ul>
+                </nav>
+            </div>
+            {% endif %}
+            {% else %}
+            <div class="text-center py-5">
+                <i class="bi bi-inbox fs-1 text-muted"></i>
+                <p class="text-muted mt-3">No commission records found</p>
+                {% if status_filter != 'all' or selected_provider_id or selected_type or date_from or date_to %}
+                <a href="{{ url_for('admin.provider_commissions') }}" class="btn btn-outline-primary">
+                    <i class="bi bi-arrow-counterclockwise me-2"></i>Clear Filters
+                </a>
+                {% endif %}
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- Mark as Paid Modal -->
+<div class="modal fade" id="markPaidModal" tabindex="-1" aria-labelledby="markPaidModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form method="POST" id="markPaidForm">
+                <div class="modal-header bg-success text-white">
+                    <h5 class="modal-title" id="markPaidModalLabel">
+                        <i class="bi bi-check-circle me-2"></i>Mark Commission as Paid
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="alert alert-info mb-3">
+                        <strong>Provider:</strong> <span id="modalProviderName"></span><br>
+                        <strong>Amount:</strong> <span id="modalAmount"></span> <span id="modalCurrency"></span>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="payment_method" class="form-label">Payment Method <span class="text-danger">*</span></label>
+                        <select name="payment_method" id="payment_method" class="form-select" required>
+                            <option value="bank_transfer">Bank Transfer</option>
+                            <option value="cash">Cash</option>
+                            <option value="check">Check</option>
+                            <option value="other">Other</option>
+                        </select>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="payment_reference" class="form-label">Payment Reference</label>
+                        <input type="text" name="payment_reference" id="payment_reference" class="form-control" placeholder="e.g., TRX-123456 (auto-generated if empty)">
+                        <small class="text-muted">Leave blank to auto-generate</small>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="payment_notes" class="form-label">Notes</label>
+                        <textarea name="payment_notes" id="payment_notes" class="form-control" rows="3" placeholder="Optional payment notes..."></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-success">
+                        <i class="bi bi-check-circle me-2"></i>Mark as Paid
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Payment Details Modal -->
+<div class="modal fade" id="paymentDetailsModal" tabindex="-1" aria-labelledby="paymentDetailsModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-info text-white">
+                <h5 class="modal-title" id="paymentDetailsModalLabel">
+                    <i class="bi bi-info-circle me-2"></i>Payment Details
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <table class="table table-borderless">
+                    <tr>
+                        <th width="40%">Provider:</th>
+                        <td id="detailProviderName"></td>
+                    </tr>
+                    <tr>
+                        <th>Amount:</th>
+                        <td><strong id="detailAmount"></strong> <span id="detailCurrency"></span></td>
+                    </tr>
+                    <tr>
+                        <th>Payment Reference:</th>
+                        <td><code id="detailPaymentRef"></code></td>
+                    </tr>
+                    <tr>
+                        <th>Payment Method:</th>
+                        <td id="detailPaymentMethod"></td>
+                    </tr>
+                    <tr>
+                        <th>Paid At:</th>
+                        <td id="detailPaidAt"></td>
+                    </tr>
+                    <tr>
+                        <th>Notes:</th>
+                        <td id="detailPaymentNotes" class="text-muted"></td>
+                    </tr>
+                </table>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Mark as Paid Modal
+document.getElementById('markPaidModal').addEventListener('show.bs.modal', function (event) {
+    const button = event.relatedTarget;
+    const commissionId = button.getAttribute('data-commission-id');
+    const providerName = button.getAttribute('data-provider-name');
+    const amount = button.getAttribute('data-amount');
+    const currency = button.getAttribute('data-currency');
+    
+    document.getElementById('modalProviderName').textContent = providerName;
+    document.getElementById('modalAmount').textContent = parseFloat(amount).toFixed(2);
+    document.getElementById('modalCurrency').textContent = currency;
+    
+    const form = document.getElementById('markPaidForm');
+    form.action = `/admin/bank-gateway/provider-commission/${commissionId}/mark-paid`;
+});
+
+// Payment Details Modal
+document.getElementById('paymentDetailsModal').addEventListener('show.bs.modal', function (event) {
+    const button = event.relatedTarget;
+    
+    document.getElementById('detailProviderName').textContent = button.getAttribute('data-provider-name');
+    document.getElementById('detailAmount').textContent = parseFloat(button.getAttribute('data-amount')).toFixed(2);
+    document.getElementById('detailCurrency').textContent = button.getAttribute('data-currency');
+    document.getElementById('detailPaymentRef').textContent = button.getAttribute('data-payment-ref') || 'N/A';
+    document.getElementById('detailPaymentMethod').textContent = button.getAttribute('data-payment-method') || 'N/A';
+    document.getElementById('detailPaidAt').textContent = button.getAttribute('data-paid-at') || 'N/A';
+    document.getElementById('detailPaymentNotes').textContent = button.getAttribute('data-payment-notes') || 'No notes';
+});
+</script>
+
+<style>
+/* Cyberpunk theme colors */
+.bg-gradient-dark {
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+}
+
+.bg-gradient-success {
+    background: linear-gradient(135deg, #0f9b0f 0%, #0d7c0d 100%);
+}
+
+.bg-gradient-danger {
+    background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+}
+
+.bg-gradient-info {
+    background: linear-gradient(135deg, #17a2b8 0%, #138496 100%);
+}
+
+.table-hover tbody tr:hover {
+    background-color: rgba(255, 165, 0, 0.05);
+}
+
+.badge {
+    font-weight: 500;
+}
+</style>
+{% endblock %}

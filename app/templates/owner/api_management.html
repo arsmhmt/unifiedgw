@@ -1,0 +1,152 @@
+{% extends 'owner/base.html' %}
+
+{% block title %}API Management - Owner Panel{% endblock %}
+
+{% block content %}
+<div class="d-flex flex-column flex-md-row align-items-center justify-content-between mb-4">
+    <div>
+        <h1 class="h3 mb-1 cyber-title">Client API Access</h1>
+        <p class="text-muted mb-0 cyber-subtitle">Oversee issued credentials, rate limits, and usage anomalies.</p>
+    </div>
+</div>
+
+<div class="row g-4 mb-4">
+    <div class="col-xl-4 col-md-6">
+        <div class="card stats-card primary h-100">
+            <div class="card-body d-flex align-items-center">
+                <div class="flex-grow-1">
+                    <h6 class="text-uppercase fw-bold mb-1">Total Keys</h6>
+                    <h3 class="mb-0">{{ stats.total_keys }}</h3>
+                </div>
+                <div class="icon-bg">
+                    <i class="bi bi-key"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-xl-4 col-md-6">
+        <div class="card stats-card success h-100">
+            <div class="card-body d-flex align-items-center">
+                <div class="flex-grow-1">
+                    <h6 class="text-uppercase fw-bold mb-1">Active Keys</h6>
+                    <h3 class="mb-0">{{ stats.active_keys }}</h3>
+                </div>
+                <div class="icon-bg">
+                    <i class="bi bi-shield-lock"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-xl-4 col-md-6">
+        <div class="card stats-card info h-100">
+            <div class="card-body d-flex align-items-center">
+                <div class="flex-grow-1">
+                    <h6 class="text-uppercase fw-bold mb-1">Clients with Keys</h6>
+                    <h3 class="mb-0">{{ stats.clients_with_keys }}</h3>
+                </div>
+                <div class="icon-bg">
+                    <i class="bi bi-diagram-3"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-4">
+    <div class="col-lg-7">
+        <div class="card shadow-sm h-100">
+            <div class="card-header bg-transparent border-bottom d-flex align-items-center justify-content-between">
+                <h5 class="mb-0"><i class="bi bi-key me-2 text-primary"></i>Issued API Keys</h5>
+                <span class="text-muted small">{{ api_keys|length }} result{{ api_keys|length != 1 and 's' or '' }}</span>
+            </div>
+            <div class="card-body p-0">
+                {% if api_keys %}
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0 align-middle">
+                        <thead class="table-dark">
+                            <tr>
+                                <th>Name</th>
+                                <th>Client</th>
+                                <th>Status</th>
+                                <th class="text-end">Rate Limit</th>
+                                <th class="text-end">Created</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for key in api_keys %}
+                            <tr>
+                                <td>
+                                    <div class="fw-semibold">{{ key.name }}</div>
+                                    <div class="text-muted small">{{ key.key_prefix }}</div>
+                                </td>
+                                <td class="text-muted small">#{{ key.client_id }}</td>
+                                <td>
+                                    {% if key.is_active %}
+                                        <span class="badge bg-success">Active</span>
+                                    {% else %}
+                                        <span class="badge bg-secondary">Disabled</span>
+                                    {% endif %}
+                                </td>
+                                <td class="text-end text-muted small">{{ key.rate_limit }}/min</td>
+                                <td class="text-end text-muted small">
+                                    {{ key.created_at.strftime('%Y-%m-%d %H:%M') if key.created_at else '—' }}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div class="text-center py-5">
+                    <i class="bi bi-key fa-3x text-muted mb-3"></i>
+                    <h6 class="text-muted">No API keys issued yet</h6>
+                    <p class="text-muted small mb-0">Create keys via client administration to enable integrations.</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-5">
+        <div class="card shadow-sm h-100">
+            <div class="card-header bg-transparent border-bottom d-flex align-items-center justify-content-between">
+                <h5 class="mb-0"><i class="bi bi-graph-up-arrow me-2 text-warning"></i>Recent Usage</h5>
+                <span class="text-muted small">Last {{ usage_logs|length }} calls</span>
+            </div>
+            <div class="card-body p-0">
+                {% if usage_logs %}
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0 align-middle">
+                        <thead class="table-dark">
+                            <tr>
+                                <th>Endpoint</th>
+                                <th>Method</th>
+                                <th>Status</th>
+                                <th class="text-end">Latency</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for log in usage_logs %}
+                            <tr>
+                                <td class="text-truncate" style="max-width: 160px;" title="{{ log.endpoint }}">{{ log.endpoint }}</td>
+                                <td class="text-muted small text-uppercase">{{ log.method }}</td>
+                                <td>
+                                    <span class="badge bg-{{ 'success' if log.status_code and log.status_code < 400 else 'danger' }}">{{ log.status_code or '—' }}</span>
+                                </td>
+                                <td class="text-end text-muted small">{{ log.response_time_ms or '—' }} ms</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div class="text-center py-5">
+                    <i class="bi bi-graph-up-arrow fa-3x text-muted mb-3"></i>
+                    <h6 class="text-muted">No usage recorded</h6>
+                    <p class="text-muted small mb-0">API calls will appear here once clients start integrating.</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,175 @@
+{% extends "base.html" %}
+
+{% block title %}Bank Gateway - Provider Dashboard{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <h1 class="h3 mb-3">Bank Gateway Provider Dashboard</h1>
+            
+            <!-- Statistics Cards -->
+            <div class="row mb-4">
+                <div class="col-md-3">
+                    <div class="card bg-primary text-white">
+                        <div class="card-body">
+                            <h5 class="card-title">Total Accounts</h5>
+                            <h2>{{ total_accounts }}</h2>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card bg-success text-white">
+                        <div class="card-body">
+                            <h5 class="card-title">Available Balance</h5>
+                            <h2>₺{{ "{:,.2f}".format(total_balance) }}</h2>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card bg-warning text-white">
+                        <div class="card-body">
+                            <h5 class="card-title">Pending Transactions</h5>
+                            <h2>{{ pending_transactions }}</h2>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card bg-info text-white">
+                        <div class="card-body">
+                            <h5 class="card-title">Commission Rate</h5>
+                            <h2>{{ provider.deposit_commission }}%</h2>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quick Actions -->
+            <div class="row mb-4">
+                <div class="col-12">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5>Quick Actions</h5>
+                        </div>
+                        <div class="card-body">
+                            <a href="{{ url_for('provider_panel.accounts') }}" class="btn btn-primary me-2">
+                                <i class="fas fa-university"></i> Manage Accounts
+                            </a>
+                            <a href="{{ url_for('provider_panel.transactions') }}" class="btn btn-success me-2">
+                                <i class="fas fa-exchange-alt"></i> View Transactions
+                            </a>
+                            <a href="{{ url_for('provider_panel.add_account') }}" class="btn btn-info">
+                                <i class="fas fa-plus"></i> Add New Account
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recent Transactions -->
+            <div class="row">
+                <div class="col-12">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5>Recent Transactions</h5>
+                        </div>
+                        <div class="card-body">
+                            {% if recent_transactions %}
+                            <div class="table-responsive">
+                                <table class="table table-striped">
+                                    <thead>
+                                        <tr>
+                                            <th>Reference</th>
+                                            <th>Type</th>
+                                            <th>Amount</th>
+                                            <th>Status</th>
+                                            <th>User</th>
+                                            <th>Date</th>
+                                            <th>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for transaction in recent_transactions %}
+                                        <tr>
+                                            <td>{{ transaction.reference_code }}</td>
+                                            <td>
+                                                <span class="badge bg-{{ 'primary' if transaction.transaction_type == 'deposit' else 'warning' }}">
+                                                    {{ transaction.transaction_type.title() }}
+                                                </span>
+                                            </td>
+                                            <td>{{ transaction.currency }} {{ "{:,.2f}".format(transaction.amount) }}</td>
+                                            <td>
+                                                <span class="badge bg-{{ 'warning' if transaction.status == 'pending' else 'success' if transaction.status == 'confirmed' else 'danger' }}">
+                                                    {{ transaction.status.title() }}
+                                                </span>
+                                            </td>
+                                            <td>{{ transaction.user_name }}</td>
+                                            <td>{{ transaction.created_at|datetime_eest('%Y-%m-%d %H:%M') }}</td>
+                                            <td>
+                                                {% if transaction.status == 'pending' %}
+                                                <button class="btn btn-sm btn-success" onclick="confirmTransaction({{ transaction.id }})">
+                                                    <i class="fas fa-check"></i>
+                                                </button>
+                                                <button class="btn btn-sm btn-danger" onclick="rejectTransaction({{ transaction.id }})">
+                                                    <i class="fas fa-times"></i>
+                                                </button>
+                                                {% endif %}
+                                            </td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                            {% else %}
+                            <p class="text-muted">No recent transactions.</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function confirmTransaction(transactionId) {
+    if (confirm('Are you sure you want to confirm this transaction?')) {
+        fetch(`/teminci/transaction/${transactionId}/confirm`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                location.reload();
+            } else {
+                alert('Error: ' + data.error);
+            }
+        });
+    }
+}
+
+function rejectTransaction(transactionId) {
+    const reason = prompt('Enter rejection reason:');
+    if (reason) {
+        fetch(`/teminci/transaction/${transactionId}/reject`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({reason: reason})
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                location.reload();
+            } else {
+                alert('Error: ' + data.error);
+            }
+        });
+    }
+}
+</script>
+{% endblock %}

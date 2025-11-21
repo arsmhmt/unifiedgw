@@ -740,24 +740,16 @@
                                     <span class="nav-text">{{ _('Payments') }}</span>
                                 </a>
 
-                                <a class="nav-link {% if request.endpoint in ['client.withdraw', 'client.withdrawal_history'] %}active{% endif %}"
-                                    href="{{ url_for('client.withdraw') }}">
+                                <a class="nav-link {% if request.endpoint in ['client.withdrawal_requests', 'client.create_withdrawal_request', 'client.view_withdrawal_request'] %}active{% endif %}"
+                                    href="{{ url_for('client.withdrawal_requests') }}">
                                     <div class="sb-nav-link-icon"><i class="bi bi-arrow-up-circle"></i></div>
                                     <span class="nav-text">Withdrawals</span>
                                 </a>
                                 {% else %}
-                                {% set upgrade_pkg = get_upgrade_package_name(current_user.package.slug if current_user and current_user.package else '') %}
-                                <a class="nav-link nav-link-locked" href="#" data-bs-toggle="tooltip"
-                                    title="Upgrade to {{ upgrade_pkg }} to unlock payment features">
-                                    <div class="sb-nav-link-icon"><i class="bi bi-credit-card"></i></div>
-                                    <span class="nav-text">Payments</span>
-                                    <div class="nav-lock"><i class="bi bi-lock-fill"></i></div>
-                                </a>
-                                <a class="nav-link nav-link-locked" href="#" data-bs-toggle="tooltip"
-                                    title="Upgrade to {{ upgrade_pkg }} to unlock withdrawal features">
+                                <a class="nav-link {% if request.endpoint in ['client.withdrawal_requests', 'client.create_withdrawal_request', 'client.view_withdrawal_request'] %}active{% endif %}"
+                                    href="{{ url_for('client.withdrawal_requests') }}">
                                     <div class="sb-nav-link-icon"><i class="bi bi-arrow-up-circle"></i></div>
                                     <span class="nav-text">Withdrawals</span>
-                                    <div class="nav-lock"><i class="bi bi-lock-fill"></i></div>
                                 </a>
                                 {% endif %}
                             </div>
@@ -835,29 +827,6 @@
                                 #}
                                 {% endif %}
                             </div>
-                            {% else %}
-                            <!-- Locked API section for users without API access -->
-                            <div class="nav-group">
-                                <div class="nav-group-header">
-                                    <i class="fas fa-code"></i>
-                                    <span>Developer</span>
-                                </div>
-
-                                {% set upgrade_pkg = get_upgrade_package_name(current_user.package.slug if current_user and current_user.package else '') %}
-                                <a class="nav-link nav-link-locked" href="#" data-bs-toggle="tooltip"
-                                    title="Upgrade to {{ upgrade_pkg }} or higher to access API management">
-                                    <div class="sb-nav-link-icon"><i class="fas fa-tools"></i></div>
-                                    <span class="nav-text">API Management</span>
-                                    <div class="nav-lock"><i class="bi bi-lock-fill"></i></div>
-                                </a>
-
-                                <a class="nav-link nav-link-locked" href="#" data-bs-toggle="tooltip"
-                                    title="Upgrade to {{ upgrade_pkg }} or higher to access API documentation">
-                                    <div class="sb-nav-link-icon"><i class="fas fa-book"></i></div>
-                                    <span class="nav-text">API Documentation</span>
-                                    <div class="nav-lock"><i class="bi bi-lock-fill"></i></div>
-                                </a>
-                            </div>
                             {% endif %}
 
                             <!-- Account & Support -->
@@ -889,106 +858,13 @@
                                 </a>
                             </div>
 
-                            <!-- Upgrade CTA -->
-                            {% if current_user and current_user.package %}
-                            {% set current_package = current_user.package %}
-                            {% set package_slug = current_package.slug if current_package else '' %}
-                            {% set is_commission = current_user.is_commission_based() %}
-                            {% set is_flat_rate = current_user.is_flat_rate() %}
-
-                            {# Determine upgrade recommendation based on client type and current package #}
-                            {% if is_commission %}
-                            {# Commission-based clients: always offer flat-rate enterprise #}
-                            {% set upgrade_package = 'professional_flat_rate' %}
-                            {% set upgrade_name = 'Enterprise' %}
-                            {% set upgrade_reason = 'Switch to flat-rate pricing and unlock all enterprise features' %}
-                            {% set show_upgrade = true %}
-                            {% elif is_flat_rate %}
-                            {# Flat-rate clients: offer next tier #}
-                            {% if package_slug == 'starter_flat_rate' %}
-                            {% set upgrade_package = 'business_flat_rate' %}
-                            {% set upgrade_name = 'Business' %}
-                            {% set upgrade_reason = 'Unlock advanced analytics and priority support' %}
-                            {% set show_upgrade = true %}
-                            {% elif package_slug == 'business_flat_rate' %}
-                            {% set upgrade_package = 'enterprise_flat_rate' %}
-                            {% set upgrade_name = 'Enterprise' %}
-                            {% set upgrade_reason = 'Get unlimited volume and all enterprise features' %}
-                            {% set show_upgrade = true %}
-                            {% else %}
-                            {# Already at highest flat-rate tier #}
-                            {% set show_upgrade = false %}
-                            {% endif %}
-                            {% else %}
-                            {# No package or unknown type #}
-                            {% set upgrade_package = 'business_flat_rate' %}
-                            {% set upgrade_name = 'Business' %}
-                            {% set upgrade_reason = 'Get started with advanced features' %}
-                            {% set show_upgrade = true %}
-                            {% endif %}
-
-                            {% if show_upgrade %}
-                            <div class="nav-group mt-auto">
-                                <div class="upgrade-cta">
-                                    <div class="upgrade-header">
-                                        <i class="bi bi-star-fill text-warning"></i>
-                                        <span>Upgrade Available</span>
-                                    </div>
-                                    <div class="upgrade-text">
-                                        {{ upgrade_reason }}
-                                    </div>
-                                    <a href="{{ url_for('main.pricing') }}" class="btn btn-upgrade">
-                                        <i class="bi bi-arrow-up"></i>
-                                        Upgrade to {{ upgrade_name }}
-                                    </a>
-                                </div>
-                            </div>
-                            {% endif %}
-                            {% endif %}
                         </div>
                     </div>
 
                     <!-- Sidebar Footer with Compact Package Info -->
                     <div class="sb-sidenav-footer">
-                        <div class="sidebar-footer-content">
-                            {% if current_user and current_user.package %}
-                            <div class="package-info">
-                                {% set package_display_name = current_user.package.name.replace(' Flat
-                                Rate','').replace(' Commission', '') %}
-                                <div class="package-badge {{ package_display_name.lower() }}">
-                                    <i class="bi bi-gem"></i>
-                                    <span>{{ package_display_name }}</span>
-                                </div>
-                                <div class="package-features">
-                                    {% set features = current_user.get_features() if
-                                    current_user.get_features else [] %}
-                                    {% set all_features = current_user.get_all_possible_features() if
-                                    current_user.get_all_possible_features else [] %}
-                                    {% set locked_features = all_features|reject('in', features)|list %}
-                                    <small>
-                                        <span data-bs-toggle="tooltip" data-bs-placement="top"
-                                            title="Locked: {{ locked_features|join(', ') }}">
-                                            {{ features|length }} of {{ all_features|length }} features active
-                                        </span>
-                                    </small>
-                                </div>
-                            </div>
-                            {% else %}
-                            <div class="package-info">
-                                <div class="package-badge basic">
-                                    <i class="bi bi-exclamation-triangle"></i>
-                                    <span>No Plan</span>
-                                </div>
-                                <a href="{{ url_for('main.pricing') }}" class="btn btn-sm btn-outline-light mt-2">
-                                    Select Plan
-                                </a>
-                            </div>
-                            {% endif %}
-                            <!-- Upgrade Plan Button -->
-                            <button class="btn btn-upgrade mt-3 w-100" data-bs-toggle="modal"
-                                data-bs-target="#upgradeModal">
-                                <i class="bi bi-arrow-up"></i> Upgrade Plan
-                            </button>
+                        <div class="sidebar-footer-content text-center">
+                            <small class="text-muted">{{ _('Secure client portal access') }}</small>
                         </div>
                     </div>
                 </nav>
@@ -1014,7 +890,7 @@
                             {% block page_title %}
                             {% if request.endpoint == 'client.dashboard' %}{{ _('Dashboard') }}
                             {% elif request.endpoint == 'client.payments' %}{{ _('Payments') }}
-                            {% elif request.endpoint == 'client.withdraw' %}{{ _('Withdrawals') }}
+                            {% elif request.endpoint in ['client.withdrawal_requests', 'client.create_withdrawal_request', 'client.view_withdrawal_request'] %}{{ _('Withdrawals') }}
                             {% elif request.endpoint == 'client.invoices' %}{{ _('Invoices') }}
                             {% elif request.endpoint == 'client.documents' %}{{ _('Documents') }}
                             {% elif request.endpoint == 'client.api_management' %}{{ _('API Management') }}
@@ -1062,7 +938,7 @@
                                     title="Create a new payment" data-bs-toggle="tooltip">
                                     <i class="bi bi-credit-card me-2"></i>New Payment
                                 </a>
-                                <a class="dropdown-item" href="{{ url_for('client.withdraw') }}"
+                                <a class="dropdown-item" href="{{ url_for('client.create_withdrawal_request') }}"
                                     title="Withdraw funds to your connected wallet" data-bs-toggle="tooltip">
                                     <i class="bi bi-arrow-up-circle me-2"></i>New Withdrawal
                                 </a>
@@ -1364,49 +1240,6 @@
         </div>
 
         <!-- Upgrade Modal -->
-        <div class="modal fade" id="upgradeModal" tabindex="-1" aria-labelledby="upgradeModalLabel" aria-hidden="true">
-            <div class="modal-dialog modal-dialog-centered">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title" id="upgradeModalLabel">Upgrade Plan</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                    </div>
-                    <div class="modal-body">
-                        <h6>Benefit Highlights</h6>
-                        <ul>
-                            <li>Unlock more features and higher limits</li>
-                            <li>Priority support</li>
-                            <li>Advanced analytics</li>
-                        </ul>
-                        <h6>Pricing Comparison</h6>
-                        <table class="table table-sm">
-                            <thead>
-                                <tr>
-                                    <th>Plan</th>
-                                    <th>Monthly</th>
-                                    <th>Features</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr>
-                                    <td>Current</td>
-                                    <td>${{ current_user.package.price_monthly if current_user and current_user.package else '-' }}</td>
-                                    <td>{{ features|length }}</td>
-                                </tr>
-                                <tr>
-                                    <td>Upgrade</td>
-                                    <td>${{ upgrade_package_price if upgrade_package_price else '-' }}</td>
-                                    <td>{{ all_features|length }}</td>
-                                </tr>
-                            </tbody>
-                        </table>
-                        <div class="text-center mt-3">
-                            <a href="{{ url_for('main.pricing') }}" class="btn btn-primary">Upgrade Now</a>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
     </body>
 
 </html>

@@ -1,0 +1,227 @@
+{% extends "admin/base.html" %}
+
+{% block title %}Branch Dashboard - {{ current_user.managed_branch.name }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-4">
+    <!-- Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="mt-4 mb-0">{{ current_user.managed_branch.name }} Dashboard</h1>
+        </div>
+        <div>
+            <span class="badge bg-primary fs-6">{{ current_user.managed_branch.total_clients }} Active Clients</span>
+        </div>
+    </div>
+
+    <!-- Statistics Cards -->
+    <div class="row mb-4">
+        <!-- Total Clients -->
+        <div class="col-xl-3 col-md-6">
+            <div class="card bg-primary text-white mb-4">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <div class="text-white-75 small">Total Clients</div>
+                            <div class="text-lg fw-bold">{{ total_clients }}</div>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="bi bi-people fs-2"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Monthly Deposits -->
+        <div class="col-xl-3 col-md-6">
+            <div class="card bg-success text-white mb-4">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <div class="text-white-75 small">Monthly Deposits</div>
+                            <div class="text-lg fw-bold">${{ "%.2f"|format(total_deposits) }}</div>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="bi bi-cash-coin fs-2"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Monthly Withdrawals -->
+        <div class="col-xl-3 col-md-6">
+            <div class="card bg-warning text-white mb-4">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <div class="text-white-75 small">Monthly Withdrawals</div>
+                            <div class="text-lg fw-bold">${{ "%.2f"|format(total_withdrawals) }}</div>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="bi bi-arrow-up-circle fs-2"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Commission Earned -->
+        <div class="col-xl-3 col-md-6">
+            <div class="card bg-info text-white mb-4">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <div class="text-white-75 small">Commission Earned</div>
+                            <div class="text-lg fw-bold">${{ "%.2f"|format(commission_earned) }}</div>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="bi bi-pie-chart fs-2"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">Quick Actions</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-3 mb-3">
+                            <a href="{{ url_for('branch.transactions') }}" class="btn btn-outline-primary w-100 h-100 d-flex flex-column align-items-center justify-content-center p-3 text-decoration-none">
+                                <i class="bi bi-receipt fs-2 mb-2"></i>
+                                <span class="fw-bold">View Transactions</span>
+                                <small class="text-muted">Approve/Reject payments</small>
+                            </a>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <a href="{{ url_for('branch.clients') }}" class="btn btn-outline-success w-100 h-100 d-flex flex-column align-items-center justify-content-center p-3 text-decoration-none">
+                                <i class="bi bi-people fs-2 mb-2"></i>
+                                <span class="fw-bold">Manage Clients</span>
+                                <small class="text-muted">View client details</small>
+                            </a>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <a href="{{ url_for('branch.audit_logs') }}" class="btn btn-outline-warning w-100 h-100 d-flex flex-column align-items-center justify-content-center p-3 text-decoration-none">
+                                <i class="bi bi-journal-text fs-2 mb-2"></i>
+                                <span class="fw-bold">Audit Logs</span>
+                                <small class="text-muted">View activity logs</small>
+                            </a>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <a href="{{ url_for('admin.clients') }}" class="btn btn-outline-info w-100 h-100 d-flex flex-column align-items-center justify-content-center p-3 text-decoration-none">
+                                <i class="bi bi-plus-circle fs-2 mb-2"></i>
+                                <span class="fw-bold">Add Client</span>
+                                <small class="text-muted">Create new client</small>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Transactions & Client Activity -->
+    <div class="row">
+        <!-- Recent Transactions -->
+        <div class="col-xl-8 mb-4">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">Recent Transactions</h5>
+                    <a href="{{ url_for('branch.transactions') }}" class="btn btn-sm btn-outline-primary">View All</a>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Type</th>
+                                    <th>Client</th>
+                                    <th>Amount</th>
+                                    <th>Status</th>
+                                    <th>Date</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for transaction in recent_transactions %}
+                                <tr>
+                                    <td>
+                                        {% if transaction.type == 'deposit' %}
+                                        <span class="badge bg-success">
+                                            <i class="bi bi-arrow-down"></i> Deposit
+                                        </span>
+                                        {% else %}
+                                        <span class="badge bg-warning">
+                                            <i class="bi bi-arrow-up"></i> Withdrawal
+                                        </span>
+                                        {% endif %}
+                                    </td>
+                                    <td>{{ transaction.client }}</td>
+                                    <td class="fw-bold">{{ transaction.amount }} {{ transaction.currency }}</td>
+                                    <td>
+                                        {% if transaction.status == 'approved' %}
+                                        <span class="badge bg-success">Approved</span>
+                                        {% elif transaction.status == 'pending' %}
+                                        <span class="badge bg-warning">Pending</span>
+                                        {% elif transaction.status == 'rejected' %}
+                                        <span class="badge bg-danger">Rejected</span>
+                                        {% else %}
+                                        <span class="badge bg-secondary">{{ transaction.status.title() }}</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>{{ transaction.date|datetime_eest('%Y-%m-%d %H:%M') }}</td>
+                                </tr>
+                                {% else %}
+                                <tr>
+                                    <td colspan="5" class="text-center py-4 text-muted">
+                                        <i class="bi bi-receipt fs-2 mb-2"></i><br>
+                                        No recent transactions
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Client Activity -->
+        <div class="col-xl-4 mb-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">Client Activity (Last 30 Days)</h5>
+                </div>
+                <div class="card-body">
+                    {% for client in client_stats[:5] %}
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <div>
+                            <div class="fw-bold">{{ client.name }}</div>
+                            <small class="text-muted">{{ client.transactions }} transactions</small>
+                        </div>
+                        <div class="text-end">
+                            <div class="fw-bold text-success">${{ "%.2f"|format(client.deposits) }}</div>
+                        </div>
+                    </div>
+                    {% if not loop.last %}
+                    <hr>
+                    {% endif %}
+                    {% else %}
+                    <div class="text-center py-4 text-muted">
+                        <i class="bi bi-graph-up fs-2 mb-2"></i><br>
+                        No client activity data
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

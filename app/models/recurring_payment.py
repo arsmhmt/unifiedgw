@@ -1,3 +1,4 @@
+from ..utils.timezone import now_eest
 from ..extensions import db  # Changed from 'from app import db'
 from datetime import datetime, timedelta
 from enum import Enum
@@ -49,7 +50,7 @@ class RecurringPayment(db.Model):
     def calculate_next_payment_date(self, current_date=None):
         """Calculate the next payment date based on frequency"""
         if not current_date:
-            current_date = datetime.utcnow()
+            current_date = now_eest()
             
         if self.frequency == RecurringFrequency.DAILY.value:
             return current_date + timedelta(days=1)

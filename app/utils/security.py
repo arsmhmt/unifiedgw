@@ -16,6 +16,7 @@ import hmac
 import hashlib
 import json
 from datetime import datetime, timedelta
+from ..utils.timezone import now_eest
 from flask import request, current_app, g, jsonify
 from functools import wraps
 from typing import Dict, List, Optional, Tuple
@@ -27,11 +28,12 @@ logger = logging.getLogger(__name__)
 try:
     if redis is not None:
         redis_client = redis.Redis(host='localhost', port=6379, db=0, decode_responses=True)
+        # Only ping if we successfully created the client
         redis_client.ping()
         REDIS_AVAILABLE = True
     else:
         raise RuntimeError("redis not installed")
-except Exception:
+except Exception as e:
     REDIS_AVAILABLE = False
     # Fallback to in-memory storage
     _memory_store = {}
@@ -332,7 +334,7 @@ class AbuseProtection:
         # Get recent withdrawal history
         recent_withdrawals = WithdrawalRequest.query.filter(
             WithdrawalRequest.client_id == client_id,
-            WithdrawalRequest.created_at >= datetime.utcnow() - timedelta(days=7)
+            WithdrawalRequest.created_at >= now_eest() - timedelta(days=7)
         ).all()
         
         # Get client info
@@ -350,7 +352,7 @@ class AbuseProtection:
         
         # Check for high frequency
         today_withdrawals = [w for w in recent_withdrawals 
-                           if w.created_at.date() == datetime.utcnow().date()]
+                           if w.created_at.date() == now_eest().date()]
         if len(today_withdrawals) > 5:
             risk_factors.append("high_frequency_withdrawals")
             risk_score += 40

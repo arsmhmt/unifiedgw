@@ -1,0 +1,356 @@
+{% extends 'admin/base.html' %}
+
+{% block title %}Login History - Security{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <h1 class="h3 mb-0 text-gray-800">
+            <i class="bi bi-shield-lock me-2 text-info"></i>Login History
+        </h1>
+        <div>
+            <button class="btn btn-outline-danger" onclick="viewSuspiciousActivity()">
+                <i class="bi bi-exclamation-triangle me-2"></i>Suspicious Activity
+            </button>
+            <button class="btn btn-outline-primary" onclick="exportLoginHistory()">
+                <i class="bi bi-download me-2"></i>Export CSV
+            </button>
+        </div>
+    </div>
+
+    <!-- Statistics Cards -->
+    <div class="row mb-4">
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-success shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
+                                Successful Logins
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ total_logins }}</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="bi bi-check-circle fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-danger shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-danger text-uppercase mb-1">
+                                Failed Attempts
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ failed_logins }}</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="bi bi-x-circle fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-warning shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
+                                Suspicious IPs
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ suspicious_activity|length }}</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="bi bi-exclamation-triangle fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-info shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-info text-uppercase mb-1">
+                                Active Sessions
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ logs.items|selectattr('logout_at', 'none')|list|length }}</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="bi bi-people fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filters -->
+    <div class="card shadow mb-4">
+        <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-primary">Filters</h6>
+        </div>
+        <div class="card-body">
+            <form method="GET" class="row g-3">
+                <div class="col-md-3">
+                    <label for="user_type" class="form-label">User Type</label>
+                    <select class="form-select" id="user_type" name="user_type">
+                        <option value="">All Types</option>
+                        <option value="admin" {% if request.args.get('user_type') == 'admin' %}selected{% endif %}>Admin</option>
+                        <option value="client" {% if request.args.get('user_type') == 'client' %}selected{% endif %}>Client</option>
+                        <option value="owner" {% if request.args.get('user_type') == 'owner' %}selected{% endif %}>Owner</option>
+                    </select>
+                </div>
+
+                <div class="col-md-3">
+                    <label for="success" class="form-label">Status</label>
+                    <select class="form-select" id="success" name="success">
+                        <option value="">All Attempts</option>
+                        <option value="1" {% if request.args.get('success') == '1' %}selected{% endif %}>Success Only</option>
+                        <option value="0" {% if request.args.get('success') == '0' %}selected{% endif %}>Failed Only</option>
+                    </select>
+                </div>
+
+                <div class="col-md-4">
+                    <label for="search" class="form-label">Search Username/IP</label>
+                    <input type="text" class="form-control" id="search" name="search" 
+                           value="{{ request.args.get('search', '') }}" placeholder="Username or IP address">
+                </div>
+
+                <div class="col-md-2">
+                    <label class="form-label">&nbsp;</label>
+                    <button type="submit" class="btn btn-primary w-100">
+                        <i class="bi bi-search me-2"></i>Filter
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Login History Table -->
+    <div class="card shadow mb-4">
+        <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-primary">Recent Login Attempts</h6>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover" id="loginHistoryTable">
+                    <thead>
+                        <tr>
+                            <th>Time</th>
+                            <th>Username</th>
+                            <th>Type</th>
+                            <th>Status</th>
+                            <th>IP Address</th>
+                            <th>Location</th>
+                            <th>Session Duration</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for log in logs.items %}
+                        <tr class="{% if not log.success %}table-danger{% endif %}">
+                            <td>
+                                <small>{{ log.login_at.strftime('%Y-%m-%d %H:%M:%S') }}</small>
+                            </td>
+                            <td>
+                                <strong>{{ log.username }}</strong>
+                                {% if log.user_id %}
+                                <a href="{{ url_for('admin.user_login_history', user_id=log.user_id) }}" 
+                                   class="btn btn-sm btn-outline-primary">
+                                    <i class="bi bi-person"></i>
+                                </a>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <span class="badge bg-{% if log.user_type == 'owner' %}danger{% elif log.user_type == 'admin' %}info{% else %}secondary{% endif %}">
+                                    {{ log.user_type|capitalize }}
+                                </span>
+                            </td>
+                            <td>
+                                {% if log.success %}
+                                    <span class="badge bg-success">
+                                        <i class="bi bi-check-circle me-1"></i>Success
+                                    </span>
+                                {% else %}
+                                    <span class="badge bg-danger">
+                                        <i class="bi bi-x-circle me-1"></i>Failed
+                                    </span>
+                                    {% if log.failure_reason %}
+                                    <br><small class="text-muted">{{ log.failure_reason }}</small>
+                                    {% endif %}
+                                {% endif %}
+                            </td>
+                            <td>
+                                <code>{{ log.ip_address }}</code>
+                            </td>
+                            <td>
+                                {% if log.city and log.country %}
+                                    <small>{{ log.city }}, {{ log.country }}</small>
+                                {% else %}
+                                    <span class="text-muted">Unknown</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if log.get_session_duration() %}
+                                    <small>{{ log.get_session_duration() }} min</small>
+                                {% elif log.success and not log.logout_at %}
+                                    <span class="badge bg-success">Active</span>
+                                {% else %}
+                                    <span class="text-muted">-</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <button class="btn btn-sm btn-outline-info" onclick="viewDetails({{ log.id }})">
+                                    <i class="bi bi-info-circle"></i>
+                                </button>
+                            </td>
+                        </tr>
+                        {% else %}
+                        <tr>
+                            <td colspan="8" class="text-center text-muted">No login history found</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Pagination -->
+            {% if logs.pages > 1 %}
+            <nav aria-label="Page navigation">
+                <ul class="pagination justify-content-center">
+                    <li class="page-item {% if not logs.has_prev %}disabled{% endif %}">
+                        <a class="page-link" href="{{ url_for('admin.login_history', page=logs.prev_num, **request.args) }}">Previous</a>
+                    </li>
+                    
+                    {% for page_num in logs.iter_pages(left_edge=1, right_edge=1, left_current=2, right_current=2) %}
+                        {% if page_num %}
+                            <li class="page-item {% if page_num == logs.page %}active{% endif %}">
+                                <a class="page-link" href="{{ url_for('admin.login_history', page=page_num, **request.args) }}">{{ page_num }}</a>
+                            </li>
+                        {% else %}
+                            <li class="page-item disabled"><span class="page-link">...</span></li>
+                        {% endif %}
+                    {% endfor %}
+                    
+                    <li class="page-item {% if not logs.has_next %}disabled{% endif %}">
+                        <a class="page-link" href="{{ url_for('admin.login_history', page=logs.next_num, **request.args) }}">Next</a>
+                    </li>
+                </ul>
+            </nav>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Suspicious Activity Card (if any) -->
+    {% if suspicious_activity %}
+    <div class="card shadow mb-4 border-danger">
+        <div class="card-header bg-danger text-white py-3">
+            <h6 class="m-0 font-weight-bold">
+                <i class="bi bi-exclamation-triangle me-2"></i>Suspicious Activity Detected
+            </h6>
+        </div>
+        <div class="card-body">
+            <p class="text-danger">
+                <strong>Warning:</strong> The following IP addresses have made multiple failed login attempts in the last hour:
+            </p>
+            <table class="table table-sm">
+                <thead>
+                    <tr>
+                        <th>IP Address</th>
+                        <th>Failed Attempts</th>
+                        <th>Last Attempt</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for ip, attempts, last_attempt in suspicious_activity %}
+                    <tr>
+                        <td><code>{{ ip }}</code></td>
+                        <td><span class="badge bg-danger">{{ attempts }}</span></td>
+                        <td><small>{{ last_attempt.strftime('%Y-%m-%d %H:%M:%S') }}</small></td>
+                        <td>
+                            <button class="btn btn-sm btn-danger" onclick="blockIP('{{ ip }}')">
+                                <i class="bi bi-ban me-1"></i>Block IP
+                            </button>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+<!-- Details Modal -->
+<div class="modal fade" id="detailsModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Login Attempt Details</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" id="detailsContent">
+                Loading...
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function viewDetails(logId) {
+    $('#detailsModal').modal('show');
+    // Load details via AJAX
+    fetch(`/admin120724/security/login-history/details/${logId}`)
+        .then(response => response.json())
+        .then(data => {
+            document.getElementById('detailsContent').innerHTML = `
+                <div class="row">
+                    <div class="col-md-6">
+                        <p><strong>Username:</strong> ${data.username}</p>
+                        <p><strong>User Type:</strong> ${data.user_type}</p>
+                        <p><strong>IP Address:</strong> <code>${data.ip_address}</code></p>
+                        <p><strong>Status:</strong> ${data.success ? '<span class="badge bg-success">Success</span>' : '<span class="badge bg-danger">Failed</span>'}</p>
+                    </div>
+                    <div class="col-md-6">
+                        <p><strong>Login Time:</strong> ${data.login_at}</p>
+                        <p><strong>Logout Time:</strong> ${data.logout_at || 'Still active'}</p>
+                        <p><strong>Session Duration:</strong> ${data.duration || 'N/A'}</p>
+                        <p><strong>Location:</strong> ${data.city || 'Unknown'}, ${data.country || 'Unknown'}</p>
+                    </div>
+                </div>
+                <hr>
+                <p><strong>User Agent:</strong><br><small>${data.user_agent || 'Not recorded'}</small></p>
+                ${data.failure_reason ? `<p class="text-danger"><strong>Failure Reason:</strong> ${data.failure_reason}</p>` : ''}
+            `;
+        })
+        .catch(error => {
+            document.getElementById('detailsContent').innerHTML = '<p class="text-danger">Failed to load details</p>';
+        });
+}
+
+function viewSuspiciousActivity() {
+    window.location.href = '{{ url_for("admin.login_history", success="0") }}';
+}
+
+function exportLoginHistory() {
+    window.location.href = '{{ url_for("admin.export_login_history") }}';
+}
+
+function blockIP(ip) {
+    if (confirm(`Are you sure you want to block IP address ${ip}?`)) {
+        // Implement IP blocking logic
+        alert('IP blocking feature coming soon!');
+    }
+}
+</script>
+{% endblock %}

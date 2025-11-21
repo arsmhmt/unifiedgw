@@ -1,0 +1,252 @@
+{% extends "branch/base.html" %}
+
+{% block title %}Bank Gateway - {{ branch.name }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <!-- Page Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="mb-1">
+                <i class="bi bi-bank me-2"></i>Bank Gateway Management
+            </h2>
+            <p class="text-muted mb-0">Branch: <strong>{{ branch.name }}</strong></p>
+        </div>
+        <a href="{{ url_for('branch.dashboard') }}" class="btn btn-outline-secondary">
+            <i class="bi bi-arrow-left me-2"></i>Back to Dashboard
+        </a>
+    </div>
+
+    <!-- Statistics Cards -->
+    <div class="row g-3 mb-4">
+        <div class="col-md-3">
+            <div class="card bg-gradient-primary text-white border-0">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="flex-shrink-0">
+                            <i class="bi bi-globe2 fs-2"></i>
+                        </div>
+                        <div class="flex-grow-1 ms-3">
+                            <h6 class="text-white-50 mb-1">Client Sites</h6>
+                            <h4 class="mb-0">{{ total_sites }}</h4>
+                            <small class="d-block">Active sites</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-3">
+            <div class="card bg-gradient-success text-white border-0">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="flex-shrink-0">
+                            <i class="bi bi-arrow-left-right fs-2"></i>
+                        </div>
+                        <div class="flex-grow-1 ms-3">
+                            <h6 class="text-white-50 mb-1">Total Transactions</h6>
+                            <h4 class="mb-0">{{ total_transactions }}</h4>
+                            <small class="d-block">{{ pending_transactions }} pending</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-3">
+            <div class="card bg-gradient-warning text-dark border-0">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="flex-shrink-0">
+                            <i class="bi bi-clock-history fs-2"></i>
+                        </div>
+                        <div class="flex-grow-1 ms-3">
+                            <h6 class="mb-1">Pending Requests</h6>
+                            <h4 class="mb-0">{{ pending_deposits + pending_withdrawals }}</h4>
+                            <small class="d-block">{{ pending_deposits }} deposits, {{ pending_withdrawals }} withdrawals</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-3">
+            <div class="card bg-gradient-info text-white border-0">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="flex-shrink-0">
+                            <i class="bi bi-currency-dollar fs-2"></i>
+                        </div>
+                        <div class="flex-grow-1 ms-3">
+                            <h6 class="text-white-50 mb-1">Monthly Revenue</h6>
+                            <h4 class="mb-0">{{ "%.2f"|format(monthly_revenue) }}</h4>
+                            <small class="d-block">Last 30 days</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="row g-3 mb-4">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white border-bottom">
+                    <h5 class="mb-0">
+                        <i class="bi bi-lightning me-2"></i>Quick Actions
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-3 mb-2">
+                            <a href="{{ url_for('branch.bank_gateway_transactions') }}" class="btn btn-outline-primary w-100">
+                                <i class="bi bi-arrow-left-right me-2"></i>View Transactions
+                            </a>
+                        </div>
+                        <div class="col-md-3 mb-2">
+                            <a href="{{ url_for('branch.bank_gateway_deposits') }}" class="btn btn-outline-success w-100">
+                                <i class="bi bi-arrow-down-circle me-2"></i>Deposit Requests
+                                {% if pending_deposits > 0 %}
+                                <span class="badge bg-danger">{{ pending_deposits }}</span>
+                                {% endif %}
+                            </a>
+                        </div>
+                        <div class="col-md-3 mb-2">
+                            <a href="{{ url_for('branch.bank_gateway_withdrawals') }}" class="btn btn-outline-warning w-100">
+                                <i class="bi bi-arrow-up-circle me-2"></i>Withdrawal Requests
+                                {% if pending_withdrawals > 0 %}
+                                <span class="badge bg-danger">{{ pending_withdrawals }}</span>
+                                {% endif %}
+                            </a>
+                        </div>
+                        <div class="col-md-3 mb-2">
+                            <a href="{{ url_for('branch.bank_gateway_reports') }}" class="btn btn-outline-info w-100">
+                                <i class="bi bi-file-text me-2"></i>Financial Reports
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Transactions -->
+    <div class="card border-0 shadow-sm">
+        <div class="card-header bg-white border-bottom">
+            <h5 class="mb-0">
+                <i class="bi bi-clock-history me-2"></i>Recent Transactions
+            </h5>
+        </div>
+        <div class="card-body p-0">
+            {% if recent_transactions %}
+            <div class="table-responsive">
+                <table class="table table-hover mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th width="8%">#</th>
+                            <th width="15%">Client Site</th>
+                            <th width="12%">Amount</th>
+                            <th width="15%">Bank Account</th>
+                            <th width="12%">Status</th>
+                            <th width="15%">Created</th>
+                            <th width="10%">Provider</th>
+                            <th width="13%">Commission</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for transaction in recent_transactions %}
+                        <tr>
+                            <td class="text-muted small">{{ transaction.id }}</td>
+                            <td>
+                                {% if transaction.client_site %}
+                                <small class="d-block text-truncate" style="max-width: 150px;">
+                                    {{ transaction.client_site.site_url }}
+                                </small>
+                                <small class="text-muted">{{ transaction.client_site.client.company_name }}</small>
+                                {% else %}
+                                <span class="text-muted">N/A</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <strong class="text-primary">{{ "%.2f"|format(transaction.amount) }}</strong>
+                                <span class="text-muted">{{ transaction.currency or 'TRY' }}</span>
+                            </td>
+                            <td>
+                                {% if transaction.bank_account %}
+                                <small>{{ transaction.bank_account.provider.bank_name if transaction.bank_account.provider else 'N/A' }}</small>
+                                {% else %}
+                                <span class="text-muted">N/A</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if transaction.status == 'confirmed' %}
+                                <span class="badge bg-success">Confirmed</span>
+                                {% elif transaction.status == 'pending' %}
+                                <span class="badge bg-warning text-dark">Pending</span>
+                                {% elif transaction.status == 'failed' %}
+                                <span class="badge bg-danger">Failed</span>
+                                {% else %}
+                                <span class="badge bg-secondary">{{ transaction.status|title }}</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <small>{{ transaction.created_at.strftime('%Y-%m-%d') }}</small><br>
+                                <small class="text-muted">{{ transaction.created_at.strftime('%H:%M') }}</small>
+                            </td>
+                            <td>
+                                {% if transaction.bank_account and transaction.bank_account.provider %}
+                                <span class="badge bg-info">{{ transaction.bank_account.provider.display_name }}</span>
+                                {% else %}
+                                <span class="text-muted">-</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <strong>{{ "%.2f"|format(transaction.commission_amount or 0) }}</strong>
+                                <span class="text-muted">{{ transaction.currency or 'TRY' }}</span>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div class="text-center py-5">
+                <i class="bi bi-inbox fs-1 text-muted"></i>
+                <p class="text-muted mt-3">No transactions found</p>
+            </div>
+            {% endif %}
+        </div>
+        {% if recent_transactions %}
+        <div class="card-footer bg-light text-center">
+            <a href="{{ url_for('branch.bank_gateway_transactions') }}" class="text-decoration-none">
+                View All Transactions <i class="bi bi-arrow-right ms-1"></i>
+            </a>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<style>
+/* Gradient backgrounds */
+.bg-gradient-primary {
+    background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+}
+
+.bg-gradient-success {
+    background: linear-gradient(135deg, #0f9b0f 0%, #0d7c0d 100%);
+}
+
+.bg-gradient-warning {
+    background: linear-gradient(135deg, #ffc107 0%, #e0a800 100%);
+}
+
+.bg-gradient-info {
+    background: linear-gradient(135deg, #17a2b8 0%, #138496 100%);
+}
+
+.table-hover tbody tr:hover {
+    background-color: rgba(255, 165, 0, 0.05);
+}
+</style>
+{% endblock %}

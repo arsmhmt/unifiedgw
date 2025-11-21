@@ -1,0 +1,151 @@
+{% extends 'admin/base.html' %}
+
+{% block title %}Create API Key for {{ client.company_name }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="h3 mb-0">
+                <i class="fas fa-plus-circle text-success"></i> Create API Key
+            </h1>
+            <p class="text-muted">Create a new API key for {{ client.company_name or client.email }}</p>
+        </div>
+        <a href="{{ url_for('admin.client_api_keys', client_id=client.id) }}" class="btn btn-outline-secondary">
+            <i class="fas fa-arrow-left"></i> Back
+        </a>
+    </div>
+
+    <!-- Alert -->
+    <div class="alert alert-info">
+        <i class="fas fa-info-circle"></i>
+        <strong>Note:</strong> API key credentials will only be shown once after creation. Make sure to save them securely.
+    </div>
+
+    <!-- Create Form -->
+    <div class="card shadow">
+        <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-primary">API Key Configuration</h6>
+        </div>
+        <div class="card-body">
+            <form method="POST" action="{{ url_for('admin.create_client_api_key', client_id=client.id) }}">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                
+                <!-- Basic Information -->
+                <div class="row mb-4">
+                    <div class="col-md-6">
+                        <label for="name" class="form-label">API Key Name *</label>
+                        <input type="text" class="form-control" id="name" name="name" 
+                               placeholder="e.g., Production API Key" required>
+                        <div class="form-text">A descriptive name to identify this API key</div>
+                    </div>
+
+                    <div class="col-md-3">
+                        <label for="rate_limit" class="form-label">Rate Limit (per minute)</label>
+                        <input type="number" class="form-control" id="rate_limit" name="rate_limit" 
+                               value="60" min="1" max="10000">
+                        <div class="form-text">Maximum requests per minute</div>
+                    </div>
+
+                    <div class="col-md-3">
+                        <label for="expires_days" class="form-label">Expiry (days)</label>
+                        <input type="number" class="form-control" id="expires_days" name="expires_days" 
+                               placeholder="Leave empty for no expiry" min="1">
+                        <div class="form-text">Optional expiration period</div>
+                    </div>
+                </div>
+
+                <!-- Client Type Info -->
+                <div class="alert alert-secondary">
+                    <strong>Client Type:</strong>
+                    {% if client.package %}
+                        {% if 'flat' in client.package.name.lower() %}
+                        <span class="badge bg-info">Flat Rate</span> - Full API access with advanced features
+                        {% else %}
+                        <span class="badge bg-secondary">Commission</span> - Limited API access for commission-based operations
+                        {% endif %}
+                    {% else %}
+                    <span class="text-muted">No package assigned</span>
+                    {% endif %}
+                </div>
+
+                <!-- Permissions -->
+                <div class="mb-4">
+                    <label class="form-label">API Permissions</label>
+                    <div class="form-text mb-3">Select which API endpoints this key can access</div>
+                    
+                    <div class="row">
+                        {% for permission in available_permissions %}
+                        <div class="col-md-6 mb-2">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" name="permissions" 
+                                       value="{{ permission }}" id="perm_{{ loop.index }}">
+                                <label class="form-check-label" for="perm_{{ loop.index }}">
+                                    <code>{{ permission }}</code>
+                                </label>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <!-- Client Information -->
+                <div class="card bg-light mb-4">
+                    <div class="card-body">
+                        <h6 class="card-title">Client Details</h6>
+                        <dl class="row mb-0">
+                            <dt class="col-sm-3">Company:</dt>
+                            <dd class="col-sm-9">{{ client.company_name or 'N/A' }}</dd>
+                            
+                            <dt class="col-sm-3">Email:</dt>
+                            <dd class="col-sm-9">{{ client.email }}</dd>
+                            
+                            <dt class="col-sm-3">Package:</dt>
+                            <dd class="col-sm-9">{{ client.package.name if client.package else 'None' }}</dd>
+                            
+                            <dt class="col-sm-3">Status:</dt>
+                            <dd class="col-sm-9">
+                                {% if client.is_active %}
+                                <span class="badge bg-success">Active</span>
+                                {% else %}
+                                <span class="badge bg-danger">Inactive</span>
+                                {% endif %}
+                            </dd>
+                        </dl>
+                    </div>
+                </div>
+
+                <!-- Submit -->
+                <div class="d-flex gap-2">
+                    <button type="submit" class="btn btn-success">
+                        <i class="fas fa-plus-circle"></i> Create API Key
+                    </button>
+                    <a href="{{ url_for('admin.client_api_keys', client_id=client.id) }}" class="btn btn-secondary">
+                        <i class="fas fa-times"></i> Cancel
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Security Guidelines -->
+    <div class="card shadow mt-4">
+        <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-warning">
+                <i class="fas fa-shield-alt"></i> Security Guidelines
+            </h6>
+        </div>
+        <div class="card-body">
+            <ul class="mb-0">
+                <li>API key credentials will be shown only once after creation</li>
+                <li>The client should store credentials securely (environment variables, secrets manager)</li>
+                <li>Credentials should never be committed to version control</li>
+                <li>If credentials are compromised, regenerate or revoke the key immediately</li>
+                <li>Set appropriate permissions based on the client's needs (principle of least privilege)</li>
+                <li>Consider setting an expiry date for enhanced security</li>
+            </ul>
+        </div>
+    </div>
+</div>
+{% endblock %}

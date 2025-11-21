@@ -1,0 +1,276 @@
+{% extends "admin/base.html" %}
+
+{% block title %}Create New Client - Branch Panel{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h4 class="card-title mb-0">
+                        <i class="fas fa-user-plus me-2"></i>Create New Client
+                    </h4>
+                    <small class="text-muted">Complete client setup with API keys and wallet configurations</small>
+                </div>
+                <div class="card-body">
+                    <form method="post" id="clientWizardForm">
+                        {{ form.hidden_tag() }}
+
+                        <!-- Progress Indicator -->
+                        <div class="wizard-progress mb-4">
+                            <div class="progress">
+                                <div class="progress-bar bg-cyber" role="progressbar" style="width: 33%" id="progressBar"></div>
+                            </div>
+                            <div class="d-flex justify-content-between mt-2">
+                                <span class="step-indicator active" data-step="1">Client Info</span>
+                                <span class="step-indicator" data-step="2">Address</span>
+                                <span class="step-indicator" data-step="3">Wallets & API</span>
+                            </div>
+                        </div>
+
+                        <!-- Step 1: Basic Client Information -->
+                        <div class="wizard-step" id="step1">
+                            <h5 class="mb-3">Step 1: Client Information</h5>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        {{ form.company_name.label(class="form-label") }}
+                                        {{ form.company_name(class="form-control", placeholder="Enter company name") }}
+                                        {% if form.company_name.errors %}
+                                            <div class="invalid-feedback d-block">
+                                                {% for error in form.company_name.errors %}{{ error }}{% endfor %}
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        {{ form.contact_email.label(class="form-label") }}
+                                        {{ form.contact_email(class="form-control", placeholder="client@company.com") }}
+                                        {% if form.contact_email.errors %}
+                                            <div class="invalid-feedback d-block">
+                                                {% for error in form.contact_email.errors %}{{ error }}{% endfor %}
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        {{ form.contact_phone.label(class="form-label") }}
+                                        {{ form.contact_phone(class="form-control", placeholder="+1 (555) 123-4567") }}
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        {{ form.website.label(class="form-label") }}
+                                        {{ form.website(class="form-control", placeholder="https://company.com") }}
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        {{ form.password.label(class="form-label") }}
+                                        {{ form.password(class="form-control", placeholder="Minimum 8 characters") }}
+                                        {% if form.password.errors %}
+                                            <div class="invalid-feedback d-block">
+                                                {% for error in form.password.errors %}{{ error }}{% endfor %}
+                                            </div>
+                                        {% endif %}
+                                        <div class="form-text">Client will use this password to login</div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="d-flex justify-content-end">
+                                <button type="button" class="btn btn-cyber" onclick="nextStep(2)">Next Step</button>
+                            </div>
+                        </div>
+
+                        <!-- Step 2: Address Information -->
+                        <div class="wizard-step d-none" id="step2">
+                            <h5 class="mb-3">Step 2: Address Information</h5>
+                            <div class="row">
+                                <div class="col-12">
+                                    <div class="mb-3">
+                                        {{ form.address.label(class="form-label") }}
+                                        {{ form.address(class="form-control", placeholder="Street address, building, etc.") }}
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <div class="mb-3">
+                                        {{ form.city.label(class="form-label") }}
+                                        {{ form.city(class="form-control", placeholder="City") }}
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="mb-3">
+                                        {{ form.country.label(class="form-label") }}
+                                        {{ form.country(class="form-control", placeholder="Country") }}
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="d-flex justify-content-between">
+                                <button type="button" class="btn btn-outline-secondary" onclick="prevStep(1)">Previous</button>
+                                <button type="button" class="btn btn-cyber" onclick="nextStep(3)">Next Step</button>
+                            </div>
+                        </div>
+
+                        <!-- Step 3: Coin and Wallet Configuration -->
+                        <div class="wizard-step d-none" id="step3">
+                            <h5 class="mb-3">Step 3: Cryptocurrency Configuration</h5>
+                            <div class="alert alert-info">
+                                <i class="fas fa-info-circle me-2"></i>
+                                Select the cryptocurrencies this client will support and provide wallet addresses for each.
+                            </div>
+
+                            <div class="mb-3">
+                                {{ form.coins.label(class="form-label") }}
+                                {{ form.coins(class="form-select", multiple=True, size=4) }}
+                                <div class="form-text">Hold Ctrl/Cmd to select multiple coins</div>
+                            </div>
+
+                            <div id="walletAddresses" class="d-none">
+                                <h6 class="mb-3">Wallet Addresses</h6>
+                                <div class="alert alert-warning">
+                                    <i class="fas fa-exclamation-triangle me-2"></i>
+                                    Ensure wallet addresses are correct. Transactions will fail if addresses are invalid.
+                                </div>
+                                <!-- Dynamic wallet address fields will be added here -->
+                            </div>
+
+                            <div class="d-flex justify-content-between mt-4">
+                                <button type="button" class="btn btn-outline-secondary" onclick="prevStep(2)">Previous</button>
+                                {{ form.submit(class="btn btn-cyber") }}
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+let currentStep = 1;
+
+function updateProgress() {
+    const progress = (currentStep / 3) * 100;
+    document.getElementById('progressBar').style.width = progress + '%';
+
+    // Update step indicators
+    document.querySelectorAll('.step-indicator').forEach((indicator, index) => {
+        const step = index + 1;
+        indicator.classList.toggle('active', step <= currentStep);
+    });
+}
+
+function showStep(step) {
+    // Hide all steps
+    document.querySelectorAll('.wizard-step').forEach(stepDiv => {
+        stepDiv.classList.add('d-none');
+    });
+
+    // Show current step
+    document.getElementById('step' + step).classList.remove('d-none');
+    currentStep = step;
+    updateProgress();
+}
+
+function nextStep(step) {
+    if (validateCurrentStep()) {
+        showStep(step);
+    }
+}
+
+function prevStep(step) {
+    showStep(step);
+}
+
+function validateCurrentStep() {
+    // Basic validation - you can enhance this
+    const currentStepDiv = document.getElementById('step' + currentStep);
+    const requiredFields = currentStepDiv.querySelectorAll('[required]');
+
+    for (let field of requiredFields) {
+        if (!field.value.trim()) {
+            alert('Please fill in all required fields.');
+            field.focus();
+            return false;
+        }
+    }
+
+    return true;
+}
+
+// Handle coin selection changes
+document.getElementById('coins').addEventListener('change', function() {
+    const selectedCoins = Array.from(this.selectedOptions).map(option => option.value);
+    const walletContainer = document.getElementById('walletAddresses');
+
+    if (selectedCoins.length > 0) {
+        walletContainer.classList.remove('d-none');
+        updateWalletFields(selectedCoins);
+    } else {
+        walletContainer.classList.add('d-none');
+    }
+});
+
+function updateWalletFields(selectedCoins) {
+    const container = document.getElementById('walletAddresses');
+
+    // Clear existing fields
+    const existingFields = container.querySelectorAll('.wallet-field');
+    existingFields.forEach(field => field.remove());
+
+    // Add new fields
+    selectedCoins.forEach(coin => {
+        const coinName = document.querySelector(`option[value="${coin}"]`).textContent;
+        const fieldDiv = document.createElement('div');
+        fieldDiv.className = 'mb-3 wallet-field';
+        fieldDiv.innerHTML = `
+            <label class="form-label">${coinName} Wallet Address</label>
+            <input type="text" class="form-control" name="wallet_${coin}" placeholder="Enter ${coin.toUpperCase()} wallet address" required>
+            <div class="form-text">Client will receive payments to this address</div>
+        `;
+        container.appendChild(fieldDiv);
+    });
+}
+
+// Initialize
+document.addEventListener('DOMContentLoaded', function() {
+    updateProgress();
+});
+</script>
+
+<style>
+.wizard-progress {
+    margin-bottom: 2rem;
+}
+
+.step-indicator {
+    font-size: 0.875rem;
+    color: #6c757d;
+    transition: color 0.3s ease;
+}
+
+.step-indicator.active {
+    color: var(--cyber-primary);
+    font-weight: 500;
+}
+
+.wizard-step {
+    min-height: 300px;
+}
+
+#walletAddresses {
+    border-left: 3px solid var(--cyber-primary);
+    padding-left: 1rem;
+    margin-top: 1rem;
+}
+</style>
+{% endblock %}

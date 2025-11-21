@@ -1,880 +1,359 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
-  <meta http-equiv="X-UA-Compatible" content="IE=edge">
-  <meta name="theme-color" content="#6366f1">
-  
-  <!-- Google tag (gtag.js) -->
-  <script async src="https://www.googletagmanager.com/gtag/js?id=G-7CZLMMBED4"></script>
-  <script>
-    window.dataLayer = window.dataLayer || [];
-    function gtag(){dataLayer.push(arguments);}
-    gtag('js', new Date());
+{% extends 'base.html' %}
 
-    gtag('config', 'G-7CZLMMBED4');
-  </script>
-  
-  <!-- Favicon -->
-  <link rel="apple-touch-icon" sizes="180x180" href="{{ url_for('static', filename='img/favicon.png') }}">
-  <link rel="icon" type="image/png" sizes="32x32" href="{{ url_for('static', filename='img/favicon.png') }}">
-  <link rel="icon" type="image/png" sizes="16x16" href="{{ url_for('static', filename='img/favicon.png') }}">
-  
-  <!-- Additional SEO Meta Tags -->
-  <meta name="geo.region" content="US">
-  <meta name="geo.country" content="US">
-  <meta name="language" content="English">
-  <meta name="distribution" content="global">
-  <meta name="rating" content="general">
-  <meta name="revisit-after" content="1 days">
-  <meta name="expires" content="never">
-  <meta name="classification" content="Business">
-  <meta name="category" content="Cryptocurrency, DeFi, Payment Gateway, Blockchain Tools">
-  <meta name="coverage" content="Worldwide">
-  <meta name="target" content="traders, businesses, developers, crypto enthusiasts">
-  <meta name="HandheldFriendly" content="True">
-  <meta name="MobileOptimized" content="320">
-  
-  <!-- SEO Meta Tags -->
-  <title>PayCrypt - #1 Crypto Payment Gateway & Free DeFi Tools | 14 Professional Analysis Tools</title>
-  <meta name="description" content="🚀 Professional crypto payment gateway accepting 100+ cryptocurrencies. Free DeFi tools: Token analyzer, gas tracker, honeypot detector, MEV protection, airdrop hunter. Enterprise solutions for businesses worldwide.">
-  <meta name="keywords" content="crypto payment gateway, bitcoin payment processor, ethereum payment gateway, DeFi tools, token security analyzer, gas price tracker, honeypot detector, MEV protection, airdrop hunter, rug pull alerts, whale tracker, trading bots, blockchain payment solutions, cryptocurrency merchant services, crypto API integration, smart contract audit, liquidity lock checker">
-  <meta name="author" content="PayCrypt - Crypto Payment Solutions">
-  <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1">
-  <meta name="googlebot" content="index, follow">
-  <link rel="canonical" href="https://paycrypt.online/">
-  
-  <!-- Open Graph / Facebook -->
+{% block title %}PayCrypt — Premium Crypto Payment Gateway & DeFi Intelligence{% endblock %}
+
+{% block head %}
+  <meta name="description" content="PayCrypt delivers premium crypto payment infrastructure, risk intelligence, and automation trusted by global fintech and Web3 teams.">
+  <meta name="keywords" content="crypto payments, defi risk, rugcheck ai, wallet intelligence, paycrypt, blockchain compliance">
   <meta property="og:type" content="website">
-  <meta property="og:url" content="https://paycrypt.online/">
-  <meta property="og:title" content="PayCrypt - #1 Crypto Payment Gateway & Free DeFi Tools">
-  <meta property="og:description" content="🚀 Professional crypto payment gateway accepting 100+ cryptocurrencies. Free DeFi analysis tools: Token analyzer, gas tracker, honeypot detector, MEV protection. Enterprise blockchain payment solutions.">
-  <meta property="og:image" content="{{ url_for('static', filename='img/paycrypt_logo.png', _external=True) }}">
-  <meta property="og:image:width" content="1200">
-  <meta property="og:image:height" content="630">
+  <meta property="og:title" content="PayCrypt — Premium Crypto Payment Gateway & DeFi Intelligence">
+  <meta property="og:description" content="Enterprise-grade crypto payment orchestration, intelligence, and concierge delivery with brand-first experiences.">
+  <meta property="og:url" content="{{ request.url_root.rstrip('/') }}">
+  <meta property="og:image" content="{{ url_for('static', filename='img/og/default-preview.png', _external=True) }}">
   <meta property="og:site_name" content="PayCrypt">
-  <meta property="og:locale" content="en_US">
-  
-  <!-- Twitter -->
+  <meta name="author" content="PayCrypt">
+  <link rel="canonical" href="{{ request.url_root.rstrip('/') }}">
+  <meta name="robots" content="index,follow,max-image-preview:large">
   <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:url" content="https://paycrypt.online/">
-  <meta name="twitter:title" content="PayCrypt - #1 Crypto Payment Gateway & Free DeFi Tools">
-  <meta name="twitter:description" content="🚀 Professional crypto payment gateway accepting 100+ cryptocurrencies. Free DeFi analysis tools for traders and businesses.">
-  <meta name="twitter:image" content="{{ url_for('static', filename='img/paycrypt_logo.png', _external=True) }}">
-  <meta name="twitter:creator" content="@paycryptonline">
   <meta name="twitter:site" content="@paycryptonline">
-  
-  <!-- Structured Data -->
+  <meta name="twitter:title" content="PayCrypt — Premium Crypto Payment Gateway & DeFi Intelligence">
+  <meta name="twitter:description" content="Enterprise-grade crypto payment orchestration, risk intelligence, and automation with concierge delivery.">
+  <meta name="twitter:image" content="{{ url_for('static', filename='img/og/default-preview.png', _external=True) }}">
   <script type="application/ld+json">
-  {
-    "@context": "https://schema.org",
-    "@type": "Organization",
-    "name": "PayCrypt",
-    "alternateName": "PayCrypt Payment Gateway",
-    "url": "https://paycrypt.online/",
-    "logo": "https://paycrypt.online/static/img/paycrypt_logo.png",
-    "description": "Professional crypto payment gateway and DeFi tools platform for businesses and traders worldwide",
-    "foundingDate": "2024",
-    "serviceType": ["Cryptocurrency Payment Gateway", "DeFi Analysis Tools", "Trading Bots", "Blockchain Payment Solutions"],
-    "areaServed": "Worldwide",
-    "contactPoint": [
-      {
-        "@type": "ContactPoint",
-        "telephone": "+1-555-PAYCRYPT",
-        "contactType": "customer service",
-        "email": "support@paycrypt.online",
-        "availableLanguage": "English"
-      }
-    ],
-    "sameAs": [
-      "https://t.me/paycryptonline",
-      "https://twitter.com/paycryptonline"
-    ],
-    "offers": [
-      {
-        "@type": "Service",
-        "name": "Crypto Payment Gateway",
-        "description": "Accept 100+ cryptocurrencies with instant settlements",
-        "provider": {
-          "@type": "Organization",
-          "name": "PayCrypt"
-        }
-      },
-      {
-        "@type": "Service", 
-        "name": "Free DeFi Analysis Tools",
-        "description": "14 professional DeFi tools including token analyzer, gas tracker, honeypot detector",
-        "provider": {
-          "@type": "Organization",
-          "name": "PayCrypt"
-        }
-      }
-    ]
-  }
+    {
+      "@context": "https://schema.org",
+      "@type": "Organization",
+      "name": "PayCrypt",
+      "url": "{{ request.url_root.rstrip('/') }}",
+      "logo": "{{ url_for('static', filename='img/og/default-preview.png', _external=True) }}",
+      "sameAs": ["https://t.me/paycryptonline"]
+    }
   </script>
-  
-  <!-- Additional SEO Schema -->
-  <script type="application/ld+json">
-  {
-    "@context": "https://schema.org",
-    "@type": "WebSite",
-    "name": "PayCrypt",
-    "url": "https://paycrypt.online/",
-    "potentialAction": {
-      "@type": "SearchAction",
-      "target": "https://paycrypt.online/tools/{search_term}",
-      "query-input": "required name=search_term"
-    }
-  }
-  </script>
-  
-  <!-- External Resources -->
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-  
-  <style>
-    :root {
-      --primary-color: #6366f1;
-      --primary-dark: #4f46e5;
-      --secondary-color: #0ea5e9;
-      --success-color: #10b981;
-      --warning-color: #f59e0b;
-      --danger-color: #ef4444;
-      --dark-bg: #0f172a;
-      --card-bg: #1e293b;
-      --text-primary: #f8fafc;
-      --text-secondary: #cbd5e1;
-      --border-color: #334155;
-    }
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/homepage.css', v=3) }}">
+{% endblock %}
 
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
+{% block breadcrumb %}{% endblock %}
 
-    body {
-      font-family: 'Inter', sans-serif;
-      background: var(--dark-bg);
-      color: var(--text-primary);
-      line-height: 1.6;
-      overflow-x: hidden;
-    }
-
-    /* Header Styles */
-    .navbar {
-      background: rgba(15, 23, 42, 0.95);
-      backdrop-filter: blur(10px);
-      border-bottom: 1px solid var(--border-color);
-      padding: 1rem 0;
-    }
-
-    .navbar-brand img {
-      height: 40px;
-      width: auto;
-    }
-
-    .navbar-nav .nav-link {
-      color: var(--text-secondary);
-      margin: 0 1rem;
-      font-weight: 500;
-      transition: color 0.3s ease;
-    }
-
-    .navbar-nav .nav-link:hover {
-      color: var(--primary-color);
-    }
-
-    /* Hero Section */
-    .hero-section {
-      background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0f172a 100%);
-      padding: 180px 0 80px;
-      position: relative;
-      overflow: hidden;
-    }
-
-    .hero-section::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 1000"><defs><radialGradient id="a" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="%236366f1" stop-opacity="0.1"/><stop offset="100%" stop-color="%236366f1" stop-opacity="0"/></radialGradient></defs><circle cx="500" cy="500" r="500" fill="url(%23a)"/></svg>');
-      opacity: 0.3;
-      pointer-events: none;
-    }
-
-    .hero-content {
-      position: relative;
-      z-index: 2;
-      text-align: center;
-    }
-
-    .hero-title {
-      font-size: 3.5rem;
-      font-weight: 800;
-      margin-bottom: 1.5rem;
-      background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-    }
-
-    .hero-subtitle {
-      font-size: 1.25rem;
-      color: var(--text-secondary);
-      margin-bottom: 2rem;
-      max-width: 600px;
-      margin-left: auto;
-      margin-right: auto;
-    }
-
-    .cta-buttons {
-      display: flex;
-      gap: 1rem;
-      justify-content: center;
-      flex-wrap: wrap;
-      margin-bottom: 3rem;
-    }
-
-    .btn-primary-custom {
-      background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
-      border: none;
-      padding: 12px 30px;
-      font-size: 1.1rem;
-      font-weight: 600;
-      border-radius: 50px;
-      transition: all 0.3s ease;
-      text-decoration: none;
-      color: white;
-    }
-
-    .btn-primary-custom:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 10px 20px rgba(99, 102, 241, 0.3);
-      color: white;
-    }
-
-    .btn-outline-custom {
-      border: 2px solid var(--primary-color);
-      color: var(--primary-color);
-      padding: 10px 30px;
-      font-size: 1.1rem;
-      font-weight: 600;
-      border-radius: 50px;
-      background: transparent;
-      transition: all 0.3s ease;
-      text-decoration: none;
-    }
-
-    .btn-outline-custom:hover {
-      background: var(--primary-color);
-      color: white;
-      transform: translateY(-2px);
-    }
-
-    /* Stats Section */
-    .stats-section {
-      padding: 60px 0;
-      background: var(--card-bg);
-    }
-
-    .stat-item {
-      text-align: center;
-      padding: 2rem;
-    }
-
-    .stat-number {
-      font-size: 3rem;
-      font-weight: 800;
-      color: var(--primary-color);
-      margin-bottom: 0.5rem;
-    }
-
-    .stat-label {
-      color: var(--text-secondary);
-      font-size: 1.1rem;
-    }
-
-    /* Services Section */
-    .services-section {
-      padding: 100px 0;
-      background: var(--dark-bg);
-    }
-
-    .section-title {
-      text-align: center;
-      font-size: 2.5rem;
-      font-weight: 700;
-      margin-bottom: 1rem;
-    }
-
-    .section-subtitle {
-      text-align: center;
-      color: var(--text-secondary);
-      font-size: 1.2rem;
-      margin-bottom: 4rem;
-      max-width: 600px;
-      margin-left: auto;
-      margin-right: auto;
-    }
-
-    .service-card {
-      background: var(--card-bg);
-      border: 1px solid var(--border-color);
-      border-radius: 15px;
-      padding: 2.5rem;
-      text-align: center;
-      transition: all 0.3s ease;
-      position: relative;
-      overflow: hidden;
-      height: 100%;
-    }
-
-    .service-card::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      height: 4px;
-      background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
-    }
-
-    .service-card:hover {
-      transform: translateY(-10px);
-      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
-      border-color: var(--primary-color);
-    }
-
-    .service-icon {
-      font-size: 3rem;
-      color: var(--primary-color);
-      margin-bottom: 1.5rem;
-    }
-
-    .service-title {
-      font-size: 1.5rem;
-      font-weight: 600;
-      margin-bottom: 1rem;
-    }
-
-    .service-description {
-      color: var(--text-secondary);
-      margin-bottom: 1.5rem;
-      line-height: 1.6;
-    }
-
-    .service-link {
-      color: var(--primary-color);
-      text-decoration: none;
-      font-weight: 600;
-      transition: color 0.3s ease;
-    }
-
-    .service-link:hover {
-      color: var(--secondary-color);
-    }
-
-    /* Tools Section */
-    .tools-section {
-      padding: 100px 0;
-      background: linear-gradient(135deg, var(--card-bg) 0%, var(--dark-bg) 100%);
-    }
-
-    .tools-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-      gap: 2rem;
-      margin-top: 3rem;
-    }
-
-    .tool-card {
-      background: var(--card-bg);
-      border: 1px solid var(--border-color);
-      border-radius: 12px;
-      padding: 1.5rem;
-      transition: all 0.3s ease;
-      cursor: pointer;
-    }
-
-    .tool-card:hover {
-      transform: translateY(-5px);
-      border-color: var(--primary-color);
-      box-shadow: 0 10px 30px rgba(99, 102, 241, 0.2);
-    }
-
-    .tool-icon {
-      font-size: 2rem;
-      color: var(--success-color);
-      margin-bottom: 1rem;
-    }
-
-    .tool-title {
-      font-size: 1.2rem;
-      font-weight: 600;
-      margin-bottom: 0.5rem;
-    }
-
-    .tool-description {
-      color: var(--text-secondary);
-      font-size: 0.9rem;
-      line-height: 1.5;
-    }
-
-    /* CTA Section */
-    .cta-section {
-      padding: 100px 0;
-      background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
-      text-align: center;
-    }
-
-    .cta-title {
-      font-size: 2.5rem;
-      font-weight: 700;
-      margin-bottom: 1rem;
-      color: white;
-    }
-
-    .cta-description {
-      font-size: 1.2rem;
-      margin-bottom: 2rem;
-      color: rgba(255, 255, 255, 0.9);
-      max-width: 600px;
-      margin-left: auto;
-      margin-right: auto;
-    }
-
-    /* Footer */
-    .footer {
-      background: var(--card-bg);
-      padding: 60px 0 30px;
-      border-top: 1px solid var(--border-color);
-    }
-
-    .footer-brand {
-      margin-bottom: 2rem;
-    }
-
-    .footer-description {
-      color: var(--text-secondary);
-      line-height: 1.6;
-      margin-bottom: 1.5rem;
-    }
-
-    .footer-links {
-      display: flex;
-      gap: 2rem;
-      margin-bottom: 2rem;
-    }
-
-    .footer-links a {
-      color: var(--text-secondary);
-      text-decoration: none;
-      transition: color 0.3s ease;
-    }
-
-    .footer-links a:hover {
-      color: var(--primary-color);
-    }
-
-    .footer-bottom {
-      border-top: 1px solid var(--border-color);
-      padding-top: 2rem;
-      text-align: center;
-      color: var(--text-secondary);
-    }
-
-    /* Responsive Design */
-    @media (max-width: 768px) {
-      .hero-title {
-        font-size: 2.5rem;
-      }
-      
-      .hero-subtitle {
-        font-size: 1.1rem;
-      }
-      
-      .cta-buttons {
-        flex-direction: column;
-        align-items: center;
-      }
-      
-      .tools-grid {
-        grid-template-columns: 1fr;
-      }
-      
-      .stat-item {
-        padding: 1rem;
-      }
-      
-      .service-card {
-        padding: 2rem;
-      }
-    }
-
-    /* Animation Classes */
-    .fade-in {
-      opacity: 0;
-      transform: translateY(30px);
-      transition: all 0.6s ease;
-    }
-
-    .fade-in.visible {
-      opacity: 1;
-      transform: translateY(0);
-    }
-
-    .pulse {
-      animation: pulse 2s infinite;
-    }
-
-    @keyframes pulse {
-      0% {
-        box-shadow: 0 0 0 0 rgba(99, 102, 241, 0.7);
-      }
-      70% {
-        box-shadow: 0 0 0 10px rgba(99, 102, 241, 0);
-      }
-      100% {
-        box-shadow: 0 0 0 0 rgba(99, 102, 241, 0);
-      }
-    }
-  </style>
-</head>
-  <body style="padding-top: 80px;">
-  <!-- Navigation -->
-  <nav class="navbar navbar-expand-lg fixed-top">
-    <div class="container">
-  <a class="navbar-brand" href="{{ url_for('main.home') }}">
-        <img src="{{ url_for('static', filename='img/paycrypt_logo_d.png') }}" alt="PayCrypt - Crypto Payment Gateway">
-      </a>
-      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-        <span class="navbar-toggler-icon"></span>
-      </button>
-      <div class="collapse navbar-collapse" id="navbarNav">
-        <ul class="navbar-nav ms-auto">
-          <li class="nav-item">
-            <a class="nav-link" href="#services">Services</a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link" href="/tools">Tools</a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link" href="#contact">Contact</a>
-          </li>
-        </ul>
+{% block content %}
+<div class="homepage">
+<section class="hero-premium">
+  <div class="hero-backdrop" aria-hidden="true">
+    <div class="hero-grid"></div>
+    <div class="hero-aurora hero-aurora--one"></div>
+    <div class="hero-aurora hero-aurora--two"></div>
+  </div>
+  <div class="container py-4">
+    <div class="row align-items-center g-4 g-lg-5">
+      <div class="col-lg-6 hero-copy section-intro">
+        <div class="hero-badges mb-3">
+          <span class="hero-badge"><i class="fas fa-shield-alt"></i> PCI DSS ready</span>
+          <span class="hero-badge"><i class="fas fa-robot"></i> AI briefings</span>
+          <span class="hero-badge"><i class="fas fa-headset"></i> Concierge onboarding</span>
+        </div>
+        <h1 class="section-heading fw-bold mb-4" style="font-size: clamp(2.6rem, 4vw, 3.6rem);">
+          Crypto payments & intelligence engineered for
+          <span class="headline-grad">human-led delivery</span>
+        </h1>
+        <p class="hero-lead section-subtitle mb-4">Blend enterprise-grade settlement, on-chain risk scoring, and automation playbooks in a single stack. PayCrypt equips exchanges, fintech teams, and Web3 enterprises with compliant infrastructure that arrives with experts attached.</p>
+        <div class="d-flex flex-column flex-sm-row gap-3">
+          <a class="btn-brand-primary" href="https://t.me/paycryptonline" target="_blank" rel="noopener" aria-label="Contact PayCrypt on Telegram about the payment gateway">
+            Contact us
+            <i class="fas fa-paper-plane"></i>
+          </a>
+          <a class="btn-brand-outline" href="https://t.me/paycryptonline" target="_blank" rel="noopener" aria-label="Get profit bot details on Telegram">
+            Bot details
+            <i class="fas fa-robot"></i>
+          </a>
+          <a class="btn-brand-outline" href="{{ url_for('tools.index') }}" aria-label="View the PayCrypt tool suite">
+            View tools
+            <i class="fas fa-compass"></i>
+          </a>
+        </div>
+      </div>
+      <div class="col-lg-6">
+        <div class="hero-card h-100">
+          <span class="section-tag mb-3"><i class="fas fa-bolt"></i> Featured suite</span>
+          <h3 class="text-light">Unified risk intelligence across wallets, tokens, and live payment sessions</h3>
+          <p style="color: var(--text-muted);">Real-time heuristics, GPT briefings, and compliance-ready audit logs keep operations fast without sacrificing trust.</p>
+          <ul>
+            <li>
+              <span class="check-icon"><i class="fas fa-wave-square"></i></span>
+              <div>Flag honeypots, MEV exposure, and liquidity anomalies across 36+ chains in seconds.</div>
+            </li>
+            <li>
+              <span class="check-icon"><i class="fas fa-user-shield"></i></span>
+              <div>Deliver executive-ready risk briefings and stakeholder sign-off packages automatically.</div>
+            </li>
+            <li>
+              <span class="check-icon"><i class="fas fa-plug"></i></span>
+              <div>Embed REST APIs, drop-in widgets, and SOC2-ready logging within existing workflows.</div>
+            </li>
+          </ul>
+          <div class="d-flex flex-wrap gap-2 mt-4 position-relative" style="z-index: 1;">
+            <a class="btn-brand-outline" href="{{ url_for('tools.wallet_profiler') }}">
+              Discover Wallet Intelligence
+              <i class="fas fa-arrow-up-right-from-square"></i>
+            </a>
+          </div>
+        </div>
       </div>
     </div>
-  </nav>
-
-  <!-- LAUNCH URGENCY STRIP -->
-<div class="bg-warning text-dark text-center py-2 fw-bold" style="letter-spacing:1px;">
-  Limited-time launch special: get setup in 48h with exclusive pricing!
-</div>
-
-
-  <!-- HERO SECTION -->
-<section class="hero-section py-5">
-  <div class="container hero-content text-center">
-    <h1 class="hero-title fade-in">Launch Your Own Crypto Gateway & Private Bots in 48 Hours</h1>
-    <p class="hero-subtitle fade-in fs-4">
-      Accept Bitcoin, USDT, and 100+ coins with your own branded payment system.<br>
-      Deploy custom crypto solutions: dashboards, Telegram bots, smart contract monitors, and more.<br>
-      <span class="text-success fw-bold">Secure. Fast. No middlemen.</span>
-    </p>
-    <div class="d-flex flex-column flex-md-row justify-content-center gap-3 mt-4">
-      <a href="/pay" class="btn btn-success btn-lg px-4">
-        <i class="fas fa-credit-card me-2"></i>Make a Payment
-      </a>
-      <a href="https://t.me/paycryptonline" target="_blank" class="btn btn-primary btn-lg px-4">
-        <i class="fab fa-telegram me-2"></i>Contact Us
-      </a>
+    <div class="hero-metric-strip mt-5">
+      <div class="hero-metric">
+        <div class="hero-metric-icon">
+          <i class="fas fa-coins" aria-hidden="true"></i>
+        </div>
+        <div class="hero-metric-content">
+          <h3>12B+</h3>
+          <p>USD volume protected across partner networks since 2022</p>
+        </div>
+      </div>
+      <div class="hero-metric">
+        <div class="hero-metric-icon">
+          <i class="fas fa-hourglass-half" aria-hidden="true"></i>
+        </div>
+        <div class="hero-metric-content">
+          <h3>48 hrs</h3>
+          <p>Average launch window for payments or risk modules</p>
+        </div>
+      </div>
+      <div class="hero-metric">
+        <div class="hero-metric-icon">
+          <i class="fas fa-globe" aria-hidden="true"></i>
+        </div>
+        <div class="hero-metric-content">
+          <h3>32 markets</h3>
+          <p>32 markets with localization & compliance playbooks</p>
+        </div>
+      </div>
+    </div>
+    <div class="trust-strip mt-4">
+      <span><i class="fas fa-building-columns"></i> Trusted by OTC desks & fintech platforms</span>
+      <span><i class="fas fa-shield-check"></i> SOC2-aligned logging & PCI DSS practices</span>
+      <span><i class="fas fa-headset"></i> 24/7 integration engineers & Telegram war rooms</span>
     </div>
   </div>
 </section>
 
-<!-- PREMIUM BOTS & SOLUTIONS SECTION -->
-<section id="premium" class="services-section" style="background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);">
-  <div class="container py-5">
-    <h2 class="section-title text-center fade-in">Payment Gateway Solutions for Businesses</h2>
-    <p class="section-subtitle text-center fade-in">
-      <span class="text-warning">B2B crypto payment infrastructure:</span> launch your own branded payment gateway for crypto and bank payments.<br>
-      <span class="text-success">Private, secure, and delivered in 48h.</span><br>
-      <span class="text-info">Production-ready modules: merchant dashboards, API key management, settlement automation, compliance monitoring.</span>
-    </p>
-    <div class="row justify-content-center mb-4">
-      <div class="col-md-6 mb-4">
-        <div class="service-card fade-in border border-success h-100 d-flex flex-column justify-content-between">
-          <div class="service-icon"><i class="fab fa-bitcoin"></i></div>
-          <h3 class="service-title">Crypto Payment Gateway</h3>
-          <ul class="list-unstyled">
-            <li><i class="fas fa-check text-success"></i> Accept Bitcoin, USDT, and 100+ coins</li>
-            <li><i class="fas fa-check text-success"></i> Branded merchant dashboard</li>
-            <li><i class="fas fa-check text-success"></i> API keys & webhook integration</li>
-            <li><i class="fas fa-check text-success"></i> Flat-rate or commission plans</li>
-            <li><i class="fas fa-check text-success"></i> Automated settlements</li>
-          </ul>
-          <a href="https://t.me/paycryptonline" class="btn btn-success btn-sm mt-auto">Request Setup</a>
-        </div>
-      </div>
-      <div class="col-md-6 mb-4">
-        <div class="service-card fade-in border border-primary h-100 d-flex flex-column justify-content-between">
-          <div class="service-icon"><i class="fas fa-university"></i></div>
-          <h3 class="service-title">Bank Payment Gateway</h3>
-          <ul class="list-unstyled">
-            <li><i class="fas fa-check text-primary"></i> Accept bank transfers and wire payments</li>
-            <li><i class="fas fa-check text-primary"></i> Multi-currency support</li>
-            <li><i class="fas fa-check text-primary"></i> Custom settlement logic</li>
-            <li><i class="fas fa-check text-primary"></i> Compliance and reporting modules</li>
-            <li><i class="fas fa-check text-primary"></i> Branded for your business</li>
-          </ul>
-          <a href="https://t.me/paycryptonline" class="btn btn-primary btn-sm mt-auto">Request Demo</a>
-        </div>
-      </div>
-    </div>
-    <div class="row mb-4">
-      <div class="col-md-6 text-center">
-        <div class="bg-dark text-success rounded p-3 mb-2">Used by 20+ businesses</div>
-      </div>
-      <div class="col-md-6 text-center">
-        <div class="bg-dark text-info rounded p-3 mb-2">Trusted by 100K+ transactions</div>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- SERVICES SECTION -->
-<section id="services" class="services-section">
-  <div class="container py-5">
-    <h2 class="section-title text-center fade-in">Custom Crypto Solutions for Builders</h2>
-    <p class="section-subtitle text-center fade-in">
-      Production-ready crypto automation: dashboards, Telegram bots, DEX sniper bots, wallet monitoring, arbitrage, liquidation alerts, trading signals, airdrop claimers, NFT minting bots, smart contract monitors, and more.<br>
-      <span class="text-success">Private. Branded. Delivered in 48h.</span>
-    </p>
-    <div class="row justify-content-center mb-4">
-      <div class="col-md-4 mb-4">
-        <div class="service-card fade-in border border-success h-100 d-flex flex-column justify-content-between">
-          <div class="service-icon"><i class="fas fa-robot"></i></div>
-          <h3 class="service-title">Telegram & Discord Bots</h3>
-          <ul class="list-unstyled">
-            <li><i class="fas fa-check text-success"></i> Sniper bots for DEX trading</li>
-            <li><i class="fas fa-check text-success"></i> Wallet monitoring & alerts</li>
-            <li><i class="fas fa-check text-success"></i> Trading signal delivery</li>
-            <li><i class="fas fa-check text-success"></i> Custom branded for your group</li>
-          </ul>
-          <a href="https://t.me/paycryptonline" class="btn btn-success btn-sm mt-auto">Order Bot</a>
-        </div>
-      </div>
-      <div class="col-md-4 mb-4">
-        <div class="service-card fade-in border border-primary h-100 d-flex flex-column justify-content-between">
-          <div class="service-icon"><i class="fas fa-bolt"></i></div>
-          <h3 class="service-title">Crypto Automation Bots</h3>
-          <ul class="list-unstyled">
-            <li><i class="fas fa-check text-primary"></i> Arbitrage & liquidation alert bots</li>
-            <li><i class="fas fa-check text-primary"></i> Airdrop claimers & NFT minting bots</li>
-            <li><i class="fas fa-check text-primary"></i> Automated trading strategies</li>
-            <li><i class="fas fa-check text-primary"></i> Custom integrations (API, webhooks)</li>
-          </ul>
-          <a href="https://t.me/paycryptonline" class="btn btn-primary btn-sm mt-auto">Request Demo</a>
-        </div>
-      </div>
-      <div class="col-md-4 mb-4">
-        <div class="service-card fade-in border border-warning h-100 d-flex flex-column justify-content-between">
-          <div class="service-icon"><i class="fas fa-chart-line"></i></div>
-          <h3 class="service-title">Dashboards & Monitors</h3>
-          <ul class="list-unstyled">
-            <li><i class="fas fa-check text-warning"></i> Portfolio & payment dashboards</li>
-            <li><i class="fas fa-check text-warning"></i> Smart contract monitors</li>
-            <li><i class="fas fa-check text-warning"></i> Compliance & analytics modules</li>
-            <li><i class="fas fa-check text-warning"></i> Delivered as web or app</li>
-          </ul>
-          <a href="https://t.me/paycryptonline" class="btn btn-warning btn-sm mt-auto">Get a Quote</a>
-        </div>
-      </div>
-    </div>
-    <div class="row mb-4">
-      <div class="col-md-6 text-center">
-        <div class="bg-dark text-success rounded p-3 mb-2">Used by 20+ businesses</div>
-      </div>
-      <div class="col-md-6 text-center">
-        <div class="bg-dark text-info rounded p-3 mb-2">Trusted by 100K+ transactions</div>
-      </div>
-    </div>
-  </div>
-</section>
-
-  <!-- Tools Section -->
-  <section id="tools" class="tools-section">
-    <div class="container py-5">
-      <hr class="my-5" style="border-top: 2px solid #6366f1;">
-      <h2 class="section-title fade-in">Free DeFi Analysis Tools</h2>
-      <p class="section-subtitle fade-in">
-        <span class="text-success">100% free tools for everyone:</span> analyze tokens, track gas prices, detect honeypots, audit contracts, and discover DeFi opportunities.
-      </p>
-      <div class="row mb-4 justify-content-center">
-        <div class="col-md-4">
-          <div class="tool-card fade-in h-100" onclick="window.open('{{ url_for('tools.rugcheck') }}', '_blank')" title="Analyze Token Security - Free Tool">
-            <div class="tool-icon"><i class="fas fa-shield-alt"></i></div>
-            <div class="tool-title">Token Security Analyzer</div>
-            <div class="tool-description">🛡️ Comprehensive security analysis powered by GoPlus API - detect honeypots and scams</div>
-          </div>
-        </div>
-        <div class="col-md-4">
-          <div class="tool-card fade-in h-100" onclick="window.open('{{ url_for('tools.gas_tracker') }}', '_blank')" title="Track Gas Prices - Free Tool">
-            <div class="tool-icon"><i class="fas fa-burn"></i></div>
-            <div class="tool-title">Gas Price Tracker</div>
-            <div class="tool-description">⛽ Real-time gas price monitoring for Ethereum, BSC, and more</div>
-          </div>
-        </div>
-        <div class="col-md-4">
-          <div class="tool-card fade-in h-100" onclick="window.open('{{ url_for('tools.honeypot_check') }}', '_blank')" title="Detect Honeypots - Free Tool">
-            <div class="tool-icon"><i class="fas fa-exclamation-triangle"></i></div>
-            <div class="tool-title">Honeypot Detector</div>
-            <div class="tool-description">🚨 Instantly check if a token is a honeypot or scam</div>
-          </div>
-        </div>
-      </div>
-      <div class="text-center mb-4">
-        <a href="/tools" class="btn btn-outline-success btn-lg"><i class="fas fa-toolbox me-2"></i>See All 14 Tools</a>
-      </div>
-      <div class="tools-grid" style="grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));">
-        <!-- Example Tool Card 1 -->
-        <div class="tool-card fade-in" onclick="window.open('{{ url_for('tools.rugcheck') }}', '_blank')" title="Analyze Token Security - Free Tool">
-          <div class="tool-icon">
-            <i class="fas fa-shield-alt"></i>
-          </div>
-          <div class="tool-title">Token Security Analyzer</div>
-          <div class="tool-description">🛡️ Comprehensive security analysis powered by GoPlus API - detect honeypots and scams</div>
-        </div>
-        <!-- Example Tool Card 2 -->
-        <div class="tool-card fade-in" onclick="window.open('{{ url_for('tools.gas_tracker') }}', '_blank')" title="Track Gas Prices - Free Tool">
-          <div class="tool-icon">
-            <i class="fas fa-burn"></i>
-          </div>
-          <div class="tool-title">Gas Price Tracker</div>
-          <div class="tool-description">⛽ Real-time gas price monitoring for Ethereum, BSC, and more</div>
-        </div>
-        <!-- Example Tool Card 3 -->
-        <div class="tool-card fade-in" onclick="window.open('{{ url_for('tools.honeypot_check') }}', '_blank')" title="Detect Honeypots - Free Tool">
-          <div class="tool-icon">
-            <i class="fas fa-exclamation-triangle"></i>
-          </div>
-          <div class="tool-title">Honeypot Detector</div>
-          <div class="tool-description">🚨 Instantly check if a token is a honeypot or scam</div>
-        </div>
-        <!-- Example Tool Card 4 -->
-        <div class="tool-card fade-in" onclick="window.open('{{ url_for('tools.index') }}', '_blank')" title="MEV Protection - Free Tool">
-          <div class="tool-icon">
-            <i class="fas fa-user-shield"></i>
-          </div>
-          <div class="tool-title">MEV Protection</div>
-          <div class="tool-description">🛡️ Protect trades from MEV bots and sandwich attacks</div>
-        </div>
-        <!-- Example Tool Card 5 -->
-        <div class="tool-card fade-in" onclick="window.open('{{ url_for('tools.rug_alert') }}', '_blank')" title="Rug Pull Alerts - Free Tool">
-          <div class="tool-icon">
-            <i class="fas fa-skull-crossbones"></i>
-          </div>
-          <div class="tool-title">Rug Pull Alerts</div>
-          <div class="tool-description">💀 Get instant alerts for suspicious token activity</div>
-        </div>
-        <!-- Example Tool Card 6 -->
-        <div class="tool-card fade-in" onclick="window.open('{{ url_for('tools.gas_tracker') }}', '_blank')" title="Whale Tracker - Free Tool">
-          <div class="tool-icon">
-            <i class="fas fa-fish"></i>
-          </div>
-          <div class="tool-title">Whale Tracker</div>
-          <div class="tool-description">🐋 Track large wallet movements and whale trades</div>
-        </div>
-        <!-- Example Tool Card 7 -->
-        <div class="tool-card fade-in" onclick="window.open('{{ url_for('tools.airdrop_hunter') }}', '_blank')" title="Airdrop Hunter - Free Tool">
-          <div class="tool-icon">
-            <i class="fas fa-gift"></i>
-          </div>
-          <div class="tool-title">Airdrop Hunter</div>
-          <div class="tool-description">🎁 Discover and track new airdrop opportunities</div>
-        </div>
-        <!-- Example Tool Card 8 -->
-        <div class="tool-card fade-in" onclick="window.open('{{ url_for('tools.audit_check') }}', '_blank')" title="Contract Audit Checker - Free Tool">
-          <div class="tool-icon">
-            <i class="fas fa-file-contract"></i>
-          </div>
-          <div class="tool-title">Contract Audit Checker</div>
-          <div class="tool-description">🔍 Instantly audit smart contracts for vulnerabilities and risks</div>
-        </div>
-        <!-- Add more tool cards as needed to fill 4x4 grid -->
-      </div>
-      <div class="text-center mt-5">
-        <p class="text-muted">+ 8 more professional analysis tools available | All tools are 100% free to use</p>
-        <div class="mt-3">
-          <span class="badge bg-primary me-2">Token Analyzer</span>
-          <span class="badge bg-success me-2">Gas Tracker</span>
-          <span class="badge bg-warning me-2">Honeypot Detector</span>
-          <span class="badge bg-info me-2">MEV Protection</span>
-          <span class="badge bg-danger me-2">Rug Pull Alerts</span>
-          <span class="badge bg-secondary me-2">Whale Tracker</span>
-          <span class="badge bg-light text-dark">Airdrop Hunter</span>
-          <span class="badge bg-dark">Contract Audit</span>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- FAQ SECTION -->
-<section id="faq" class="faq-section py-5" style="background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%); color: #f8fafc;">
+<section class="pillars-section">
   <div class="container">
-    <h2 class="section-title text-center fade-in" style="color: #10b981;">Frequently Asked Questions</h2>
-    <div class="accordion" id="faqAccordion" style="background: var(--card-bg); border-radius: 12px;">
-      <div class="accordion-item" style="background: var(--card-bg); border: 1px solid var(--primary-color); border-radius: 8px; margin-bottom: 1rem;">
+    <div class="section-intro text-center text-lg-start mb-4">
+      <span class="eyebrow"><i class="fas fa-star"></i> Why PayCrypt</span>
+      <h2 class="section-heading fw-semibold mt-3 mb-3">Security-first architecture with human concierge delivery</h2>
+      <p class="section-subtitle mb-0">Every launch ships with compliance templates, alerting playbooks, and embedded specialists. From token listings to institutional settlement, PayCrypt keeps your crypto operations fast, traceable, and trustworthy.</p>
+    </div>
+    <div class="pillars-grid">
+      <div class="pillar-card">
+        <span class="pillar-icon"><i class="fas fa-credit-card"></i></span>
+        <h4 class="text-light mb-1">Payment orchestration</h4>
+        <p>Hosted checkout, fiat bridges, recurring billing, and reconciliation dashboards tailored for finance teams.</p>
+      </div>
+      <div class="pillar-card">
+        <span class="pillar-icon"><i class="fas fa-chart-network"></i></span>
+        <h4 class="text-light mb-1">Risk operations</h4>
+        <p>Live rug, liquidity, and sanctions heuristics with automated GPT briefings for leadership sign-off.</p>
+      </div>
+      <div class="pillar-card">
+        <span class="pillar-icon"><i class="fas fa-gears"></i></span>
+        <h4 class="text-light mb-1">Automation & analytics</h4>
+        <p>Portfolio dashboards, webhook triggers, and investor reporting aligned with revenue and compliance goals.</p>
+      </div>
+      <div class="pillar-card">
+        <span class="pillar-icon"><i class="fas fa-people-roof"></i></span>
+        <h4 class="text-light mb-1">Concierge delivery</h4>
+        <p>Dedicated engineers and compliance leads embedded in your workspace with bespoke runbooks and governance.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="solutions-section">
+  <div class="container">
+    <div class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-center gap-3 mb-4">
+      <div class="section-intro">
+        <span class="eyebrow"><i class="fas fa-th-large"></i> Core solutions</span>
+        <h2 class="section-heading fw-semibold text-light mt-3 mb-3">Deploy the PayCrypt intelligence stack across your ecosystem</h2>
+        <p class="section-subtitle mb-0">Mix and match rugged risk tooling, behavioral analytics, and payment automation to match your market launch plan.</p>
+      </div>
+      <a class="btn-brand-outline" href="{{ url_for('tools.index') }}">
+        Explore all tools
+        <i class="fas fa-arrow-right"></i>
+      </a>
+    </div>
+    <div class="solutions-grid">
+      <article class="solution-card">
+        <div class="solution-heading">
+          <div>
+            <span class="solution-tag">Risk intelligence</span>
+            <h4 class="mt-3 mb-2 text-light">RugCheck AI</h4>
+            <p class="mb-0" style="color: var(--text-muted);">Live honeypot detection, liquidity health scoring, and GPT briefings bundled into a single decision dashboard.</p>
+          </div>
+          <i class="fas fa-shield-virus fa-lg text-warning"></i>
+        </div>
+        <ul class="benefit-list">
+          <li><span class="benefit-dot"></span><span>MEV-aware heuristics across 20+ chains.</span></li>
+          <li><span class="benefit-dot"></span><span>Clear pass/fail indicators for listings and treasury moves.</span></li>
+          <li><span class="benefit-dot"></span><span>Embeddable REST API & white-label widgets.</span></li>
+        </ul>
+        <div class="mt-4 position-relative" style="z-index: 2;">
+          <a class="btn-brand-outline btn-sm" href="{{ url_for('tools.rugcheck') }}">
+            Explore RugCheck
+            <i class="fas fa-arrow-up-right-from-square"></i>
+          </a>
+        </div>
+        <p class="mt-3">
+          <a href="/docs/rugcheck" class="micro-link">RugCheck API docs</a>
+        </p>
+      </article>
+      <article class="solution-card">
+        <div class="solution-heading">
+          <div>
+            <span class="solution-tag">Behavioral analytics</span>
+            <h4 class="mt-3 mb-2 text-light">Wallet Intelligence</h4>
+            <p class="mb-0" style="color: var(--text-muted);">Instantly understand counterparties with clustering, profitability metrics, and AML-ready dossiers.</p>
+          </div>
+          <i class="fas fa-wallet fa-lg text-info"></i>
+        </div>
+        <ul class="benefit-list">
+          <li><span class="benefit-dot"></span><span>Whale tiering, counterparty scoring, and behavior triggers.</span></li>
+          <li><span class="benefit-dot"></span><span>Export-ready compliance packs for regulators and partners.</span></li>
+          <li><span class="benefit-dot"></span><span>Webhook automations for disputes and fraud escalations.</span></li>
+        </ul>
+        <div class="mt-4 position-relative" style="z-index: 2;">
+          <a class="btn-brand-outline btn-sm" href="{{ url_for('tools.wallet_profiler') }}">
+            Discover Wallet Intelligence
+            <i class="fas fa-arrow-up-right-from-square"></i>
+          </a>
+        </div>
+        <p class="mt-3">
+          <a href="/docs/wallet-intelligence" class="micro-link">Wallet Intelligence playbooks</a>
+        </p>
+      </article>
+      <article class="solution-card">
+        <div class="solution-heading">
+          <div>
+            <span class="solution-tag">Automation</span>
+            <h4 class="mt-3 mb-2 text-light">Payment Sessions API</h4>
+            <p class="mb-0" style="color: var(--text-muted);">Embed secure checkout, settlement reconciliation, and adaptive dispute tooling into any product experience.</p>
+          </div>
+          <i class="fas fa-network-wired fa-lg text-primary"></i>
+        </div>
+        <ul class="benefit-list">
+          <li><span class="benefit-dot"></span><span>PCI-ready templates and SOC2 logging baked in.</span></li>
+          <li><span class="benefit-dot"></span><span>Real-time settlement status with Slack/Telegram alerts.</span></li>
+          <li><span class="benefit-dot"></span><span>Instant webhooks for treasury reconciliation and BI feeds.</span></li>
+        </ul>
+        <div class="mt-4 position-relative" style="z-index: 2;">
+          <a class="btn-brand-outline btn-sm" href="https://t.me/paycryptonline" target="_blank" rel="noopener" aria-label="Connect on Telegram about the Payment Sessions gateway">
+            Chat about Payment Gateway
+            <i class="fas fa-paper-plane"></i>
+          </a>
+        </div>
+        <p class="mt-3">
+          <a href="/docs/payment-sessions" class="micro-link">Payment Sessions integration guide</a>
+        </p>
+      </article>
+    </div>
+  </div>
+</section>
+
+<section class="testimonials-section">
+  <div class="container">
+    <div class="row justify-content-between align-items-end mb-4">
+      <div class="col-lg-7 section-intro">
+        <span class="eyebrow"><i class="fas fa-comments"></i> Testimonials</span>
+        <h2 class="section-heading fw-semibold text-light mt-3 mb-3">Operators scaling with PayCrypt</h2>
+        <p class="section-subtitle mb-0">From regulated OTC desks to hybrid exchanges, teams lean on PayCrypt to compress launch timelines and keep compliance teams in the loop.</p>
+      </div>
+    </div>
+    <div class="row g-4">
+      <div class="col-lg-6">
+        <article class="testimonial-panel h-100">
+          <div class="testimonial-quote">
+            “PayCrypt became our one-stop crypto stack. Payments, token screenings, and portfolio intelligence now live in a single dashboard our regulators actually approve.”
+          </div>
+          <div class="testimonial-author">
+            <div class="testimonial-avatar">AK</div>
+            <div>
+              <strong class="text-light">Ana K., Head of Risk</strong>
+              <div class="small" style="color: var(--text-muted-2);">Regulated OTC Desk, EU</div>
+            </div>
+          </div>
+        </article>
+      </div>
+      <div class="col-lg-6">
+        <article class="testimonial-panel h-100">
+          <div class="testimonial-quote">
+            “Integration took 48 hours and settlement uptime jumped overnight. RugCheck plus Wallet Intelligence cut our listing risk review from hours to minutes.”
+          </div>
+          <div class="testimonial-author">
+            <div class="testimonial-avatar">DL</div>
+            <div>
+              <strong class="text-light">Darren L., Product Lead</strong>
+              <div class="small" style="color: var(--text-muted-2);">Hybrid Exchange, APAC</div>
+            </div>
+          </div>
+        </article>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="faq-section" id="faq">
+  <div class="container">
+    <div class="row justify-content-center">
+      <div class="col-lg-8 text-center section-intro mb-4">
+        <span class="eyebrow"><i class="fas fa-circle-question"></i> FAQs</span>
+        <h2 class="section-heading fw-semibold text-light mt-3 mb-3">Answers for compliance, product, and ops teams</h2>
+        <p class="section-subtitle mb-0">Everything you need to know about deploying PayCrypt safely inside regulated or growth-stage environments.</p>
+      </div>
+    </div>
+    <div class="accordion" id="faqAccordion">
+      <div class="accordion-item faq-card">
         <h2 class="accordion-header" id="faq1">
-          <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapse1" aria-expanded="true" aria-controls="collapse1" style="background: var(--primary-color); color: #fff; font-weight: 600;">
-            How fast is setup and delivery?
+          <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapse1" aria-expanded="true" aria-controls="collapse1">
+            How fast can we go live?
           </button>
         </h2>
         <div id="collapse1" class="accordion-collapse collapse show" aria-labelledby="faq1" data-bs-parent="#faqAccordion">
-          <div class="accordion-body" style="background: var(--card-bg); color: #cbd5e1;">
-            Most products are delivered within 48 hours. Custom requests may take longer depending on complexity.
+          <div class="accordion-body">
+            Most customers launch payment orchestration or risk intelligence modules in under 48 hours. Complex multi-entity compliance rollouts may take a few additional days for stakeholder training and controls sign-off.
           </div>
         </div>
       </div>
-      <div class="accordion-item" style="background: var(--card-bg); border: 1px solid var(--success-color); border-radius: 8px; margin-bottom: 1rem;">
+      <div class="accordion-item faq-card">
         <h2 class="accordion-header" id="faq2">
-          <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse2" aria-expanded="false" aria-controls="collapse2" style="background: var(--success-color); color: #fff; font-weight: 600;">
-            What fees do you charge?
+          <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse2" aria-expanded="false" aria-controls="collapse2">
+            How do you price deployments?
           </button>
         </h2>
         <div id="collapse2" class="accordion-collapse collapse" aria-labelledby="faq2" data-bs-parent="#faqAccordion">
-          <div class="accordion-body" style="background: var(--card-bg); color: #cbd5e1;">
-            We offer flat and commission-based plans. Contact us for a custom quote based on your needs.
+          <div class="accordion-body">
+            Fixed retainers cover institutional desks, volume tiers support exchanges and processors, and bespoke bundles are available for full concierge builds. Your roadmap determines the mix of automation, support hours, and integrations.
           </div>
         </div>
       </div>
-      <div class="accordion-item" style="background: var(--card-bg); border: 1px solid var(--warning-color); border-radius: 8px; margin-bottom: 1rem;">
+      <div class="accordion-item faq-card">
         <h2 class="accordion-header" id="faq3">
-          <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse3" aria-expanded="false" aria-controls="collapse3" style="background: var(--warning-color); color: #fff; font-weight: 600;">
-            Is my data and code private?
+          <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse3" aria-expanded="false" aria-controls="collapse3">
+            What about data privacy and code ownership?
           </button>
         </h2>
         <div id="collapse3" class="accordion-collapse collapse" aria-labelledby="faq3" data-bs-parent="#faqAccordion">
-          <div class="accordion-body" style="background: var(--card-bg); color: #cbd5e1;">
-            Yes. All solutions are delivered privately and securely. No code reuse, no leaks.
+          <div class="accordion-body">
+            All deliverables are private and custom-built. No shared code bases, no reused playbooks, and clear audit logs for every action. We sign NDAs, enforce principle-of-least-privilege access, and keep runbooks in your secure workspace.
           </div>
         </div>
       </div>
-      <div class="accordion-item" style="background: var(--card-bg); border: 1px solid var(--info-color, #0ea5e9); border-radius: 8px; margin-bottom: 1rem;">
+      <div class="accordion-item faq-card">
         <h2 class="accordion-header" id="faq4">
-          <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse4" aria-expanded="false" aria-controls="collapse4" style="background: var(--info-color, #0ea5e9); color: #fff; font-weight: 600;">
-            Can I request custom features?
+          <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse4" aria-expanded="false" aria-controls="collapse4">
+            Can you extend the product for our use case?
           </button>
         </h2>
         <div id="collapse4" class="accordion-collapse collapse" aria-labelledby="faq4" data-bs-parent="#faqAccordion">
-          <div class="accordion-body" style="background: var(--card-bg); color: #cbd5e1;">
-            Absolutely! We build custom bots, dashboards, and automations for any crypto use case.
+          <div class="accordion-body">
+            Absolutely. Our integration engineers act as an embedded team—building custom dashboards, governance workflows, and API endpoints tailored to your compliance or growth objectives without disrupting existing infrastructure.
           </div>
         </div>
       </div>
@@ -882,120 +361,34 @@
   </div>
 </section>
 
-  <!-- FOOTER SECTION -->
-  <footer class="footer mt-5">
-    <div class="container">
-      <div class="footer-brand mb-3">
-        <img src="{{ url_for('static', filename='img/paycrypt_logo_d.png') }}" alt="PayCrypt Logo" height="40">
-      </div>
-      <div class="footer-description mb-3">
-        PayCrypt &mdash; Professional Crypto Payment Gateway & DeFi Tools for businesses, traders, and developers. Secure, fast, and private solutions delivered worldwide.
-      </div>
-      <div id="contact" class="footer-links mb-3">
-        <a href="https://t.me/paycryptonline" target="_blank"><i class="fab fa-telegram"></i> Telegram</a>
-        <a href="mailto:support@paycrypt.online"><i class="fas fa-envelope"></i> Email</a>
-        <a href="/tools"><i class="fas fa-toolbox"></i> Free Tools</a>
-        <span class="badge bg-success ms-2">PCI DSS Compliant</span>
-        <span class="badge bg-info ms-2">99.9% uptime</span>
-        <span class="badge bg-warning ms-2">24/7 support</span>
-        <a href="https://t.me/paycryptonline" target="_blank" class="ms-2"><i class="fab fa-telegram"></i> Support Chat</a>
-      </div>
-      <div class="footer-bottom">
-        <p class="text-light mb-0">&copy; 2024 PayCrypt - Professional Crypto Payment Gateway & DeFi Tools. All rights reserved.</p>
-        <small class="text-light">Keywords: crypto payment gateway, DeFi tools, token analyzer, gas tracker, honeypot detector, MEV protection, trading bots</small>
+<section>
+  <div class="container">
+    <div class="cta-banner">
+      <div class="row align-items-center g-4">
+        <div class="col-lg-8 section-intro">
+          <span class="eyebrow"><i class="fas fa-rocket"></i> Ready to move fast?</span>
+          <h2 class="section-heading fw-semibold text-light mt-3 mb-3">Spin up a concierge-led crypto payments pilot this week</h2>
+          <p class="section-subtitle mb-0">Book a strategy session with PayCrypt solution architects to map settlement flows, compliance checklists, and bespoke dashboards before you ever ship to production.</p>
+        </div>
+        <div class="col-lg-4 text-lg-end">
+          <div class="cta-banner-actions">
+            <a class="btn-brand-primary" href="{{ url_for('auth.register') }}" aria-label="Start your PayCrypt pilot">
+              <i class="fas fa-rocket" aria-hidden="true"></i>
+              Start free pilot
+            </a>
+            <a class="btn-brand-outline" href="mailto:support@paycrypt.online" aria-label="Contact PayCrypt sales by email">
+              <i class="fas fa-phone-volume" aria-hidden="true"></i>
+              Talk to sales
+            </a>
+            <a class="btn-brand-outline" href="https://t.me/paycryptonline" target="_blank" rel="noopener" aria-label="Join the PayCrypt secure support room on Telegram">
+              <i class="fab fa-telegram-plane" aria-hidden="true"></i>
+              Join the secure support room
+            </a>
+          </div>
+        </div>
       </div>
     </div>
-  </footer>
-
-  <!-- Scripts -->
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-  <script>
-    // Smooth scrolling
-    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-      anchor.addEventListener('click', function (e) {
-        e.preventDefault();
-        const target = document.querySelector(this.getAttribute('href'));
-        if (target) {
-          target.scrollIntoView({
-            behavior: 'smooth',
-            block: 'start'
-          });
-        }
-      });
-    });
-
-    // Fade in animation on scroll
-    const observerOptions = {
-      threshold: 0.1,
-      rootMargin: '0px 0px -50px 0px'
-    };
-
-    const observer = new IntersectionObserver(function(entries) {
-      entries.forEach(entry => {
-        if (entry.isIntersecting) {
-          entry.target.classList.add('visible');
-        }
-      });
-    }, observerOptions);
-
-    document.querySelectorAll('.fade-in').forEach(el => {
-      observer.observe(el);
-    });
-
-    // Navbar background on scroll
-    window.addEventListener('scroll', function() {
-      const navbar = document.querySelector('.navbar');
-      if (window.scrollY > 50) {
-        navbar.style.background = 'rgba(15, 23, 42, 0.98)';
-      } else {
-        navbar.style.background = 'rgba(15, 23, 42, 0.95)';
-      }
-    });
-
-    // Counter animation
-    function animateCounters() {
-      const counters = document.querySelectorAll('.stat-number');
-      counters.forEach(counter => {
-        const target = parseInt(counter.textContent);
-        const increment = target / 100;
-        let current = 0;
-        
-        const timer = setInterval(() => {
-          current += increment;
-          if (current >= target) {
-            counter.textContent = target + (counter.textContent.includes('%') ? '%' : '');
-            clearInterval(timer);
-          } else {
-            counter.textContent = Math.floor(current) + (counter.textContent.includes('%') ? '%' : '');
-          }
-        }, 20);
-      });
-    }
-
-    // Trigger counter animation when stats section is visible
-    const statsSection = document.querySelector('.stats-section');
-    const statsObserver = new IntersectionObserver(function(entries) {
-      entries.forEach(entry => {
-        if (entry.isIntersecting) {
-          animateCounters();
-          statsObserver.unobserve(entry.target);
-        }
-      });
-    }, { threshold: 0.5 });
-
-    if (statsSection) {
-      statsObserver.observe(statsSection);
-    }
-
-    // Tool card click effects
-    document.querySelectorAll('.tool-card').forEach(card => {
-      card.addEventListener('click', function() {
-        this.style.transform = 'scale(0.95)';
-        setTimeout(() => {
-          this.style.transform = '';
-        }, 150);
-      });
-    });
-  </script>
-</body>
-</html>
+  </div>
+</section>
+</div>
+{% endblock %}

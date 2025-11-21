@@ -59,7 +59,7 @@
                     </div>
                     <div class="col-md-6 mb-3">
                         <h6 class="text-muted small mb-1">Requested</h6>
-                        <p class="mb-0">{{ withdrawal.created_at.strftime('%Y-%m-%d %H:%M:%S') }}</p>
+                        <p class="mb-0">{{ withdrawal.created_at|datetime_eest('%Y-%m-%d %H:%M:%S') }}</p>
                     </div>
                     {% if withdrawal.processed_at %}
                         <div class="col-md-6 mb-3">
@@ -72,7 +72,7 @@
                                     Processed
                                 {% endif %}
                             </h6>
-                            <p class="mb-0">{{ withdrawal.processed_at.strftime('%Y-%m-%d %H:%M:%S') }}</p>
+                            <p class="mb-0">{{ withdrawal.processed_at|datetime_eest('%Y-%m-%d %H:%M:%S') }}</p>
                         </div>
                     {% endif %}
                     {% if withdrawal.tx_hash %}

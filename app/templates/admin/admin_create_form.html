@@ -1,0 +1,207 @@
+{% extends 'admin/base.html' %}
+{% from 'admin/_form_helpers.html' import render_field, form_actions %}
+
+{% block title %}{{ title }} - Admin{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Page Heading -->
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <h1 class="h3 mb-0 text-gray-800">{{ title }}</h1>
+        <a href="{{ url_for('admin.list_admins') }}" class="d-none d-sm-inline-block btn btn-sm btn-secondary shadow-sm">
+            <i class="bi bi-arrow-left me-1"></i> Back to Admins
+        </a>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Admin Details</h6>
+                </div>
+                <div class="card-body">
+                    <form method="POST" action="">
+                        {{ form.hidden_tag() }}
+
+                        <!-- Basic Information -->
+                        <div class="row">
+                            <div class="col-md-6">
+                                {{ render_field(form.username, autofocus=true) }}
+                            </div>
+                            <div class="col-md-6">
+                                {{ render_field(form.email, type='email') }}
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                {{ render_field(form.first_name) }}
+                            </div>
+                            <div class="col-md-6">
+                                {{ render_field(form.last_name) }}
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                {{ render_field(form.password) }}
+                            </div>
+                            <div class="col-md-6">
+                                {{ render_field(form.confirm_password) }}
+                            </div>
+                        </div>
+
+                        <!-- Admin Type -->
+                        <div class="row mb-4">
+                            <div class="col-md-6">
+                                <label class="form-label">Admin Type</label>
+                                <div class="form-check">
+                                    {{ form.admin_type(class="form-check-input", value="admin", checked=true) }}
+                                    {{ form.admin_type.label(class="form-check-label", text="Limited Admin - Can only perform assigned tasks") }}
+                                </div>
+                                <div class="form-check">
+                                    {{ form.admin_type(class="form-check-input", value="superadmin") }}
+                                    {{ form.admin_type.label(class="form-check-label", text="Super Admin - Full access") }}
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Management Permissions -->
+                        <div class="card mb-4" id="permissions-card">
+                            <div class="card-header">
+                                <h6 class="m-0 font-weight-bold text-primary">Management Permissions</h6>
+                                <small class="text-muted">Select which features this admin can access</small>
+                            </div>
+                            <div class="card-body">
+                                <div class="row">
+                                    <!-- Client Management -->
+                                    <div class="col-md-4">
+                                        <h6 class="text-primary mb-3">Client Management</h6>
+                                        <div class="form-check">
+                                            {{ form.perm_view_clients(class="form-check-input") }}
+                                            {{ form.perm_view_clients.label(class="form-check-label") }}
+                                        </div>
+                                        <div class="form-check">
+                                            {{ form.perm_create_clients(class="form-check-input") }}
+                                            {{ form.perm_create_clients.label(class="form-check-label") }}
+                                        </div>
+                                        <div class="form-check">
+                                            {{ form.perm_edit_clients(class="form-check-input") }}
+                                            {{ form.perm_edit_clients.label(class="form-check-label") }}
+                                        </div>
+                                        <div class="form-check">
+                                            {{ form.perm_delete_clients(class="form-check-input") }}
+                                            {{ form.perm_delete_clients.label(class="form-check-label") }}
+                                        </div>
+                                    </div>
+
+                                    <!-- Transaction Management -->
+                                    <div class="col-md-4">
+                                        <h6 class="text-primary mb-3">Transaction Management</h6>
+                                        <div class="form-check">
+                                            {{ form.perm_approve_payments(class="form-check-input") }}
+                                            {{ form.perm_approve_payments.label(class="form-check-label") }}
+                                        </div>
+                                        <div class="form-check">
+                                            {{ form.perm_approve_withdrawals(class="form-check-input") }}
+                                            {{ form.perm_approve_withdrawals.label(class="form-check-label") }}
+                                        </div>
+                                        <div class="form-check">
+                                            {{ form.perm_view_transactions(class="form-check-input") }}
+                                            {{ form.perm_view_transactions.label(class="form-check-label") }}
+                                        </div>
+                                    </div>
+
+                                    <!-- System Management -->
+                                    <div class="col-md-4">
+                                        <h6 class="text-primary mb-3">System Management</h6>
+                                        <div class="form-check">
+                                            {{ form.perm_view_stats(class="form-check-input") }}
+                                            {{ form.perm_view_stats.label(class="form-check-label") }}
+                                        </div>
+                                        <div class="form-check">
+                                            {{ form.perm_view_reports(class="form-check-input") }}
+                                            {{ form.perm_view_reports.label(class="form-check-label") }}
+                                        </div>
+                                        <div class="form-check">
+                                            {{ form.perm_manage_api_keys(class="form-check-input") }}
+                                            {{ form.perm_manage_api_keys.label(class="form-check-label") }}
+                                        </div>
+                                        <div class="form-check">
+                                            {{ form.perm_access_audit_logs(class="form-check-input") }}
+                                            {{ form.perm_access_audit_logs.label(class="form-check-label") }}
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="row mt-3">
+                                    <!-- Provider Management -->
+                                    <div class="col-md-6">
+                                        <h6 class="text-primary mb-3">Provider Management</h6>
+                                        <div class="form-check">
+                                            {{ form.perm_manage_wallet_providers(class="form-check-input") }}
+                                            {{ form.perm_manage_wallet_providers.label(class="form-check-label") }}
+                                        </div>
+                                        <div class="form-check">
+                                            {{ form.perm_manage_bank_providers(class="form-check-input") }}
+                                            {{ form.perm_manage_bank_providers.label(class="form-check-label") }}
+                                        </div>
+                                    </div>
+
+                                    <!-- Admin Management -->
+                                    <div class="col-md-6">
+                                        <h6 class="text-primary mb-3">Administrative</h6>
+                                        <div class="form-check">
+                                            {{ form.perm_manage_admins(class="form-check-input") }}
+                                            {{ form.perm_manage_admins.label(class="form-check-label") }}
+                                        </div>
+                                        <div class="form-check">
+                                            {{ form.perm_manage_settings(class="form-check-input") }}
+                                            {{ form.perm_manage_settings.label(class="form-check-label") }}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Status -->
+                        <div class="form-check form-switch mb-4">
+                            {{ form.is_active(class="form-check-input", role="switch") }}
+                            {{ form.is_active.label(class="form-check-label") }}
+                        </div>
+
+                        <!-- Notes -->
+                        <div class="mb-4">
+                            {{ render_field(form.notes, rows=3) }}
+                        </div>
+
+                        {{ form_actions(cancel_url=url_for('admin.list_admins')) }}
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Toggle permissions card visibility based on admin type
+document.querySelectorAll('input[name="admin_type"]').forEach(radio => {
+    radio.addEventListener('change', function() {
+        const permissionsCard = document.getElementById('permissions-card');
+        if (this.value === 'superadmin') {
+            permissionsCard.style.display = 'none';
+        } else {
+            permissionsCard.style.display = 'block';
+        }
+    });
+});
+
+// Initialize on page load
+document.addEventListener('DOMContentLoaded', function() {
+    const superadminRadio = document.querySelector('input[name="admin_type"][value="superadmin"]');
+    if (superadminRadio && superadminRadio.checked) {
+        document.getElementById('permissions-card').style.display = 'none';
+    }
+});
+</script>
+{% endblock %}

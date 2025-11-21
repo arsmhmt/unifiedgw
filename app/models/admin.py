@@ -75,7 +75,7 @@ class AdminUser(UserMixin, BaseModel):
         return self._active
 
     def get_id(self):
-        return str(self.id)
+        return f"admin_{self.id}"
         
     def has_permission(self, permission_name):
         """

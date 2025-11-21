@@ -1,0 +1,166 @@
+{% extends 'owner/base.html' %}
+
+{% block title %}System Health - Owner Panel{% endblock %}
+
+{% block content %}
+<div class="d-flex flex-column flex-md-row align-items-center justify-content-between mb-4">
+    <div>
+        <h1 class="h3 mb-1 cyber-title">System Health</h1>
+        <p class="text-muted mb-0 cyber-subtitle">Monitor authentication flow, Teminci transaction load, and branch uptime.</p>
+    </div>
+</div>
+
+<div class="row g-4 mb-4">
+    <div class="col-xl-3 col-md-6">
+        <div class="card stats-card primary h-100">
+            <div class="card-body d-flex align-items-center">
+                <div class="flex-grow-1">
+                    <h6 class="text-uppercase fw-bold mb-1">Logins (24h)</h6>
+                    <h3 class="mb-0">{{ stats.logins_24h }}</h3>
+                </div>
+                <div class="icon-bg">
+                    <i class="bi bi-person-badge"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-xl-3 col-md-6">
+        <div class="card stats-card danger h-100">
+            <div class="card-body d-flex align-items-center">
+                <div class="flex-grow-1">
+                    <h6 class="text-uppercase fw-bold mb-1">Failed Logins</h6>
+                    <h3 class="mb-0">{{ stats.failed_logins_24h }}</h3>
+                </div>
+                <div class="icon-bg">
+                    <i class="bi bi-exclamation-octagon"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-xl-3 col-md-6">
+        <div class="card stats-card warning h-100">
+            <div class="card-body d-flex align-items-center">
+                <div class="flex-grow-1">
+                    <h6 class="text-uppercase fw-bold mb-1">Pending Tx</h6>
+                    <h3 class="mb-0">{{ stats.pending_transactions }}</h3>
+                </div>
+                <div class="icon-bg">
+                    <i class="bi bi-arrow-repeat"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-xl-3 col-md-6">
+        <div class="card stats-card success h-100">
+            <div class="card-body d-flex align-items-center">
+                <div class="flex-grow-1">
+                    <h6 class="text-uppercase fw-bold mb-1">Active Branches</h6>
+                    <h3 class="mb-0">{{ stats.active_branches }}</h3>
+                </div>
+                <div class="icon-bg">
+                    <i class="bi bi-diagram-3"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-4">
+    <div class="col-lg-6">
+        <div class="card shadow-sm h-100">
+            <div class="card-header bg-transparent border-bottom d-flex align-items-center justify-content-between">
+                <h5 class="mb-0"><i class="bi bi-activity me-2 text-success"></i>Recent Logins</h5>
+                <span class="text-muted small">Last 25 attempts</span>
+            </div>
+            <div class="card-body p-0">
+                {% if recent_logins %}
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0 align-middle">
+                        <thead class="table-dark">
+                            <tr>
+                                <th>User</th>
+                                <th>Type</th>
+                                <th>Status</th>
+                                <th>IP</th>
+                                <th class="text-end">Time</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for login in recent_logins %}
+                            <tr>
+                                <td>{{ login.username }}</td>
+                                <td class="text-muted small text-uppercase">{{ login.user_type }}</td>
+                                <td>
+                                    {% if login.success %}
+                                        <span class="badge bg-success">Success</span>
+                                    {% else %}
+                                        <span class="badge bg-danger">Failed</span>
+                                    {% endif %}
+                                </td>
+                                <td class="text-muted small">{{ login.ip_address }}</td>
+                                <td class="text-end text-muted small">
+                                    {{ login.login_at.strftime('%Y-%m-%d %H:%M') if login.login_at else '—' }}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div class="text-center py-5">
+                    <i class="bi bi-person-badge fa-3x text-muted mb-3"></i>
+                    <h6 class="text-muted">No login records</h6>
+                    <p class="text-muted small mb-0">User sign-in events will appear here in real time.</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-6">
+        <div class="card shadow-sm h-100">
+            <div class="card-header bg-transparent border-bottom d-flex align-items-center justify-content-between">
+                <h5 class="mb-0"><i class="bi bi-cash-coin me-2 text-warning"></i>Teminci Transactions</h5>
+                <span class="text-muted small">Last 25 operations</span>
+            </div>
+            <div class="card-body p-0">
+                {% if recent_transactions %}
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0 align-middle">
+                        <thead class="table-dark">
+                            <tr>
+                                <th>Reference</th>
+                                <th>Type</th>
+                                <th>Status</th>
+                                <th class="text-end">Amount</th>
+                                <th class="text-end">Created</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for tx in recent_transactions %}
+                            <tr>
+                                <td class="fw-medium">{{ tx.reference_code }}</td>
+                                <td class="text-muted small text-uppercase">{{ tx.transaction_type }}</td>
+                                <td>
+                                    <span class="badge bg-{{ 'success' if tx.status == 'confirmed' else 'warning' if tx.status == 'pending' else 'secondary' }} text-uppercase">{{ tx.status }}</span>
+                                </td>
+                                <td class="text-end">{{ '{:,.2f}'.format(tx.amount) }} {{ tx.currency }}</td>
+                                <td class="text-end text-muted small">
+                                    {{ tx.created_at.strftime('%Y-%m-%d %H:%M') if tx.created_at else '—' }}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div class="text-center py-5">
+                    <i class="bi bi-cash-coin fa-3x text-muted mb-3"></i>
+                    <h6 class="text-muted">No Teminci traffic yet</h6>
+                    <p class="text-muted small mb-0">Incoming Teminci transactions will be listed once processed.</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
