@@ -119,6 +119,7 @@ def crypto_deposit_webhook(wallet_id):
     
     try:
         # Find matching payment by transaction_id or address
+        current_app.logger.info(f"Looking for payment: transaction_id={transaction_id}, wallet.client_id={wallet.client_id}, address={address}")
         payment = Payment.query.filter(
             Payment.client_id == wallet.client_id,
             db.or_(
@@ -128,20 +129,37 @@ def crypto_deposit_webhook(wallet_id):
         ).order_by(Payment.created_at.desc()).first()
         
         if not payment:
-            current_app.logger.warning(f"No payment found for transaction {transaction_id}")
+            # Debug: check if payment exists with different client_id
+            any_payment = Payment.query.filter_by(transaction_id=transaction_id).first()
+            if any_payment:
+                current_app.logger.warning(f"Payment found but client_id mismatch: payment.client_id={any_payment.client_id}, wallet.client_id={wallet.client_id}")
+            else:
+                current_app.logger.warning(f"No payment found for transaction {transaction_id}")
             return jsonify({'error': 'Payment not found'}), 404
         
-        # Update payment status based on webhook status
+        # Update payment status based on webhook status using set_status()
         old_status = payment.status
         
         if status in ['confirmed', 'completed', 'success']:
             if confirmations >= 1:  # Configurable threshold
-                payment.status = PaymentStatus.APPROVED
+                payment.set_status(
+                    PaymentStatus.APPROVED,
+                    reason=f"Auto-approved via wallet webhook (confirmations: {confirmations}, txid: {txid})",
+                    commit=False
+                )
                 current_app.logger.info(f"Payment {payment.id} auto-approved via webhook (confirmations: {confirmations})")
         elif status in ['pending', 'processing']:
-            payment.status = PaymentStatus.PENDING
+            payment.set_status(
+                PaymentStatus.PENDING,
+                reason=f"Status updated to pending via wallet webhook",
+                commit=False
+            )
         elif status in ['failed', 'rejected', 'cancelled']:
-            payment.status = PaymentStatus.REJECTED
+            payment.set_status(
+                PaymentStatus.REJECTED,
+                reason=f"Payment rejected via wallet webhook (status: {status})",
+                commit=False
+            )
         
         # Store blockchain transaction hash if provided
         if txid and not payment.description:
@@ -241,9 +259,9 @@ def crypto_withdrawal_webhook(wallet_id):
         
         # Store transaction hash if provided
         if txid:
-            if not withdrawal.metadata:
-                withdrawal.metadata = {}
-            withdrawal.metadata['txid'] = txid
+            metadata = withdrawal.extra_metadata or {}
+            metadata['txid'] = txid
+            withdrawal.extra_metadata = metadata
         
         db.session.commit()
         

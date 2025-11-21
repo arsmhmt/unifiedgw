@@ -155,9 +155,10 @@ def require_api_key(f):
                 'retry_after': reset_seconds
             }), 429
         
-        # Add rate limit headers to response
+        # Store scalar rate-limit values to avoid DetachedInstanceError later
         g.rate_limit_remaining = remaining
         g.rate_limit_reset = reset_at
+        g.api_rate_limit = api_key_obj.rate_limit or 60
         
         # Log API usage
         try:
@@ -193,8 +194,9 @@ def add_rate_limit_headers(response):
     if hasattr(g, 'rate_limit_reset'):
         response.headers['X-RateLimit-Reset'] = g.rate_limit_reset.isoformat()
     
-    if hasattr(g, 'api_key'):
-        response.headers['X-RateLimit-Limit'] = str(g.api_key.rate_limit or 60)
+    # Use scalar copy instead of touching ORM object to avoid DetachedInstanceError
+    if hasattr(g, 'api_rate_limit'):
+        response.headers['X-RateLimit-Limit'] = str(g.api_rate_limit)
     
     return response
 
