@@ -1491,6 +1491,65 @@ def api_key_details(key_id):
 def api_docs():
     return render_template("client/api_docs.html")
 
+# --- Webhook Settings ---
+@client_bp.route('/webhook-settings', methods=['GET'])
+@login_required
+@client_required
+def webhook_settings():
+    """Display webhook configuration page."""
+    return render_template('client/webhook_settings.html')
+
+
+@client_bp.route('/webhook-settings/update', methods=['POST'])
+@login_required
+@client_required
+def update_webhook_settings():
+    """Update webhook configuration."""
+    import secrets
+    
+    # Get client data
+    client_data = None
+    if isinstance(current_user, User) and current_user.client:
+        client_data = current_user.client
+    elif isinstance(current_user, Client):
+        client_data = current_user
+    
+    if not client_data:
+        flash('Client data not found', 'danger')
+        return redirect(url_for('client.webhook_settings'))
+    
+    try:
+        # Get form data
+        webhook_enabled = request.form.get('webhook_enabled') == 'on'
+        webhook_url = request.form.get('webhook_url', '').strip()
+        webhook_secret = request.form.get('webhook_secret', '').strip()
+        
+        # Validate webhook URL if enabled
+        if webhook_enabled and not webhook_url:
+            flash('Webhook URL is required when webhooks are enabled', 'danger')
+            return redirect(url_for('client.webhook_settings'))
+        
+        # Auto-generate secret if empty and webhooks are enabled
+        if webhook_enabled and not webhook_secret:
+            webhook_secret = secrets.token_hex(32)
+        
+        # Update client webhook settings
+        client_data.webhook_enabled = webhook_enabled
+        client_data.webhook_url = webhook_url if webhook_enabled else None
+        client_data.webhook_secret = webhook_secret if webhook_enabled else None
+        
+        db.session.commit()
+        
+        flash('Webhook settings updated successfully', 'success')
+        
+    except Exception as e:
+        db.session.rollback()
+        current_app.logger.error(f"Failed to update webhook settings: {e}")
+        flash('Failed to update webhook settings', 'danger')
+    
+    return redirect(url_for('client.webhook_settings'))
+
+
 # --- Pricing Page (stub) ---
 @client_bp.route('/pricing')
 def pricing():

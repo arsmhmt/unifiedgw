@@ -178,7 +178,8 @@ def create_app():
     from app.routes.main import main_bp, api_bp
     from app.routes.withdrawal_admin import withdrawal_admin
     from app.routes.api_v1 import api_v1
-    from app.webhooks import webhooks
+    from app.api.v1 import api_v1_bp  # Clean v1 Payments API with webhooks
+    from app.webhooks import webhooks as payment_webhooks  # Inbound payment status webhooks
     from app.utils.wallet_webhooks import wallet_webhooks
     from app.routes.webhooks import webhooks_bp  # wallet provider webhooks
     from app.routes.tools import tools_bp
@@ -196,7 +197,8 @@ def create_app():
     app.register_blueprint(withdrawal_admin)
     app.register_blueprint(api_bp)
     app.register_blueprint(api_v1)
-    app.register_blueprint(webhooks)
+    app.register_blueprint(api_v1_bp)  # Clean v1 Payments API
+    app.register_blueprint(payment_webhooks)  # Inbound payment status webhooks
     app.register_blueprint(wallet_webhooks)
     app.register_blueprint(webhooks_bp)  # wallet provider webhooks
     app.register_blueprint(tools_bp)
@@ -217,8 +219,9 @@ def create_app():
     # Exempt JSON APIs from CSRF (they use Bearer auth, not cookies/forms)
     try:
         csrf.exempt(api_v1)
+        csrf.exempt(api_v1_bp)  # Clean v1 Payments API
         csrf.exempt(api_bp)
-        csrf.exempt(webhooks)
+        csrf.exempt(payment_webhooks)  # Inbound payment status webhooks
         csrf.exempt(wallet_webhooks)
         csrf.exempt(webhooks_bp)  # wallet provider webhooks
         csrf.exempt(payment_sessions_api)

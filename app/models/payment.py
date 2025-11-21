@@ -135,3 +135,44 @@ class Payment(BaseModel):
         if self.fiat_amount and self.fiat_currency:
             return f"<Payment {self.id} | {self.fiat_amount} {self.fiat_currency} → {self.crypto_amount:.8f} {self.crypto_currency} | {self.status.value}>"
         return f"<Payment {self.id} | {self.amount} {self.currency} | {self.status.value}>"
+
+
+@event.listens_for(Payment, 'after_update')
+def payment_status_changed(mapper, connection, target):
+    """
+    SQLAlchemy event listener to emit webhook events when payment status changes.
+    """
+    from sqlalchemy import inspect
+    from app.payment.constants import WebhookEventType
+    
+    # Check if status was changed
+    state = inspect(target)
+    history = state.get_history('_status', passive=True)
+    
+    if not history.has_changes():
+        return
+    
+    # Map status to webhook event type
+    status_to_event = {
+        PaymentStatus.PENDING: WebhookEventType.PAYMENT_PENDING,
+        PaymentStatus.APPROVED: WebhookEventType.PAYMENT_APPROVED,
+        PaymentStatus.COMPLETED: WebhookEventType.PAYMENT_COMPLETED,
+        PaymentStatus.FAILED: WebhookEventType.PAYMENT_FAILED,
+        PaymentStatus.REJECTED: WebhookEventType.PAYMENT_REJECTED,
+        PaymentStatus.CANCELLED: WebhookEventType.PAYMENT_CANCELLED,
+    }
+    
+    new_status = target._status
+    event_type = status_to_event.get(new_status)
+    
+    if event_type:
+        # Import here to avoid circular imports
+        from app.events.service import create_event
+        try:
+            # Use db.session.flush() to ensure the payment is persisted before creating event
+            db.session.flush()
+            create_event(target, event_type)
+        except Exception as e:
+            # Log error but don't fail the payment update
+            import logging
+            logging.error(f"Failed to create webhook event for payment {target.id}: {e}")

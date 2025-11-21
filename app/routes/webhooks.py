@@ -14,7 +14,7 @@ from app.models import Payment, WithdrawalRequest, ClientWallet, WalletStatus
 from app.models.enums import PaymentStatus, WithdrawalStatus
 from ..utils.timezone import now_eest
 
-webhooks_bp = Blueprint('webhooks', __name__, url_prefix='/webhooks')
+webhooks_bp = Blueprint('wallet_provider_webhooks', __name__, url_prefix='/webhooks')
 
 
 def validate_webhook_signature(wallet_id):
